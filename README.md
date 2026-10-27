@@ -152,7 +152,7 @@ In an `.mdx` file, `{` starts code. When you mention a snippet in a sentence, wr
 
 ## Change words, links, and colors
 
-- Name, positioning, public URL, email, LinkedIn, and GitHub: `src/config.ts`. Search for `PLACEHOLDER`. Email and LinkedIn are still fake on purpose. GitHub points at `https://github.com/ziyongwu-git`.
+- Name, positioning, public URL, email, LinkedIn, and GitHub: `src/config.ts`. Search for `PLACEHOLDER`. LinkedIn is still a fake URL on purpose. Email is `ziyong.w@gmail.com` (a `mailto` link in the footer and on About). GitHub points at `https://github.com/ziyongwu-git`. Phone number and street address are intentionally absent.
 - Colors and fonts: the two variable blocks at the top of `src/styles/global.css`.
 - The About page text: `src/pages/about.astro`. The Meta role (Staff/Senior Data Engineer, about 10 years) is the part already filled in. Leave education and achievement details blank until you write them yourself.
 

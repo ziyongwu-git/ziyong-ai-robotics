@@ -35,8 +35,8 @@ export const site = {
    * After Vercel gives you a domain, replace this and deploy again.
    */
   url: 'https://ziyongwu.vercel.app',
-  email: 'you@example.com',
-  emailNote: 'PLACEHOLDER — replace with your email',
+  /** Public contact address. Shown as a mailto link. Phone and street address stay off the site. */
+  email: 'ziyong.w@gmail.com',
   linkedin: 'https://www.linkedin.com/in/your-handle',
   linkedinNote: 'PLACEHOLDER — replace with your LinkedIn URL',
   github: 'https://github.com/ziyongwu-git',
