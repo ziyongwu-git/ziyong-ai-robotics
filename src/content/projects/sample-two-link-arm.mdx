@@ -1,0 +1,36 @@
+---
+# SAMPLE PROJECT — copy this file when you start a real one.
+title: "[Sample] Two-link robot arm"
+summary: "Placeholder project. Move the sliders to see a two-link arm solve inverse kinematics. Replace this page with a project of your own."
+tags:
+  - robotics
+  - data
+status: sample
+featured: true
+date: 2026-10-25
+# Optional. A path on this site, or a full https URL. Update it if you rename the file.
+demo: "/projects/sample-two-link-arm#demo"
+# repo: "https://github.com/you/your-repo"
+---
+
+import RobotArm from '../../components/demos/RobotArm.tsx';
+
+A two-link arm is a small robotics picture with a data readout: two straight pieces, two joints, and a hand that can reach a ring of points. The widget below solves the joint angles for a point you choose.
+
+## Why this page exists
+
+It is the pattern for a project on this site. The words are Markdown. The sliders are a React component placed in the page. The frontmatter status `sample` turns on the placeholder banner above.
+
+<h2 id="demo">Interactive demo</h2>
+
+<RobotArm client:load />
+
+The component file is `src/components/demos/RobotArm.tsx`. The tag above carries the `client:load` directive. That is the instruction Astro needs before it will ship the JavaScript for the widget. The rest of this page stays static HTML.
+
+The same idea, as a short note, is in the learning log: [Planar robot arms](/learning/sample-planar-robot-arms).
+
+## Make it yours
+
+1. Copy this file and give the copy a new name in `src/content/projects/`.
+2. Replace the title, summary, tags, and status.
+3. Point the import at a component of your own, or delete the demo when the project is writing only.

@@ -1,0 +1,107 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HeroFigure from '../components/HeroFigure.astro';
+import LearningCard from '../components/LearningCard.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { site } from '../config';
+import { getFeaturedProjects, getLearningPosts } from '../lib/content';
+
+const posts = (await getLearningPosts()).slice(0, 3);
+const featured = await getFeaturedProjects();
+---
+
+<BaseLayout title={site.name} description={site.description}>
+  <div class="grid items-center gap-10 lg:grid-cols-[minmax(0,1.15fr)_280px]">
+    <div>
+      <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">Staff / Senior Data Engineer</p>
+      <h1 class="mt-3 font-serif text-5xl text-ink sm:text-7xl">{site.name}</h1>
+      <p class="mt-4 max-w-xl text-xl leading-8 text-ink sm:text-2xl">{site.role}.</p>
+      <div class="mt-6 max-w-xl space-y-4 text-base leading-7 text-muted">
+        <p>
+          I spent about ten years at Meta as a staff and senior data engineer. I am moving into AI and robotics, with
+          data as the strength I already have.
+        </p>
+        <p>This site is my public notebook for that move. Pages marked Sample show the format for notes and tools.</p>
+      </div>
+    </div>
+    <HeroFigure />
+  </div>
+
+  <dl class="mt-12 grid gap-6 border-y border-line py-6 sm:grid-cols-3">
+    <div>
+      <dt class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Experience</dt>
+      <dd class="mt-2 font-serif text-2xl">About 10 years</dd>
+    </div>
+    <div>
+      <dt class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Role</dt>
+      <dd class="mt-2 font-serif text-2xl">Meta, Staff / Senior</dd>
+    </div>
+    <div>
+      <dt class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Direction</dt>
+      <dd class="mt-2 font-serif text-2xl">AI and robotics</dd>
+    </div>
+  </dl>
+
+  <section class="mt-14" aria-labelledby="sections-heading">
+    <h2 id="sections-heading" class="font-serif text-3xl">Sections</h2>
+    <ul class="mt-6 grid gap-4 md:grid-cols-3">
+      <li>
+        <a href="/learning" class="block h-full rounded-2xl border border-line bg-card p-5 hover:border-accent">
+          <p class="font-mono text-xs tracking-[0.16em] text-accent uppercase">01</p>
+          <h3 class="mt-3 font-serif text-2xl">Learning log</h3>
+          <p class="mt-2 text-sm leading-6 text-muted">Course notes and daily writing on AI, robotics, and data.</p>
+        </a>
+      </li>
+      <li>
+        <a href="/projects" class="block h-full rounded-2xl border border-line bg-card p-5 hover:border-accent">
+          <p class="font-mono text-xs tracking-[0.16em] text-accent uppercase">02</p>
+          <h3 class="mt-3 font-serif text-2xl">Projects</h3>
+          <p class="mt-2 text-sm leading-6 text-muted">Small tools, including pages with an interactive demo.</p>
+        </a>
+      </li>
+      <li>
+        <a href="/about" class="block h-full rounded-2xl border border-line bg-card p-5 hover:border-accent">
+          <p class="font-mono text-xs tracking-[0.16em] text-accent uppercase">03</p>
+          <h3 class="mt-3 font-serif text-2xl">About</h3>
+          <p class="mt-2 text-sm leading-6 text-muted">A short bio, the Meta role, and contact links.</p>
+        </a>
+      </li>
+    </ul>
+  </section>
+
+  <section class="mt-16" aria-labelledby="notes-heading">
+    <div class="flex flex-wrap items-end justify-between gap-3">
+      <h2 id="notes-heading" class="font-serif text-3xl">Latest notes</h2>
+      <a class="text-sm text-accent underline decoration-line underline-offset-4" href="/learning">All notes</a>
+    </div>
+    {
+      posts.length === 0 ? (
+        <p class="mt-6 text-muted">No notes yet.</p>
+      ) : (
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          {posts.map((post) => (
+            <LearningCard post={post} />
+          ))}
+        </div>
+      )
+    }
+  </section>
+
+  <section class="mt-16" aria-labelledby="featured-heading">
+    <div class="flex flex-wrap items-end justify-between gap-3">
+      <h2 id="featured-heading" class="font-serif text-3xl">Featured projects</h2>
+      <a class="text-sm text-accent underline decoration-line underline-offset-4" href="/projects">All projects</a>
+    </div>
+    {
+      featured.length === 0 ? (
+        <p class="mt-6 text-muted">No featured projects yet.</p>
+      ) : (
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          {featured.map((project) => (
+            <ProjectCard project={project} />
+          ))}
+        </div>
+      )
+    }
+  </section>
+</BaseLayout>

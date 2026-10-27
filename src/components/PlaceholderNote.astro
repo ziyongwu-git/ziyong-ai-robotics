@@ -1,0 +1,14 @@
+---
+interface Props {
+  /** Small label at the top of the box. */
+  label?: string;
+}
+const { label = 'Placeholder' } = Astro.props;
+---
+
+<aside class="rounded-2xl border border-accent bg-accent-soft px-4 py-3 text-sm leading-6 text-ink">
+  <p class="font-mono text-xs tracking-[0.16em] text-accent uppercase">{label}</p>
+  <div class="mt-1">
+    <slot />
+  </div>
+</aside>

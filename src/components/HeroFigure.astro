@@ -1,0 +1,37 @@
+---
+/**
+ * Static drawing for the home page. The moving version is the React demo
+ * on the sample project page. Keeping this as SVG means the home page
+ * does not need to download that component.
+ */
+---
+
+<aside class="rounded-3xl border border-line bg-card p-5">
+  <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">On the bench</p>
+  <svg viewBox="0 0 280 210" class="mt-3 h-auto w-full" aria-hidden="true">
+    <circle cx="58" cy="158" r="92" fill="none" stroke="var(--line)" stroke-dasharray="4 6"></circle>
+    <circle cx="58" cy="158" r="26" fill="none" stroke="var(--line)" stroke-dasharray="3 5"></circle>
+    <path
+      d="M58 158 L138 72"
+      fill="none"
+      stroke="var(--ink)"
+      stroke-width="7"
+      stroke-linecap="round"></path>
+    <path
+      d="M138 72 L214 118"
+      fill="none"
+      stroke="var(--accent)"
+      stroke-width="7"
+      stroke-linecap="round"></path>
+    <circle cx="58" cy="158" r="6" fill="var(--ink)"></circle>
+    <circle cx="138" cy="72" r="6" fill="var(--card)" stroke="var(--ink)" stroke-width="3"></circle>
+    <circle cx="214" cy="118" r="6" fill="var(--highlight)"></circle>
+    <circle cx="214" cy="118" r="14" fill="none" stroke="var(--highlight)"></circle>
+  </svg>
+  <p class="mt-3 text-sm text-muted">
+    Sample demo ·
+    <a class="text-accent underline decoration-line underline-offset-4" href="/projects/sample-two-link-arm#demo">
+      Two-link arm
+    </a>
+  </p>
+</aside>
