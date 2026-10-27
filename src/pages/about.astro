@@ -2,91 +2,154 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PlaceholderNote from '../components/PlaceholderNote.astro';
 import { site } from '../config';
+import {
+  certifications,
+  earlyCareer,
+  education,
+  experience,
+  highlights,
+  locationLabel,
+  skillGroups,
+} from '../profile';
 ---
 
 <BaseLayout
   title="About"
-  description="Bio for Ziyong Wu, a data engineer with about ten years at Meta, moving into AI and robotics."
+  description="Ziyong Wu is a staff data engineer in the Seattle area, at Meta from 2019 to July 2026, moving into AI and robotics."
   width="narrow"
 >
-  <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">Bio</p>
-  <h1 class="mt-3 font-serif text-4xl sm:text-5xl">About</h1>
-  <p class="mt-4 text-lg leading-8 text-muted">
-    A short resume page. The Meta role below is filled in. Boxes marked Placeholder are waiting for your own words.
-  </p>
-
-  <section class="mt-10" aria-labelledby="bio-heading">
-    <h2 id="bio-heading" class="font-serif text-3xl">Summary</h2>
-    <p class="mt-4 leading-7">
-      I am a data engineer moving into AI and robotics. I spent about ten years at Meta as a Staff/Senior Data Engineer.
-      Data is the strength I am building the next chapter on.
+  <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">{locationLabel}</p>
+  <h1 class="mt-3 font-serif text-4xl sm:text-5xl">{site.name}</h1>
+  <p class="mt-4 text-xl leading-8 text-ink">{site.role}.</p>
+  <div class="mt-6 space-y-4 leading-7 text-muted">
+    <p>
+      Google Cloud–certified staff data engineer. Seven years at Meta, from 2019 to July 2026, across Ads Guidance
+      &amp; Monetization, AR/VR, and People Analytics. Before that, Munich Re from 2016 to 2019. About ten years in
+      data.
     </p>
-    <div class="mt-4">
-      <PlaceholderNote>
-        Add a few sentences in your own words: the kind of data work you want a hiring manager to remember, and what you
-        want next in AI or robotics. Write the details yourself so the page stays accurate.
-      </PlaceholderNote>
-    </div>
+    <p>
+      The next chapter is AI and robotics. The work already touches that direction: hardware telemetry for Ray-Ban
+      Stories and XR input, an accuracy metric for a company AI system, and advertising data platforms at petabyte
+      scale.
+    </p>
+  </div>
+
+  <section class="mt-12" aria-labelledby="highlights-heading">
+    <h2 id="highlights-heading" class="font-serif text-3xl">Highlights</h2>
+    <ul class="mt-4 space-y-3">
+      {
+        highlights.map((item) => (
+          <li class="rounded-2xl border border-line bg-card p-5">
+            <h3 class="font-serif text-xl">{item.title}</h3>
+            <p class="mt-2 text-sm leading-6 text-muted">{item.text}</p>
+          </li>
+        ))
+      }
+    </ul>
   </section>
 
   <section class="mt-12" aria-labelledby="experience-heading">
     <h2 id="experience-heading" class="font-serif text-3xl">Experience</h2>
-    <article class="mt-4 rounded-2xl border border-line bg-card p-5">
-      <p class="font-mono text-xs tracking-[0.16em] text-highlight uppercase">Confirmed</p>
-      <h3 class="mt-2 font-serif text-2xl">Meta</h3>
-      <p class="mt-1">Staff / Senior Data Engineer</p>
-      <p class="text-sm text-muted">About 10 years</p>
-      <div class="mt-4">
-        <PlaceholderNote>
-          Add a short description of the work you want a hiring manager to know. Add project names and numbers yourself
-          when you are ready to publish them.
-        </PlaceholderNote>
-      </div>
-    </article>
+    <ol class="mt-6 space-y-8 border-l border-line pl-6">
+      {
+        experience.map((role) => (
+          <li class="relative">
+            <span class="absolute top-1.5 -left-[1.65rem] h-2.5 w-2.5 rounded-full bg-accent" aria-hidden="true" />
+            <p class="font-mono text-xs tracking-[0.14em] text-muted uppercase">{role.dates}</p>
+            <h3 class="mt-1 font-serif text-2xl">{role.title}</h3>
+            <p class="text-sm text-muted">
+              {role.org}
+              {role.place ? ` · ${role.place}` : ''}
+            </p>
+            <ul class="mt-3 list-disc space-y-2 pl-5 text-sm leading-6">
+              {role.points.map((point) => (
+                <li>{point}</li>
+              ))}
+            </ul>
+          </li>
+        ))
+      }
+    </ol>
+    <p class="mt-8 text-sm leading-6 text-muted">
+      <span class="font-medium text-ink">Early career. </span>
+      {earlyCareer}
+    </p>
+  </section>
+
+  <section class="mt-12" aria-labelledby="skills-heading">
+    <h2 id="skills-heading" class="font-serif text-3xl">Skills</h2>
+    <dl class="mt-4 space-y-4">
+      {
+        skillGroups.map((group) => (
+          <div class="rounded-2xl border border-line bg-card p-5">
+            <dt class="font-mono text-xs tracking-[0.14em] text-accent uppercase">{group.label}</dt>
+            <dd class="mt-2 text-sm leading-6">{group.items}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <section class="mt-12" aria-labelledby="certifications-heading">
+    <h2 id="certifications-heading" class="font-serif text-3xl">Certifications</h2>
+    <ul class="mt-4 space-y-3">
+      {
+        certifications.map((item) => (
+          <li class="flex flex-wrap items-baseline justify-between gap-2 border-b border-line pb-3">
+            <span>
+              {item.name}
+              <span class="text-muted"> · {item.by}</span>
+            </span>
+            <span class="font-mono text-xs text-muted">{item.year}</span>
+          </li>
+        ))
+      }
+    </ul>
   </section>
 
   <section class="mt-12" aria-labelledby="education-heading">
     <h2 id="education-heading" class="font-serif text-3xl">Education</h2>
-    <div class="mt-4">
-      <PlaceholderNote>
-        Add schools, degrees, and dates when you want them listed. They are left blank on purpose.
-      </PlaceholderNote>
-    </div>
-  </section>
-
-  <section class="mt-12" aria-labelledby="contact-heading">
-    <h2 id="contact-heading" class="font-serif text-3xl">Contact</h2>
-    <p class="mt-4 text-sm leading-6 text-muted">
-      Email and GitHub are live. LinkedIn still needs your real profile URL.
-    </p>
-    <ul class="mt-4 divide-y divide-line border-y border-line">
-      <li class="flex flex-wrap items-baseline justify-between gap-3 py-4">
-        <div>
-          <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Email</p>
-          <a class="mt-1 inline-block text-lg text-accent" href={`mailto:${site.email}`}>{site.email}</a>
-        </div>
-      </li>
-      <li class="flex flex-wrap items-baseline justify-between gap-3 py-4">
-        <div>
-          <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">LinkedIn</p>
-          <a class="mt-1 inline-block text-lg text-accent" href={site.linkedin}>{site.linkedin.replace('https://', '')}</a>
-          <p class="text-sm text-muted">{site.linkedinNote}</p>
-        </div>
-      </li>
-      <li class="flex flex-wrap items-baseline justify-between gap-3 py-4">
-        <div>
-          <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">GitHub</p>
-          <a class="mt-1 inline-block text-lg text-accent" href={site.github} target="_blank" rel="noopener noreferrer">
-            {site.github.replace('https://', '')}
-          </a>
-        </div>
-      </li>
+    <ul class="mt-4 space-y-3">
+      {
+        education.map((item) => (
+          <li class="flex flex-wrap items-baseline justify-between gap-2 border-b border-line pb-3">
+            <span>
+              {item.credential}
+              <span class="text-muted"> · {item.school}</span>
+            </span>
+            <span class="font-mono text-xs text-muted">{item.dates}</span>
+          </li>
+        ))
+      }
     </ul>
   </section>
 
-  <p class="mt-10 text-sm text-muted">
-    <a class="text-accent underline decoration-line underline-offset-4" href="/learning">Learning log</a>
-    <span aria-hidden="true"> · </span>
-    <a class="text-accent underline decoration-line underline-offset-4" href="/projects">Projects</a>
-  </p>
+  <section class="mt-12" id="contact" aria-labelledby="contact-heading">
+    <h2 id="contact-heading" class="font-serif text-3xl">Contact</h2>
+    <p class="mt-4 text-sm leading-6 text-muted">
+      LinkedIn and GitHub are live. The email below is still a placeholder. Phone number and street address are not
+      listed.
+    </p>
+    <ul class="mt-4 divide-y divide-line border-y border-line">
+      <li class="py-4">
+        <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Email</p>
+        <a class="mt-1 inline-block text-lg text-accent" href={`mailto:${site.email}`}>{site.email}</a>
+        <div class="mt-3">
+          <PlaceholderNote>{site.emailNote}. Phone number and street address stay off this site.</PlaceholderNote>
+        </div>
+      </li>
+      <li class="py-4">
+        <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">LinkedIn</p>
+        <a class="mt-1 inline-block text-lg text-accent" href={site.linkedin} target="_blank" rel="noopener noreferrer">
+          linkedin.com/in/ziyongwu
+        </a>
+      </li>
+      <li class="py-4">
+        <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">GitHub</p>
+        <a class="mt-1 inline-block text-lg text-accent" href={site.github} target="_blank" rel="noopener noreferrer">
+          github.com/ziyongwu-git
+        </a>
+      </li>
+    </ul>
+  </section>
 </BaseLayout>

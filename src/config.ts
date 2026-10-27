@@ -29,15 +29,18 @@ export const site = {
   role: 'Data engineer moving into AI and robotics',
   /** Default sentence for search results and link previews. */
   description:
-    'Ziyong Wu is a data engineer moving into AI and robotics. Learning notes, small projects, and a short bio.',
+    'Ziyong Wu is a staff data engineer moving into AI and robotics. Meta (2019–July 2026), Munich Re before that, based in the Seattle area.',
   /**
    * Public URL of the deployed site, with no trailing slash.
    * After Vercel gives you a domain, replace this and deploy again.
    */
   url: 'https://ziyongwu.vercel.app',
-  /** Public contact address. Shown as a mailto link. Phone and street address stay off the site. */
-  email: 'ziyong.w@gmail.com',
-  linkedin: 'https://www.linkedin.com/in/your-handle',
-  linkedinNote: 'PLACEHOLDER — replace with your LinkedIn URL',
+  /**
+   * PLACEHOLDER. Do not put a personal Gmail address here until you decide
+   * to publish one. Phone number and street address stay off the site.
+   */
+  email: 'you@example.com',
+  emailNote: 'PLACEHOLDER — replace with the email you want to publish',
+  linkedin: 'https://www.linkedin.com/in/ziyongwu/',
   github: 'https://github.com/ziyongwu-git',
 } as const;

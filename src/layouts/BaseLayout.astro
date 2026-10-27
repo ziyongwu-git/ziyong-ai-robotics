@@ -37,10 +37,10 @@ const person = {
   '@type': 'Person',
   name: site.name,
   description: site.role,
-  jobTitle: 'Data Engineer',
-  email: site.email,
+  jobTitle: 'Staff Data Engineer',
   url: Astro.site?.href,
-  sameAs: [site.github],
+  homeLocation: { '@type': 'Place', name: 'Seattle area' },
+  sameAs: [site.linkedin, site.github],
 };
 ---
 
