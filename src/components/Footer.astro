@@ -18,8 +18,8 @@ const year = new Date().getFullYear();
       >
         LinkedIn
       </a>
-      <a class="text-ink underline decoration-line underline-offset-4 hover:text-accent" href="/about#contact">
-        Email (placeholder)
+      <a class="text-ink underline decoration-line underline-offset-4 hover:text-accent" href={`mailto:${site.email}`}>
+        {site.email}
       </a>
       <a class="text-ink underline decoration-line underline-offset-4 hover:text-accent" href="/rss.xml">RSS</a>
       <a

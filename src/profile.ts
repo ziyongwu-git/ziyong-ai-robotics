@@ -2,7 +2,7 @@
  * Background shown on the home page and the about page.
  * Every line here is taken from Ziyong's resume. Do not add employers,
  * dates, degrees, or metrics that are not already written down.
- * Do not add a phone number, a street address, or a personal email.
+ * Do not add a phone number or a street address.
  * The public location line stays "Seattle area".
  */
 

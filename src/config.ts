@@ -1,7 +1,7 @@
 /**
  * Site-wide facts and the lists the rest of the site is allowed to use.
  * Edit this file when your wording, public URL, or contact links change.
- * Search the project for PLACEHOLDER to find values that are still fake.
+ * Phone number and street address stay off the site.
  */
 
 /** Tags a learning note or project is allowed to use. Add a new one here. */
@@ -35,12 +35,8 @@ export const site = {
    * After Vercel gives you a domain, replace this and deploy again.
    */
   url: 'https://ziyongwu.vercel.app',
-  /**
-   * PLACEHOLDER. Do not put a personal Gmail address here until you decide
-   * to publish one. Phone number and street address stay off the site.
-   */
-  email: 'you@example.com',
-  emailNote: 'PLACEHOLDER — replace with the email you want to publish',
+  /** Public contact address. Shown as a mailto link. */
+  email: 'ziyong.w@gmail.com',
   linkedin: 'https://www.linkedin.com/in/ziyongwu/',
   github: 'https://github.com/ziyongwu-git',
 } as const;

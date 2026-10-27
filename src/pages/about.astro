@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PlaceholderNote from '../components/PlaceholderNote.astro';
 import { site } from '../config';
 import {
   certifications,
@@ -126,17 +125,10 @@ import {
 
   <section class="mt-12" id="contact" aria-labelledby="contact-heading">
     <h2 id="contact-heading" class="font-serif text-3xl">Contact</h2>
-    <p class="mt-4 text-sm leading-6 text-muted">
-      LinkedIn and GitHub are live. The email below is still a placeholder. Phone number and street address are not
-      listed.
-    </p>
     <ul class="mt-4 divide-y divide-line border-y border-line">
       <li class="py-4">
         <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Email</p>
         <a class="mt-1 inline-block text-lg text-accent" href={`mailto:${site.email}`}>{site.email}</a>
-        <div class="mt-3">
-          <PlaceholderNote>{site.emailNote}. Phone number and street address stay off this site.</PlaceholderNote>
-        </div>
       </li>
       <li class="py-4">
         <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">LinkedIn</p>

@@ -152,7 +152,7 @@ In an `.mdx` file, `{` starts code. When you mention a snippet in a sentence, wr
 
 ## Change words, links, and colors
 
-- Name, positioning, public URL, email, LinkedIn, and GitHub: `src/config.ts`. Search for `PLACEHOLDER`. The email is still a placeholder (`you@example.com`). LinkedIn is `https://www.linkedin.com/in/ziyongwu/`. GitHub is `https://github.com/ziyongwu-git`. Do not add a phone number, a street address, or a personal Gmail address.
+- Name, positioning, public URL, email, LinkedIn, and GitHub: `src/config.ts`. Email is `ziyong.w@gmail.com` (a `mailto` link in the footer and on About). LinkedIn is `https://www.linkedin.com/in/ziyongwu/`. GitHub is `https://github.com/ziyongwu-git`. Do not add a phone number or a street address.
 - The resume-style copy (roles, dates, skills, education): `src/profile.ts`. Add a line only when you can point at the source. The public location line stays "Seattle area".
 - Colors and fonts: the two variable blocks at the top of `src/styles/global.css`.
 
