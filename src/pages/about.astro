@@ -1,0 +1,147 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config';
+import {
+  certifications,
+  earlyCareer,
+  education,
+  experience,
+  highlights,
+  locationLabel,
+  skillGroups,
+} from '../profile';
+---
+
+<BaseLayout
+  title="About"
+  description="Ziyong Wu is a staff data engineer in the Seattle area, at Meta from 2019 to July 2026, moving into AI and robotics."
+  width="narrow"
+>
+  <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">{locationLabel}</p>
+  <h1 class="mt-3 font-serif text-4xl sm:text-5xl">{site.name}</h1>
+  <p class="mt-4 text-xl leading-8 text-ink">{site.role}.</p>
+  <div class="mt-6 space-y-4 leading-7 text-muted">
+    <p>
+      Google Cloud–certified staff data engineer. Seven years at Meta, from 2019 to July 2026, across Ads Guidance
+      &amp; Monetization, AR/VR, and People Analytics. Before that, Munich Re from 2016 to 2019. About ten years in
+      data.
+    </p>
+    <p>
+      The next chapter is AI and robotics. The work already touches that direction: hardware telemetry for Ray-Ban
+      Stories and XR input, an accuracy metric for a company AI system, and advertising data platforms at petabyte
+      scale.
+    </p>
+  </div>
+
+  <section class="mt-12" aria-labelledby="highlights-heading">
+    <h2 id="highlights-heading" class="font-serif text-3xl">Highlights</h2>
+    <ul class="mt-4 space-y-3">
+      {
+        highlights.map((item) => (
+          <li class="rounded-2xl border border-line bg-card p-5">
+            <h3 class="font-serif text-xl">{item.title}</h3>
+            <p class="mt-2 text-sm leading-6 text-muted">{item.text}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="mt-12" aria-labelledby="experience-heading">
+    <h2 id="experience-heading" class="font-serif text-3xl">Experience</h2>
+    <ol class="mt-6 space-y-8 border-l border-line pl-6">
+      {
+        experience.map((role) => (
+          <li class="relative">
+            <span class="absolute top-1.5 -left-[1.65rem] h-2.5 w-2.5 rounded-full bg-accent" aria-hidden="true" />
+            <p class="font-mono text-xs tracking-[0.14em] text-muted uppercase">{role.dates}</p>
+            <h3 class="mt-1 font-serif text-2xl">{role.title}</h3>
+            <p class="text-sm text-muted">
+              {role.org}
+              {role.place ? ` · ${role.place}` : ''}
+            </p>
+            <ul class="mt-3 list-disc space-y-2 pl-5 text-sm leading-6">
+              {role.points.map((point) => (
+                <li>{point}</li>
+              ))}
+            </ul>
+          </li>
+        ))
+      }
+    </ol>
+    <p class="mt-8 text-sm leading-6 text-muted">
+      <span class="font-medium text-ink">Early career. </span>
+      {earlyCareer}
+    </p>
+  </section>
+
+  <section class="mt-12" aria-labelledby="skills-heading">
+    <h2 id="skills-heading" class="font-serif text-3xl">Skills</h2>
+    <dl class="mt-4 space-y-4">
+      {
+        skillGroups.map((group) => (
+          <div class="rounded-2xl border border-line bg-card p-5">
+            <dt class="font-mono text-xs tracking-[0.14em] text-accent uppercase">{group.label}</dt>
+            <dd class="mt-2 text-sm leading-6">{group.items}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <section class="mt-12" aria-labelledby="certifications-heading">
+    <h2 id="certifications-heading" class="font-serif text-3xl">Certifications</h2>
+    <ul class="mt-4 space-y-3">
+      {
+        certifications.map((item) => (
+          <li class="flex flex-wrap items-baseline justify-between gap-2 border-b border-line pb-3">
+            <span>
+              {item.name}
+              <span class="text-muted"> · {item.by}</span>
+            </span>
+            <span class="font-mono text-xs text-muted">{item.year}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="mt-12" aria-labelledby="education-heading">
+    <h2 id="education-heading" class="font-serif text-3xl">Education</h2>
+    <ul class="mt-4 space-y-3">
+      {
+        education.map((item) => (
+          <li class="flex flex-wrap items-baseline justify-between gap-2 border-b border-line pb-3">
+            <span>
+              {item.credential}
+              <span class="text-muted"> · {item.school}</span>
+            </span>
+            <span class="font-mono text-xs text-muted">{item.dates}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="mt-12" id="contact" aria-labelledby="contact-heading">
+    <h2 id="contact-heading" class="font-serif text-3xl">Contact</h2>
+    <ul class="mt-4 divide-y divide-line border-y border-line">
+      <li class="py-4">
+        <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Email</p>
+        <a class="mt-1 inline-block text-lg text-accent" href={`mailto:${site.email}`}>{site.email}</a>
+      </li>
+      <li class="py-4">
+        <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">LinkedIn</p>
+        <a class="mt-1 inline-block text-lg text-accent" href={site.linkedin} target="_blank" rel="noopener noreferrer">
+          linkedin.com/in/ziyongwu
+        </a>
+      </li>
+      <li class="py-4">
+        <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">GitHub</p>
+        <a class="mt-1 inline-block text-lg text-accent" href={site.github} target="_blank" rel="noopener noreferrer">
+          github.com/ziyongwu-git
+        </a>
+      </li>
+    </ul>
+  </section>
+</BaseLayout>

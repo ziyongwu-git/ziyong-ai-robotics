@@ -1,0 +1,59 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { ProjectStatus } from '../config';
+import { statusLabel } from '../lib/format';
+import TagList from './TagList.astro';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+const href = `/projects/${project.id}`;
+const demo = project.data.demo;
+const repo = project.data.repo;
+const demoIsExternal = demo ? demo.startsWith('http') : false;
+const demoLabel = demoIsExternal ? 'Live demo' : 'Interactive demo';
+
+const statusTone: Record<ProjectStatus, string> = {
+  sample: 'bg-accent-soft',
+  idea: 'border border-line bg-paper',
+  'in-progress': 'bg-accent-soft',
+  shipped: 'bg-highlight-soft',
+};
+---
+
+<article data-tags={project.data.tags.join(' ')} class="flex h-full flex-col rounded-2xl border border-line bg-card p-5">
+  <div class="flex flex-wrap items-center gap-2">
+    <span class:list={['rounded-full px-2.5 py-1 font-mono text-xs tracking-wide text-ink uppercase', statusTone[project.data.status]]}>
+      {statusLabel(project.data.status)}
+    </span>
+    <TagList tags={project.data.tags} filterHref="/projects" />
+  </div>
+  <h3 class="mt-3 font-serif text-2xl text-ink">
+    <a class="hover:text-accent" href={href}>{project.data.title}</a>
+  </h3>
+  <p class="mt-2 flex-1 text-sm leading-6 text-muted">{project.data.summary}</p>
+  <div class="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+    <a class="text-accent underline decoration-line underline-offset-4" href={href}>Read the note</a>
+    {
+      demo && (
+        <a
+          class="text-accent underline decoration-line underline-offset-4"
+          href={demo}
+          target={demoIsExternal ? '_blank' : undefined}
+          rel={demoIsExternal ? 'noopener noreferrer' : undefined}
+        >
+          {demoLabel}
+        </a>
+      )
+    }
+    {
+      repo && (
+        <a class="text-accent underline decoration-line underline-offset-4" href={repo} target="_blank" rel="noopener noreferrer">
+          Repository
+        </a>
+      )
+    }
+  </div>
+</article>

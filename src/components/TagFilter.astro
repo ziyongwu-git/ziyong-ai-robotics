@@ -1,0 +1,76 @@
+---
+import { tags } from '../config';
+import { tagLabel } from '../lib/format';
+
+/**
+ * Row of tag buttons plus the cards you put inside.
+ * Each card needs a `data-tags` attribute, for example data-tags="ai data".
+ * Without JavaScript every card stays visible, so the lists still work.
+ */
+---
+
+<div data-tag-filter>
+  <div class="flex flex-wrap gap-2" role="group" aria-label="Filter by tag">
+    <button
+      type="button"
+      data-tag="all"
+      aria-pressed="true"
+      class="rounded-full border border-line px-3 py-1.5 text-sm aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-paper"
+    >
+      All
+    </button>
+    {
+      tags.map((tag) => (
+        <button
+          type="button"
+          data-tag={tag}
+          aria-pressed="false"
+          class="rounded-full border border-line px-3 py-1.5 text-sm aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-paper"
+        >
+          {tagLabel(tag)}
+        </button>
+      ))
+    }
+  </div>
+  <div class="mt-6 grid gap-4 md:grid-cols-2" data-tag-list>
+    <slot />
+  </div>
+  <p data-empty hidden class="mt-6 text-muted">No entries with that tag yet.</p>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-tag-filter]').forEach((root) => {
+    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-tag]'));
+    const cards = Array.from(root.querySelectorAll<HTMLElement>('[data-tags]'));
+    const empty = root.querySelector<HTMLElement>('[data-empty]');
+
+    const apply = (tag: string) => {
+      let shown = 0;
+      cards.forEach((card) => {
+        const cardTags = (card.dataset.tags ?? '').split(/\s+/).filter(Boolean);
+        const match = tag === 'all' || cardTags.includes(tag);
+        card.hidden = !match;
+        if (match) shown += 1;
+      });
+      buttons.forEach((button) => {
+        button.setAttribute('aria-pressed', button.dataset.tag === tag ? 'true' : 'false');
+      });
+      if (empty) empty.hidden = shown !== 0;
+
+      const url = new URL(window.location.href);
+      if (tag === 'all') url.searchParams.delete('tag');
+      else url.searchParams.set('tag', tag);
+      window.history.replaceState(null, '', url);
+    };
+
+    const requested = new URLSearchParams(window.location.search).get('tag');
+    const known = buttons.some((button) => button.dataset.tag === requested);
+    apply(known && requested ? requested : 'all');
+
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => {
+        apply(button.dataset.tag ?? 'all');
+      });
+    });
+  });
+</script>

@@ -1,0 +1,26 @@
+---
+import { tagLabel } from '../lib/format';
+
+interface Props {
+  tags: readonly string[];
+  /** Index page that understands ?tag=, for example /learning or /projects. */
+  filterHref: string;
+}
+
+const { tags, filterHref } = Astro.props;
+---
+
+<ul class="m-0 flex list-none flex-wrap gap-2 p-0">
+  {
+    tags.map((tag) => (
+      <li>
+        <a
+          href={`${filterHref}?tag=${tag}`}
+          class="inline-block rounded-full bg-accent-soft px-2.5 py-1 font-mono text-xs tracking-wide text-ink uppercase hover:bg-accent hover:text-paper"
+        >
+          {tagLabel(tag)}
+        </a>
+      </li>
+    ))
+  }
+</ul>

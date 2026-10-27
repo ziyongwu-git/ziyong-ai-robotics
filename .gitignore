@@ -1,0 +1,18 @@
+# Dependencies and build output. Safe to delete; npm install and npm run build recreate them.
+node_modules/
+dist/
+
+# Astro generates types here when you run dev or build.
+.astro/
+
+# Local environment files, if you add them later.
+.env
+.env.*
+
+# Vercel CLI metadata.
+.vercel/
+
+# Logs and OS junk.
+npm-debug.log*
+.DS_Store
+*.tsbuildinfo

@@ -1,0 +1,103 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PlaceholderNote from '../../components/PlaceholderNote.astro';
+import TagList from '../../components/TagList.astro';
+import { formatDate, isoDate, statusLabel } from '../../lib/format';
+import type { ProjectStatus } from '../../config';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({
+    params: { id: project.id },
+  }));
+}
+
+const { id } = Astro.params;
+if (!id) {
+  throw new Error('Missing project id.');
+}
+
+const project = await getEntry('projects', id);
+if (!project) {
+  throw new Error(`No project entry for ${id}.`);
+}
+
+const { Content } = await render(project);
+const demo = project.data.demo;
+const repo = project.data.repo;
+const demoIsExternal = demo ? demo.startsWith('http') : false;
+
+const statusTone: Record<ProjectStatus, string> = {
+  sample: 'bg-accent-soft',
+  idea: 'border border-line bg-paper',
+  'in-progress': 'bg-accent-soft',
+  shipped: 'bg-highlight-soft',
+};
+---
+
+<BaseLayout
+  title={project.data.title}
+  description={project.data.summary}
+  width="narrow"
+  ogType="article"
+  published={project.data.date}
+>
+  <p>
+    <a class="text-sm text-accent underline decoration-line underline-offset-4" href="/projects">All projects</a>
+  </p>
+  <div class="mt-6 flex flex-wrap items-center gap-2">
+    <span
+      class:list={[
+        'rounded-full px-2.5 py-1 font-mono text-xs tracking-wide text-ink uppercase',
+        statusTone[project.data.status],
+      ]}
+    >
+      {statusLabel(project.data.status)}
+    </span>
+    <TagList tags={project.data.tags} filterHref="/projects" />
+  </div>
+  <h1 class="mt-4 font-serif text-4xl leading-tight sm:text-5xl">{project.data.title}</h1>
+  <p class="mt-4 text-lg leading-8 text-muted">{project.data.summary}</p>
+  {
+    project.data.date && (
+      <p class="mt-3 text-sm text-muted">
+        <time datetime={isoDate(project.data.date)}>{formatDate(project.data.date)}</time>
+      </p>
+    )
+  }
+  {
+    (demo || repo) && (
+      <div class="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+        {demo && (
+          <a
+            class="text-accent underline decoration-line underline-offset-4"
+            href={demo}
+            target={demoIsExternal ? '_blank' : undefined}
+            rel={demoIsExternal ? 'noopener noreferrer' : undefined}
+          >
+            {demoIsExternal ? 'Live demo' : 'Jump to the demo'}
+          </a>
+        )}
+        {repo && (
+          <a class="text-accent underline decoration-line underline-offset-4" href={repo} target="_blank" rel="noopener noreferrer">
+            Repository
+          </a>
+        )}
+      </div>
+    )
+  }
+  {
+    project.data.status === 'sample' && (
+      <div class="mt-6">
+        <PlaceholderNote>
+          This is a sample project. It shows the file format and a working interactive demo. Replace the write-up with
+          your own project, or delete the file when you no longer need the example.
+        </PlaceholderNote>
+      </div>
+    )
+  }
+  <div class="prose mt-10 max-w-none">
+    <Content />
+  </div>
+</BaseLayout>

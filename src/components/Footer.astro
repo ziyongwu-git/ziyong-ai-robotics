@@ -1,0 +1,36 @@
+---
+import { site } from '../config';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-auto border-t border-line">
+  <div
+    class="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-8"
+  >
+    <p>&copy; {year} {site.name}</p>
+    <nav aria-label="Footer" class="flex flex-wrap gap-x-5 gap-y-2">
+      <a
+        class="text-ink underline decoration-line underline-offset-4 hover:text-accent"
+        href={site.linkedin}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        LinkedIn
+      </a>
+      <a class="text-ink underline decoration-line underline-offset-4 hover:text-accent" href={`mailto:${site.email}`}>
+        {site.email}
+      </a>
+      <a class="text-ink underline decoration-line underline-offset-4 hover:text-accent" href="/rss.xml">RSS</a>
+      <a
+        class="text-ink underline decoration-line underline-offset-4 hover:text-accent"
+        href={site.github}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        GitHub
+      </a>
+      <a class="text-ink underline decoration-line underline-offset-4 hover:text-accent" href="/about">Contact</a>
+    </nav>
+  </div>
+</footer>
