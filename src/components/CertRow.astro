@@ -1,0 +1,58 @@
+---
+/**
+ * One certificate: name, issuer, date, and the credential link when there is one.
+ * `nested` is a course listed under a specialization, so the type is a step smaller.
+ * Logo and skills render only when the data file sets them.
+ */
+import type { Certification } from '../data/certifications';
+
+interface Props {
+  item: Certification;
+  nested?: boolean;
+}
+
+const { item, nested = false } = Astro.props;
+---
+
+<div class="flex gap-3">
+  {
+    item.logo && (
+      <img src={item.logo} alt="" class="mt-1 h-10 w-10 shrink-0 rounded-lg border border-line object-contain" />
+    )
+  }
+  <div class="min-w-0 flex-1">
+    {
+      item.credentialUrl ? (
+        <a
+          class:list={[
+            'text-ink underline decoration-line underline-offset-4 hover:text-accent',
+            nested ? 'font-medium' : 'font-serif text-xl',
+          ]}
+          href={item.credentialUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {item.name}
+          <span class="sr-only"> (credential, opens in a new tab)</span>
+        </a>
+      ) : (
+        <p class:list={[nested ? 'font-medium' : 'font-serif text-xl']}>{item.name}</p>
+      )
+    }
+    <p class="mt-1 text-sm text-muted">
+      {item.issuer} · {item.date}
+      {item.expired && <span class="text-accent"> · Expired {item.expired}</span>}
+    </p>
+    {
+      item.skills && item.skills.length > 0 && (
+        <ul class="mt-2 flex list-none flex-wrap gap-2 p-0">
+          {item.skills.map((skill) => (
+            <li class="rounded-full bg-accent-soft px-2 py-0.5 font-mono text-xs tracking-wide text-ink uppercase">
+              {skill}
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</div>

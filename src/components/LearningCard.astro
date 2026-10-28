@@ -1,25 +1,53 @@
 ---
+/**
+ * One learning-log note in a list.
+ *
+ * layout:
+ * - card: picture on top. Used in the two-column index.
+ * - row: small picture beside the text, from the `md` breakpoint up.
+ * - feature: large picture beside the text. Used for the newest note on the home page.
+ *
+ * The picture links to the note as well as the title, but it is removed from
+ * the tab order so keyboard users land on the title once.
+ */
 import type { CollectionEntry } from 'astro:content';
-import { formatDate, isoDate } from '../lib/format';
+import CoverArt from './CoverArt.astro';
 import TagList from './TagList.astro';
+import { formatDate, isoDate } from '../lib/format';
 
 interface Props {
   post: CollectionEntry<'learning'>;
+  layout?: 'feature' | 'row' | 'card';
 }
 
-const { post } = Astro.props;
+const { post, layout = 'card' } = Astro.props;
 const href = `/learning/${post.id}`;
+const horizontal = layout === 'feature' || layout === 'row';
 ---
 
-<article data-tags={post.data.tags.join(' ')} class="flex h-full flex-col rounded-2xl border border-line bg-card p-5">
-  <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-    <time class="text-sm text-muted" datetime={isoDate(post.data.date)}>{formatDate(post.data.date)}</time>
-    <TagList tags={post.data.tags} filterHref="/learning" />
+<article
+  data-tags={post.data.tags.join(' ')}
+  class:list={[
+    'group flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-card hover:border-accent motion-safe:transition motion-safe:duration-300 motion-safe:hover:-translate-y-0.5',
+    layout === 'feature' && 'md:col-span-2',
+    horizontal && 'md:grid',
+    layout === 'feature' && 'md:grid-cols-[minmax(0,1.12fr)_minmax(0,0.88fr)]',
+    layout === 'row' && 'md:grid-cols-[300px_minmax(0,1fr)]',
+  ]}
+>
+  <a href={href} tabindex="-1" aria-hidden="true" class:list={['block', horizontal && 'md:self-center']}>
+    <CoverArt title={post.data.title} tags={post.data.tags} cover={post.data.cover} seed={post.id} />
+  </a>
+  <div class:list={['flex flex-1 flex-col', layout === 'feature' ? 'p-6 sm:p-7' : 'p-5']}>
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+      <time class="text-sm text-muted" datetime={isoDate(post.data.date)}>{formatDate(post.data.date)}</time>
+      <TagList tags={post.data.tags} filterHref="/learning" />
+    </div>
+    <h3 class:list={['mt-3 font-serif text-ink', layout === 'feature' ? 'text-3xl' : 'text-2xl']}>
+      <a class="hover:text-accent" href={href}>{post.data.title}</a>
+    </h3>
+    <p class="mt-2 flex-1 text-sm leading-6 text-muted">{post.data.summary}</p>
+    <p class="mt-4 font-mono text-xs tracking-wide text-muted uppercase">Course / source</p>
+    <p class="mt-1 text-sm">{post.data.source}</p>
   </div>
-  <h3 class="mt-3 font-serif text-2xl text-ink">
-    <a class="hover:text-accent" href={href}>{post.data.title}</a>
-  </h3>
-  <p class="mt-2 flex-1 text-sm leading-6 text-muted">{post.data.summary}</p>
-  <p class="mt-4 font-mono text-xs tracking-wide text-muted uppercase">Course / source</p>
-  <p class="mt-1 text-sm">{post.data.source}</p>
 </article>

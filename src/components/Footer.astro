@@ -8,7 +8,7 @@ const year = new Date().getFullYear();
   <div
     class="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-8"
   >
-    <p>&copy; {year} {site.name}</p>
+    <p>&copy; {year} {site.name} · Notes on data, AI, and robotics.</p>
     <nav aria-label="Footer" class="flex flex-wrap gap-x-5 gap-y-2">
       <a
         class="text-ink underline decoration-line underline-offset-4 hover:text-accent"
@@ -20,6 +20,9 @@ const year = new Date().getFullYear();
       </a>
       <a class="text-ink underline decoration-line underline-offset-4 hover:text-accent" href={`mailto:${site.email}`}>
         {site.email}
+      </a>
+      <a class="text-ink underline decoration-line underline-offset-4 hover:text-accent" href="/learning/certifications">
+        Certifications
       </a>
       <a class="text-ink underline decoration-line underline-offset-4 hover:text-accent" href="/rss.xml">RSS</a>
       <a

@@ -29,7 +29,7 @@ export const site = {
   role: 'Data engineer moving into AI and robotics',
   /** Default sentence for search results and link previews. */
   description:
-    'Ziyong Wu is a staff data engineer moving into AI and robotics. Meta (2019–July 2026), Munich Re before that, based in the Seattle area.',
+    'Public notebook of Ziyong Wu: course notes and small experiments on AI, robotics, and data. Data engineer in the Seattle area, previously at Meta (2019–July 2026) and Munich Re.',
   /**
    * Public URL of the deployed site, with no trailing slash.
    * After Vercel gives you a domain, replace this and deploy again.

@@ -1,15 +1,22 @@
 ---
+/**
+ * One project in a list. The layouts match LearningCard.astro.
+ * The status chip sits on the picture. "Sample" is the example format.
+ */
 import type { CollectionEntry } from 'astro:content';
 import type { ProjectStatus } from '../config';
-import { statusLabel } from '../lib/format';
+import CoverArt from './CoverArt.astro';
 import TagList from './TagList.astro';
+import { statusLabel } from '../lib/format';
 
 interface Props {
   project: CollectionEntry<'projects'>;
+  layout?: 'feature' | 'row' | 'card';
 }
 
-const { project } = Astro.props;
+const { project, layout = 'card' } = Astro.props;
 const href = `/projects/${project.id}`;
+const horizontal = layout === 'feature' || layout === 'row';
 const demo = project.data.demo;
 const repo = project.data.repo;
 const demoIsExternal = demo ? demo.startsWith('http') : false;
@@ -23,37 +30,56 @@ const statusTone: Record<ProjectStatus, string> = {
 };
 ---
 
-<article data-tags={project.data.tags.join(' ')} class="flex h-full flex-col rounded-2xl border border-line bg-card p-5">
-  <div class="flex flex-wrap items-center gap-2">
-    <span class:list={['rounded-full px-2.5 py-1 font-mono text-xs tracking-wide text-ink uppercase', statusTone[project.data.status]]}>
+<article
+  data-tags={project.data.tags.join(' ')}
+  class:list={[
+    'group flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-card hover:border-accent motion-safe:transition motion-safe:duration-300 motion-safe:hover:-translate-y-0.5',
+    layout === 'feature' && 'md:col-span-2',
+    horizontal && 'md:grid',
+    layout === 'feature' && 'md:grid-cols-[minmax(0,1.12fr)_minmax(0,0.88fr)]',
+    layout === 'row' && 'md:grid-cols-[300px_minmax(0,1fr)]',
+  ]}
+>
+  <div class:list={['relative', horizontal && 'md:self-center']}>
+    <a href={href} tabindex="-1" aria-hidden="true" class="block">
+      <CoverArt title={project.data.title} tags={project.data.tags} cover={project.data.cover} seed={project.id} />
+    </a>
+    <span
+      class:list={[
+        'pointer-events-none absolute top-3 left-3 rounded-full px-2.5 py-1 font-mono text-xs tracking-wide text-ink uppercase',
+        statusTone[project.data.status],
+      ]}
+    >
       {statusLabel(project.data.status)}
     </span>
-    <TagList tags={project.data.tags} filterHref="/projects" />
   </div>
-  <h3 class="mt-3 font-serif text-2xl text-ink">
-    <a class="hover:text-accent" href={href}>{project.data.title}</a>
-  </h3>
-  <p class="mt-2 flex-1 text-sm leading-6 text-muted">{project.data.summary}</p>
-  <div class="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm">
-    <a class="text-accent underline decoration-line underline-offset-4" href={href}>Read the note</a>
-    {
-      demo && (
-        <a
-          class="text-accent underline decoration-line underline-offset-4"
-          href={demo}
-          target={demoIsExternal ? '_blank' : undefined}
-          rel={demoIsExternal ? 'noopener noreferrer' : undefined}
-        >
-          {demoLabel}
-        </a>
-      )
-    }
-    {
-      repo && (
-        <a class="text-accent underline decoration-line underline-offset-4" href={repo} target="_blank" rel="noopener noreferrer">
-          Repository
-        </a>
-      )
-    }
+  <div class:list={['flex flex-1 flex-col', layout === 'feature' ? 'p-6 sm:p-7' : 'p-5']}>
+    <TagList tags={project.data.tags} filterHref="/projects" />
+    <h3 class:list={['mt-3 font-serif text-ink', layout === 'feature' ? 'text-3xl' : 'text-2xl']}>
+      <a class="hover:text-accent" href={href}>{project.data.title}</a>
+    </h3>
+    <p class="mt-2 flex-1 text-sm leading-6 text-muted">{project.data.summary}</p>
+    <div class="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+      <a class="text-accent underline decoration-line underline-offset-4" href={href}>Read the note</a>
+      {
+        demo && (
+          <a
+            class="text-accent underline decoration-line underline-offset-4"
+            href={demo}
+            target={demoIsExternal ? '_blank' : undefined}
+            rel={demoIsExternal ? 'noopener noreferrer' : undefined}
+          >
+            {demoLabel}
+          </a>
+        )
+      }
+      {
+        repo && (
+          <a class="text-accent underline decoration-line underline-offset-4" href={repo} target="_blank" rel="noopener noreferrer">
+            Repository
+          </a>
+        )
+      }
+    </div>
   </div>
 </article>

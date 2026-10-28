@@ -1,0 +1,176 @@
+---
+/**
+ * Picture at the top of a note or project.
+ *
+ * Set `cover` in frontmatter to use your own image (a file in public/,
+ * or an https URL). Leave it out and this draws a pattern from the title
+ * and the tags. The pattern is inline SVG, so it follows light and dark mode.
+ * Your own image does not: give it a background of its own.
+ *
+ * The picture is decorative. The title next to it is the accessible name.
+ */
+import { coverModel } from '../lib/cover';
+
+interface Props {
+  title: string;
+  tags: readonly string[];
+  cover?: string;
+  /** card: 16:9 banner. fill: stretch into a row layout. hero: wide masthead. */
+  frame?: 'card' | 'fill' | 'hero';
+  /** Unique key so two pictures on one page do not share SVG ids. */
+  seed?: string;
+}
+
+const { title, tags, cover, frame = 'card', seed } = Astro.props;
+const model = coverModel(seed ?? title, tags);
+const uid = `c${seed ?? title}`.replace(/[^a-zA-Z0-9]/g, '');
+---
+
+<div
+  class:list={[
+    'relative overflow-hidden bg-accent-soft',
+    frame === 'fill' && 'h-full min-h-52',
+    frame === 'hero' && 'aspect-[2/1]',
+    frame === 'card' && 'aspect-[16/9]',
+  ]}
+>
+  {
+    cover ? (
+      <img
+        src={cover}
+        alt=""
+        loading={frame === 'hero' ? 'eager' : 'lazy'}
+        decoding="async"
+        class="absolute inset-0 h-full w-full object-cover motion-safe:transition motion-safe:duration-700 motion-safe:group-hover:scale-[1.03]"
+      />
+    ) : (
+      <svg
+        viewBox="0 0 640 360"
+        preserveAspectRatio="xMidYMid slice"
+        class="absolute inset-0 h-full w-full motion-safe:transition motion-safe:duration-700 motion-safe:group-hover:scale-[1.03]"
+        aria-hidden="true"
+      >
+        <defs>
+          <pattern id={`${uid}-dots`} width="22" height="22" patternUnits="userSpaceOnUse">
+            <circle cx="1.2" cy="1.2" r="1.1" fill="var(--line)" />
+          </pattern>
+          <radialGradient id={`${uid}-wash`} cx="28%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="var(--highlight)" stop-opacity="0.2" />
+            <stop offset="75%" stop-color="var(--highlight)" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+        <rect width="640" height="360" fill={`url(#${uid}-wash)`} />
+        <rect width="640" height="360" fill={`url(#${uid}-dots)`} />
+        {model.showData && (
+          <g fill="none" stroke-linecap="round">
+            {model.streams.map((d, index) => (
+              <path
+                d={d}
+                stroke={index === 1 ? 'var(--accent)' : index === 2 ? 'var(--ink)' : 'var(--highlight)'}
+                stroke-width="1.7"
+                stroke-dasharray="1.5 9"
+                opacity={index === 2 ? 0.4 : 0.9}
+              />
+            ))}
+          </g>
+        )}
+        {model.showNet && (
+          <g>
+            {model.edges.map((edge) => (
+              <line
+                x1={edge.x1}
+                y1={edge.y1}
+                x2={edge.x2}
+                y2={edge.y2}
+                stroke="var(--ink)"
+                stroke-opacity="0.28"
+              />
+            ))}
+            {model.nodes.map((node) => (
+              <circle
+                cx={node.x}
+                cy={node.y}
+                r={node.r}
+                fill={node.live ? 'var(--highlight)' : 'var(--card)'}
+                stroke="var(--ink)"
+                stroke-width={node.live ? 0 : 1.6}
+              />
+            ))}
+          </g>
+        )}
+        {model.showArm && (
+          <g>
+            {model.rings.map((ring) => (
+              <circle
+                cx={ring.cx}
+                cy={ring.cy}
+                r={ring.r}
+                fill="none"
+                stroke="var(--ink)"
+                stroke-opacity="0.28"
+                stroke-dasharray="4 7"
+              />
+            ))}
+            <g opacity="0.35">
+              <line
+                x1={model.ghostUpper.x1}
+                y1={model.ghostUpper.y1}
+                x2={model.ghostUpper.x2}
+                y2={model.ghostUpper.y2}
+                stroke="var(--ink)"
+                stroke-width="6"
+                stroke-linecap="round"
+              />
+              <line
+                x1={model.ghostLower.x1}
+                y1={model.ghostLower.y1}
+                x2={model.ghostLower.x2}
+                y2={model.ghostLower.y2}
+                stroke="var(--accent)"
+                stroke-width="6"
+                stroke-linecap="round"
+              />
+              <circle cx={model.ghostElbow.x} cy={model.ghostElbow.y} r="4" fill="var(--ink)" />
+              <circle cx={model.ghostHand.x} cy={model.ghostHand.y} r="4" fill="var(--highlight)" />
+            </g>
+            <line
+              x1={model.upper.x1}
+              y1={model.upper.y1}
+              x2={model.upper.x2}
+              y2={model.upper.y2}
+              stroke="var(--ink)"
+              stroke-width="8"
+              stroke-linecap="round"
+            />
+            <line
+              x1={model.lower.x1}
+              y1={model.lower.y1}
+              x2={model.lower.x2}
+              y2={model.lower.y2}
+              stroke="var(--accent)"
+              stroke-width="8"
+              stroke-linecap="round"
+            />
+            <circle cx={model.shoulder.x} cy={model.shoulder.y} r="7" fill="var(--ink)" />
+            <circle
+              cx={model.elbow.x}
+              cy={model.elbow.y}
+              r="6"
+              fill="var(--card)"
+              stroke="var(--ink)"
+              stroke-width="3"
+            />
+            <circle cx={model.hand.x} cy={model.hand.y} r="6" fill="var(--highlight)" />
+          </g>
+        )}
+        {model.showData && (
+          <g>
+            {model.bars.map((bar) => (
+              <rect x={bar.x} y={bar.y} width="16" height={bar.h} rx="3" fill="var(--accent)" opacity="0.78" />
+            ))}
+          </g>
+        )}
+      </svg>
+    )
+  }
+</div>
