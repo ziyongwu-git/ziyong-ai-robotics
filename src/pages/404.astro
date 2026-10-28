@@ -3,15 +3,30 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title="Page not found" description="That address is not on this site." noindex>
-  <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">404</p>
-  <h1 class="mt-3 font-serif text-4xl sm:text-5xl">Page not found</h1>
-  <p class="mt-4 max-w-xl text-lg leading-8 text-muted">That address is not on this site.</p>
-  <p class="mt-8">
-    <a
-      class="inline-flex rounded-full bg-ink px-4 py-2 text-sm text-paper hover:bg-accent"
-      href="/"
-    >
-      Back to the home page
-    </a>
-  </p>
+  <div class="grid items-center gap-8 sm:grid-cols-[160px_minmax(0,1fr)]">
+    <svg viewBox="0 0 160 140" class="h-auto w-40" aria-hidden="true">
+      <circle cx="36" cy="108" r="40" fill="none" stroke="var(--line)" stroke-dasharray="3 5"></circle>
+      <line x1="34" y1="108" x2="78" y2="64" stroke="var(--ink)" stroke-width="7" stroke-linecap="round"></line>
+      <line
+        x1="96"
+        y1="58"
+        x2="132"
+        y2="36"
+        stroke="var(--accent)"
+        stroke-width="7"
+        stroke-linecap="round"
+        stroke-dasharray="5 6"></line>
+      <circle cx="34" cy="108" r="5" fill="var(--ink)"></circle>
+      <circle cx="78" cy="64" r="5" fill="var(--card)" stroke="var(--ink)" stroke-width="2.5"></circle>
+      <circle cx="132" cy="36" r="5" fill="var(--highlight)"></circle>
+    </svg>
+    <div>
+      <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">404</p>
+      <h1 class="mt-3 font-serif text-4xl sm:text-5xl">This link does not reach</h1>
+      <p class="mt-4 max-w-xl text-lg leading-8 text-muted">That address is not on this site.</p>
+      <p class="mt-8">
+        <a class="btn btn-solid" href="/">Back to the notebook</a>
+      </p>
+    </div>
+  </div>
 </BaseLayout>

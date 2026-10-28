@@ -18,15 +18,30 @@ import { projectStatuses, tags } from './config';
  * The glob pattern already picks up every .md and .mdx file in the folder.
  */
 
+/**
+ * A path on this site (`/covers/photo.jpg`) or a full http(s) URL.
+ * `what` is only used in the error message.
+ */
+function optionalPath(what: string) {
+  return z
+    .string()
+    .min(1)
+    .refine(
+      (value) => value.startsWith('/') || value.startsWith('http://') || value.startsWith('https://'),
+      `Start ${what} with /, http://, or https://. Leave the field out if you have nothing to put here.`,
+    )
+    .optional();
+}
+
 /** A link on a project: a path on this site, or a full http(s) URL. */
-const optionalLink = z
-  .string()
-  .min(1)
-  .refine(
-    (value) => value.startsWith('/') || value.startsWith('http://') || value.startsWith('https://'),
-    'Start the link with /, http://, or https://. Leave the field out if you have no link.',
-  )
-  .optional();
+const optionalLink = optionalPath('the link');
+
+/**
+ * Optional picture. Put the file in `public/` and use a path like
+ * `/covers/photo.jpg`, or paste an https URL. Leave it out and the
+ * site draws a pattern from the tags.
+ */
+const optionalCover = optionalPath('the cover');
 
 const learning = defineCollection({
   loader: glob({
@@ -44,6 +59,8 @@ const learning = defineCollection({
      */
     source: z.string(),
     summary: z.string(),
+    /** Optional picture. Leave it out for a generated pattern. See `optionalCover`. */
+    cover: optionalCover,
   }),
 });
 
@@ -65,6 +82,8 @@ const projects = defineCollection({
     demo: optionalLink,
     /** Optional repository URL. */
     repo: optionalLink,
+    /** Optional picture. Leave it out for a generated pattern. See `optionalCover`. */
+    cover: optionalCover,
   }),
 });
 

@@ -1,0 +1,26 @@
+---
+import Band from '../../components/Band.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Certifications from '../../components/Certifications.astro';
+---
+
+<BaseLayout
+  title="Certifications & courses"
+  description="Licenses and course certificates from Ziyong Wu, including 2026 DeepLearning.AI certificates and earlier data and cloud credentials."
+  width="narrow"
+>
+  <p>
+    <a class="text-sm text-accent underline decoration-line underline-offset-4" href="/learning">Learning log</a>
+  </p>
+  <div class="mt-6">
+    <Band kind="certifications" />
+  </div>
+  <h1 class="mt-6 font-serif text-4xl sm:text-5xl">Certifications &amp; courses</h1>
+  <p class="mt-4 text-lg leading-8 text-muted">
+    Licenses and course certificates, listed as recorded. A linked title opens the credential. Courses inside a
+    specialization are grouped under it.
+  </p>
+  <div class="mt-10">
+    <Certifications variant="full" />
+  </div>
+</BaseLayout>

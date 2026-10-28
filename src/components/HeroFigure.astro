@@ -1,37 +1,242 @@
 ---
 /**
- * Static drawing for the home page. The moving version is the React demo
- * on the sample project page. Keeping this as SVG means the home page
- * does not need to download that component.
+ * Home-page sketch: data streams, a small network, and a two-link arm.
+ *
+ * It is inline SVG plus CSS. The home page does not download the React
+ * demo for this. The moving arm you can steer lives on the sample project.
+ * Motion turns off when the visitor has asked for reduced motion.
  */
 ---
 
-<aside class="rounded-3xl border border-line bg-card p-5">
-  <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">On the bench</p>
-  <svg viewBox="0 0 280 210" class="mt-3 h-auto w-full" aria-hidden="true">
-    <circle cx="58" cy="158" r="92" fill="none" stroke="var(--line)" stroke-dasharray="4 6"></circle>
-    <circle cx="58" cy="158" r="26" fill="none" stroke="var(--line)" stroke-dasharray="3 5"></circle>
-    <path
-      d="M58 158 L138 72"
-      fill="none"
-      stroke="var(--ink)"
-      stroke-width="7"
-      stroke-linecap="round"></path>
-    <path
-      d="M138 72 L214 118"
-      fill="none"
-      stroke="var(--accent)"
-      stroke-width="7"
-      stroke-linecap="round"></path>
-    <circle cx="58" cy="158" r="6" fill="var(--ink)"></circle>
-    <circle cx="138" cy="72" r="6" fill="var(--card)" stroke="var(--ink)" stroke-width="3"></circle>
-    <circle cx="214" cy="118" r="6" fill="var(--highlight)"></circle>
-    <circle cx="214" cy="118" r="14" fill="none" stroke="var(--highlight)"></circle>
+<aside class="enter-late rounded-3xl border border-line bg-card p-4 sm:p-5">
+  <div class="flex items-baseline justify-between gap-3">
+    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Field sketch</p>
+    <p class="font-mono text-xs text-muted">Data · net · arm</p>
+  </div>
+  <svg
+    viewBox="0 0 640 460"
+    class="motif mt-3 h-auto w-full"
+    role="img"
+    aria-label="Sketch of data streams, a small network, and a two-link arm."
+  >
+    <defs>
+      <pattern id="motif-dots" width="20" height="20" patternUnits="userSpaceOnUse">
+        <circle cx="1" cy="1" r="1.05" fill="var(--line)"></circle>
+      </pattern>
+      <radialGradient id="motif-wash" cx="22%" cy="28%" r="68%">
+        <stop offset="0%" stop-color="var(--highlight)" stop-opacity="0.2"></stop>
+        <stop offset="72%" stop-color="var(--highlight)" stop-opacity="0"></stop>
+      </radialGradient>
+      <radialGradient id="motif-wash-b" cx="78%" cy="78%" r="55%">
+        <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.14"></stop>
+        <stop offset="70%" stop-color="var(--accent)" stop-opacity="0"></stop>
+      </radialGradient>
+    </defs>
+    <rect width="640" height="460" fill="url(#motif-wash)"></rect>
+    <rect width="640" height="460" fill="url(#motif-wash-b)"></rect>
+    <rect width="640" height="460" fill="url(#motif-dots)"></rect>
+
+    <g fill="none" stroke-linecap="round">
+      <path id="motif-stream-a" class="motif-stream" d="M-20 74 C 140 74, 210 118, 330 112 S 500 62, 670 92" stroke="var(--highlight)"></path>
+      <path id="motif-stream-b" class="motif-stream motif-stream-b" d="M-20 116 C 120 138, 240 86, 360 132 S 520 168, 670 128" stroke="var(--accent)"></path>
+      <path id="motif-stream-c" class="motif-stream motif-stream-c" d="M-20 162 C 150 150, 250 206, 390 176 S 530 140, 670 186" stroke="var(--ink)"></path>
+    </g>
+    <circle class="motif-packet" r="3.4" fill="var(--highlight)"></circle>
+    <circle class="motif-packet motif-packet-b" r="3" fill="var(--accent)"></circle>
+    <circle class="motif-packet motif-packet-c" r="2.6" fill="var(--ink)"></circle>
+
+    <g stroke="var(--ink)" stroke-opacity="0.32">
+      <g class="motif-wires">
+        {/* Input to hidden, then hidden to output. Coordinates match the circles below. */}
+        <line x1="92" y1="214" x2="196" y2="196"></line>
+        <line x1="92" y1="214" x2="196" y2="258"></line>
+        <line x1="92" y1="214" x2="196" y2="320"></line>
+        <line x1="92" y1="214" x2="196" y2="382"></line>
+        <line x1="92" y1="292" x2="196" y2="196"></line>
+        <line x1="92" y1="292" x2="196" y2="258"></line>
+        <line x1="92" y1="292" x2="196" y2="320"></line>
+        <line x1="92" y1="292" x2="196" y2="382"></line>
+        <line x1="92" y1="370" x2="196" y2="196"></line>
+        <line x1="92" y1="370" x2="196" y2="258"></line>
+        <line x1="92" y1="370" x2="196" y2="320"></line>
+        <line x1="92" y1="370" x2="196" y2="382"></line>
+        <line x1="196" y1="196" x2="300" y2="236"></line>
+        <line x1="196" y1="196" x2="300" y2="314"></line>
+        <line x1="196" y1="196" x2="300" y2="392"></line>
+        <line x1="196" y1="258" x2="300" y2="236"></line>
+        <line x1="196" y1="258" x2="300" y2="314"></line>
+        <line x1="196" y1="258" x2="300" y2="392"></line>
+        <line x1="196" y1="320" x2="300" y2="236"></line>
+        <line x1="196" y1="320" x2="300" y2="314"></line>
+        <line x1="196" y1="320" x2="300" y2="392"></line>
+        <line x1="196" y1="382" x2="300" y2="236"></line>
+        <line x1="196" y1="382" x2="300" y2="314"></line>
+        <line x1="196" y1="382" x2="300" y2="392"></line>
+      </g>
+    </g>
+    <g>
+      <circle class="motif-node" cx="92" cy="214" r="6"></circle>
+      <circle class="motif-node motif-node-live" cx="92" cy="292" r="7"></circle>
+      <circle class="motif-node" cx="92" cy="370" r="6"></circle>
+      <circle class="motif-node" cx="196" cy="196" r="6"></circle>
+      <circle class="motif-node motif-node-live motif-node-delay" cx="196" cy="258" r="7"></circle>
+      <circle class="motif-node" cx="196" cy="320" r="6"></circle>
+      <circle class="motif-node" cx="196" cy="382" r="6"></circle>
+      <circle class="motif-node motif-node-live motif-node-delay-b" cx="300" cy="236" r="7"></circle>
+      <circle class="motif-node" cx="300" cy="314" r="6"></circle>
+      <circle class="motif-node" cx="300" cy="392" r="6"></circle>
+    </g>
+
+    <circle cx="468" cy="400" r="108" fill="none" stroke="var(--ink)" stroke-opacity="0.2" stroke-dasharray="4 7"></circle>
+    <circle cx="468" cy="400" r="46" fill="none" stroke="var(--ink)" stroke-opacity="0.16" stroke-dasharray="3 6"></circle>
+    <g class="motif-shoulder">
+      <line x1="468" y1="400" x2="572" y2="400" stroke="var(--ink)" stroke-width="8" stroke-linecap="round"></line>
+      <circle cx="468" cy="400" r="7" fill="var(--ink)"></circle>
+      <g class="motif-elbow">
+        <line x1="572" y1="400" x2="658" y2="400" stroke="var(--accent)" stroke-width="8" stroke-linecap="round"></line>
+        <circle cx="572" cy="400" r="6" fill="var(--card)" stroke="var(--ink)" stroke-width="3"></circle>
+        <circle cx="658" cy="400" r="6" fill="var(--highlight)"></circle>
+        <path d="M658 400 l14 -11 M658 400 l14 11" fill="none" stroke="var(--highlight)" stroke-width="3" stroke-linecap="round"></path>
+      </g>
+    </g>
   </svg>
-  <p class="mt-3 text-sm text-muted">
-    Sample demo ·
-    <a class="text-accent underline decoration-line underline-offset-4" href="/projects/sample-two-link-arm#demo">
-      Two-link arm
-    </a>
+  <p class="mt-3 text-sm leading-6 text-muted">
+    The same two-link arm, with sliders, is the
+    <a class="text-accent underline decoration-line underline-offset-4" href="/projects/sample-two-link-arm#demo">sample demo</a>.
   </p>
 </aside>
+
+<style>
+  .motif-node {
+    fill: var(--card);
+    stroke: var(--ink);
+    stroke-width: 1.6;
+  }
+
+  .motif-node-live {
+    fill: var(--highlight);
+    stroke: none;
+    animation: motif-pulse 3.4s ease-in-out infinite;
+  }
+
+  .motif-node-delay {
+    animation-delay: 0.6s;
+  }
+
+  .motif-node-delay-b {
+    animation-delay: 1.2s;
+  }
+
+  .motif-stream {
+    stroke-width: 1.6;
+    stroke-dasharray: 1.4 10;
+    animation: motif-flow 18s linear infinite;
+  }
+
+  .motif-stream-b {
+    animation-duration: 24s;
+    animation-direction: reverse;
+  }
+
+  .motif-stream-c {
+    opacity: 0.4;
+    animation-duration: 28s;
+  }
+
+  .motif-packet {
+    offset-path: path('M-20 74 C 140 74, 210 118, 330 112 S 500 62, 670 92');
+    offset-rotate: 0deg;
+    animation: motif-travel 9s linear infinite;
+  }
+
+  .motif-packet-b {
+    offset-path: path('M-20 116 C 120 138, 240 86, 360 132 S 520 168, 670 128');
+    animation-duration: 12s;
+    animation-delay: -4s;
+  }
+
+  .motif-packet-c {
+    offset-path: path('M-20 162 C 150 150, 250 206, 390 176 S 530 140, 670 186');
+    animation-duration: 15s;
+    animation-delay: -7s;
+  }
+
+  .motif-shoulder,
+  .motif-elbow {
+    transform-box: view-box;
+  }
+
+  .motif-shoulder {
+    transform: rotate(-52deg);
+    transform-origin: 468px 400px;
+    animation: motif-shoulder 8.5s ease-in-out infinite alternate;
+  }
+
+  .motif-elbow {
+    transform: rotate(46deg);
+    transform-origin: 572px 400px;
+    animation: motif-elbow 6.4s ease-in-out infinite alternate;
+  }
+
+  @keyframes motif-pulse {
+    0%,
+    100% {
+      opacity: 0.45;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes motif-flow {
+    to {
+      stroke-dashoffset: -240;
+    }
+  }
+
+  @keyframes motif-travel {
+    to {
+      offset-distance: 100%;
+    }
+  }
+
+  @keyframes motif-shoulder {
+    from {
+      transform: rotate(-74deg);
+    }
+    to {
+      transform: rotate(-34deg);
+    }
+  }
+
+  @keyframes motif-elbow {
+    from {
+      transform: rotate(18deg);
+    }
+    to {
+      transform: rotate(72deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .motif-node-live,
+    .motif-stream,
+    .motif-packet,
+    .motif-shoulder,
+    .motif-elbow {
+      animation: none;
+    }
+
+    .motif-packet {
+      offset-distance: 42%;
+    }
+
+    .motif-packet-b {
+      offset-distance: 63%;
+    }
+
+    .motif-packet-c {
+      offset-distance: 28%;
+    }
+  }
+</style>

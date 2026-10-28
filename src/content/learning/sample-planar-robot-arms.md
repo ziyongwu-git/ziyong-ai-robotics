@@ -7,6 +7,7 @@ tags:
 # course/source — where the note came from. The field name is `source`.
 source: "Sample source — replace with the textbook section or lecture"
 summary: "Placeholder note on a two-link arm. The matching interactive demo lives under Projects."
+# cover: "/covers/my-picture.jpg"
 ---
 
 > **Sample post.** Copy this file when you want a new note, then replace the text. The title, the summary, and this box mark it as an example.

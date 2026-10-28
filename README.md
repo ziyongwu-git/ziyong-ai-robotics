@@ -1,6 +1,6 @@
 # Ziyong Wu — personal site
 
-A small professional site: a home page, a learning log, projects, and an about page.
+A personal notebook: a home page, a learning log, projects, and an about page. The home page leads with notes and projects. The resume-style background lives on About.
 
 It is built with [Astro](https://astro.build), [Tailwind CSS](https://tailwindcss.com), and [MDX](https://mdxjs.com), with React available when a project needs something interactive (a slider, a chart, a small tool). The finished site is a folder of static files, which [Vercel](https://vercel.com) can host for free.
 
@@ -44,10 +44,11 @@ npm run preview
 | `src/content/learning/` | Learning-log posts. One `.md` or `.mdx` file per note. |
 | `src/content/projects/` | Project write-ups. Use `.mdx` when the page embeds a demo. |
 | `src/content.config.ts` | The checklist for those files (required title, allowed tags, and so on). It sits **next to** `content/`, not inside it. |
+| `src/data/certifications.ts` | Licenses and courses. One list, used by the home page, the learning log, and `/learning/certifications`. |
 | `src/config.ts` | Your name, one-line positioning, public URL, and contact links. |
 | `src/styles/global.css` | Colors, fonts, and dark mode. |
-| `src/lib/` | Small helpers (dates, loading posts). |
-| `public/` | Files copied as-is. The favicon is here. |
+| `src/lib/` | Small helpers (dates, loading posts, sorting certificates, generated covers). |
+| `public/` | Files copied as-is. The favicon is here. Pictures for notes go in `public/covers/`. |
 | `docs/` | Notes about the tools. These pages are not on the website. |
 | `astro.config.ts` | Astro settings: static output, React, MDX, the sitemap. |
 | `dist/` | The built site. Generated. Do not edit it. |
@@ -59,12 +60,13 @@ The header links are the `nav` list in `src/config.ts`.
 
 | URL | Page |
 | --- | --- |
-| `/` | Home: name, positioning, links to the other sections, latest notes, featured projects |
-| `/learning` | Learning log, newest first, with tag filters |
+| `/` | Home: the notebook, a short "currently learning" strip, latest notes, featured projects |
+| `/learning` | Learning log, newest first, with tag filters and a certifications sidebar |
 | `/learning/<file-name>` | One note |
+| `/learning/certifications` | Full list of licenses and courses |
 | `/projects` | Project index |
 | `/projects/<file-name>` | One project |
-| `/about` | Bio and contact |
+| `/about` | Bio, experience, skills, education, and contact |
 | `/rss.xml` | RSS feed for the learning log |
 | `/sitemap-index.xml` | Sitemap |
 
@@ -83,7 +85,9 @@ tags:
   - data
 # course/source — the field name is source
 source: "Fast.ai Practical Deep Learning, lesson 2"
-summary: "Two sentences a recruiter can read without opening the note."
+summary: "Two sentences a reader can scan without opening the note."
+# Optional picture. Leave the line out for a generated pattern.
+# cover: "/covers/my-picture.jpg"
 ---
 ```
 
@@ -95,6 +99,7 @@ Rules the build will enforce:
 - `date` is `YYYY-MM-DD`.
 - `tags` is one or more of `ai`, `robotics`, `data`. To allow a new tag, add it to the `tags` array in `src/config.ts`.
 - `source` is the course, paper, video, or book. The label on the page is "Course / source".
+- `cover` is optional. Put an image in `public/covers/` and set `cover: "/covers/my-picture.jpg"`, or use an `https://` URL. Leave the line out and the site draws a pattern from the tags (AI, robotics, data). A file in `public/` does not follow the light/dark switch, so give a photo or a drawing its own background. The sample attention note uses `public/covers/attention.svg` as the example. The pattern covers are original drawings in the code, not stock photos.
 
 Save the file. The dev server should show the note on `/learning` and on the home page (the three newest). If it does not appear, stop the server and run `npm run dev` again.
 
@@ -124,6 +129,7 @@ repo: "https://github.com/ziyongwu-git/my-repo"
 - `featured: true` puts the project on the home page. Omit it, or set `false`, to keep the project on the projects page only.
 - `date` is optional. Newer dates are listed first.
 - `demo` and `repo` are optional. Leave the line out when you do not have a link. A link must start with `/` (a page on this site), `http://`, or `https://`.
+- `cover` works the same way as on a learning note.
 
 `/projects/sample-two-link-arm` is the example, including a working demo. Delete that file when you are done with it, and delete `src/components/demos/RobotArm.tsx` and `kinematics.ts` if nothing else imports them.
 
@@ -150,11 +156,23 @@ If the widget's buttons look strangely spaced, add `className="not-prose"` to it
 
 In an `.mdx` file, `{` starts code. When you mention a snippet in a sentence, wrap it in backticks.
 
+## Certifications and courses
+
+Edit `src/data/certifications.ts`. Copy an existing block. The comment at the top of that file explains each field.
+
+- `current: true` puts a certificate on the home page strip and the learning-log sidebar. Use it for recent certificates, not for a course that is nested under a specialization.
+- `parentId` nests a course under another entry. The Deep Learning Specialization is the example: its four courses set `parentId: 'deep-learning-specialization'`.
+- `expired` is a date such as `Oct 2021`, only when the credential has lapsed. PMP is marked that way.
+- Leave `credentialUrl` out when there is no public link. Do not invent a course or a description of what it taught.
+
+`/learning/certifications` prints the whole list in two groups. About links to that page.
+
 ## Change words, links, and colors
 
 - Name, positioning, public URL, email, LinkedIn, and GitHub: `src/config.ts`. Email is `ziyong.w@gmail.com` (a `mailto` link in the footer and on About). LinkedIn is `https://www.linkedin.com/in/ziyongwu/`. GitHub is `https://github.com/ziyongwu-git`. Do not add a phone number or a street address.
 - The resume-style copy (roles, dates, skills, education): `src/profile.ts`. Add a line only when you can point at the source. The public location line stays "Seattle area".
-- Colors and fonts: the two variable blocks at the top of `src/styles/global.css`.
+- Licenses and courses: `src/data/certifications.ts`, not `profile.ts`.
+- Colors and fonts: the two variable blocks at the top of `src/styles/global.css`. The home-page sketch is `src/components/HeroFigure.astro`. Its motion stops when the browser is set to reduced motion.
 
 The public URL in `src/config.ts` (`url`) is what the sitemap and RSS feed use. It has no trailing slash.
 
@@ -184,7 +202,8 @@ Read the last lines of the terminal. The content checker is the usual cause:
 - A missing `title`, `date`, `source`, or `summary` on a note.
 - A date not written as `YYYY-MM-DD`.
 - A project `status` outside `idea`, `in-progress`, `shipped`, `sample`.
-- A `demo` or `repo` link that does not start with `/`, `http://`, or `https://`.
+- A `demo`, `repo`, or `cover` path that does not start with `/`, `http://`, or `https://`.
+- A certification date that is not like `Oct 2026`, a repeated `id`, or a `parentId` that does not match another entry. The error names the certificate.
 
 Fix the file it names and run `npm run build` again.
 

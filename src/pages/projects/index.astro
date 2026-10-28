@@ -1,4 +1,5 @@
 ---
+import Band from '../../components/Band.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 import TagFilter from '../../components/TagFilter.astro';
@@ -11,12 +12,15 @@ const projects = await getProjects();
   title="Projects"
   description="Small tools and experiments from Ziyong Wu, including interactive demos."
 >
-  <header class="max-w-2xl">
-    <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">Work</p>
-    <h1 class="mt-3 font-serif text-4xl sm:text-5xl">Projects</h1>
-    <p class="mt-4 text-lg leading-8 text-muted">
-      Small tools and experiments. A project can be a write-up, a link, or a page with an interactive demo.
-    </p>
+  <header class="grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+    <div class="max-w-2xl">
+      <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">Experiments</p>
+      <h1 class="mt-3 font-serif text-4xl sm:text-5xl">Projects</h1>
+      <p class="mt-4 text-lg leading-8 text-muted">
+        Small tools and experiments. A project can be a write-up, a link, or a page with an interactive demo.
+      </p>
+    </div>
+    <Band kind="projects" />
   </header>
   <div class="mt-10">
     {
@@ -25,7 +29,7 @@ const projects = await getProjects();
       ) : (
         <TagFilter>
           {projects.map((project) => (
-            <ProjectCard project={project} />
+            <ProjectCard project={project} layout={projects.length === 1 ? 'feature' : 'card'} />
           ))}
         </TagFilter>
       )

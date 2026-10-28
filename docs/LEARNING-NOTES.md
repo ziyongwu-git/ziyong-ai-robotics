@@ -57,6 +57,18 @@ A content collection is a folder of posts plus a checklist.
 
 You do not register a new file in the config. The config already says "read every `.md` and `.mdx` file in this folder."
 
+## Pictures
+
+Notes and projects can show a picture. If the file's frontmatter has no `cover`, the site draws one from the tags: a small network for AI, an arm for robotics, streams and bars for data. That drawing is SVG in the page, so it follows light and dark mode, and it does not download an image.
+
+If you set `cover`, the site uses that file instead. Put it in `public/covers/` and point at it with `/covers/your-file.jpg`. A file used that way keeps its own colors in both themes. The sample attention note is the example (`public/covers/attention.svg`). It is an original drawing, not a photo of a person.
+
+The moving sketch on the home page is also SVG and CSS. It is not the React arm. The React arm is only on the sample project, and only because that page says `client:load`.
+
+## Certifications
+
+`src/data/certifications.ts` is a list, not a page. The home page shows the entries marked current. `/learning/certifications` shows every entry. You do not copy the list into the about page. About links to it.
+
 ## What you can ignore for now
 
 Server-rendered pages, databases, and hosting adapters. Static files are enough for this site. Add those only when a page needs to do something at the moment someone requests it, such as accept a form and store the answer.

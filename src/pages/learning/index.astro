@@ -1,5 +1,7 @@
 ---
+import Band from '../../components/Band.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Certifications from '../../components/Certifications.astro';
 import LearningCard from '../../components/LearningCard.astro';
 import TagFilter from '../../components/TagFilter.astro';
 import { getLearningPosts } from '../../lib/content';
@@ -11,24 +13,37 @@ const posts = await getLearningPosts();
   title="Learning log"
   description="Course notes and daily writing from Ziyong Wu on AI, robotics, and data. Newest first."
 >
-  <header class="max-w-2xl">
-    <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">Notes</p>
-    <h1 class="mt-3 font-serif text-4xl sm:text-5xl">Learning log</h1>
-    <p class="mt-4 text-lg leading-8 text-muted">
-      Notes from courses, papers, and practice. Newest first. Filter by AI, robotics, or data.
-    </p>
+  <header class="grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+    <div class="max-w-2xl">
+      <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">Notes</p>
+      <h1 class="mt-3 font-serif text-4xl sm:text-5xl">Learning log</h1>
+      <p class="mt-4 text-lg leading-8 text-muted">
+        Notes from courses, papers, and practice. Newest first. Filter by AI, robotics, or data.
+      </p>
+      <p class="mt-4">
+        <a class="text-sm text-accent underline decoration-line underline-offset-4" href="/learning/certifications">
+          Certifications &amp; courses
+        </a>
+      </p>
+    </div>
+    <Band kind="learning" />
   </header>
-  <div class="mt-10">
-    {
-      posts.length === 0 ? (
-        <p class="text-muted">No notes yet.</p>
-      ) : (
-        <TagFilter>
-          {posts.map((post) => (
-            <LearningCard post={post} />
-          ))}
-        </TagFilter>
-      )
-    }
+  <div class="mt-10 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_280px]">
+    <div>
+      {
+        posts.length === 0 ? (
+          <p class="text-muted">No notes yet.</p>
+        ) : (
+          <TagFilter>
+            {posts.map((post) => (
+              <LearningCard post={post} />
+            ))}
+          </TagFilter>
+        )
+      }
+    </div>
+    <div class="lg:sticky lg:top-24">
+      <Certifications variant="rail" />
+    </div>
   </div>
 </BaseLayout>

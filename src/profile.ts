@@ -1,9 +1,12 @@
 /**
- * Background shown on the home page and the about page.
+ * Background shown on the about page.
  * Every line here is taken from Ziyong's resume. Do not add employers,
  * dates, degrees, or metrics that are not already written down.
  * Do not add a phone number or a street address.
  * The public location line stays "Seattle area".
+ *
+ * Certifications and courses are not in this file.
+ * They live in src/data/certifications.ts.
  */
 
 export const locationLabel = 'Seattle area';
@@ -113,19 +116,6 @@ export const skillGroups = [
     label: 'Technical leadership',
     items:
       'Technical strategy and roadmapping, capacity planning and cost optimization, cross-functional stakeholders, mentorship, executive communication',
-  },
-] as const;
-
-export const certifications = [
-  {
-    name: 'Google Cloud Certified Professional Data Engineer',
-    by: 'Google',
-    year: '2019',
-  },
-  {
-    name: 'Project Management Professional (PMP)',
-    by: 'Project Management Institute',
-    year: '2018',
   },
 ] as const;
 

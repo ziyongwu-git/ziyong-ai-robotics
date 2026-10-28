@@ -1,15 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { site } from '../config';
-import {
-  certifications,
-  earlyCareer,
-  education,
-  experience,
-  highlights,
-  locationLabel,
-  skillGroups,
-} from '../profile';
+import { certificationById } from '../lib/certifications';
+import { earlyCareer, education, experience, highlights, locationLabel, skillGroups } from '../profile';
+
+const gcp = certificationById('gcp-professional-data-engineer');
 ---
 
 <BaseLayout
@@ -17,9 +12,9 @@ import {
   description="Ziyong Wu is a staff data engineer in the Seattle area, at Meta from 2019 to July 2026, moving into AI and robotics."
   width="narrow"
 >
-  <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">{locationLabel}</p>
+  <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">Background</p>
   <h1 class="mt-3 font-serif text-4xl sm:text-5xl">{site.name}</h1>
-  <p class="mt-4 text-xl leading-8 text-ink">{site.role}.</p>
+  <p class="mt-4 font-serif text-xl italic leading-8 text-ink">The short version of the work, for anyone who wants it.</p>
   <div class="mt-6 space-y-4 leading-7 text-muted">
     <p>
       Google Cloud–certified staff data engineer. Seven years at Meta, from 2019 to July 2026, across Ads Guidance
@@ -32,6 +27,21 @@ import {
       scale.
     </p>
   </div>
+
+  <dl class="mt-10 grid gap-6 border-y border-line py-6 sm:grid-cols-3">
+    <div>
+      <dt class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Meta</dt>
+      <dd class="mt-2 font-serif text-2xl">2019 – Jul 2026</dd>
+    </div>
+    <div>
+      <dt class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Munich Re</dt>
+      <dd class="mt-2 font-serif text-2xl">2016 – 2019</dd>
+    </div>
+    <div>
+      <dt class="font-mono text-xs tracking-[0.16em] text-muted uppercase">Certified</dt>
+      <dd class="mt-2 font-serif text-2xl">GCP Data Engineer</dd>
+    </div>
+  </dl>
 
   <section class="mt-12" aria-labelledby="highlights-heading">
     <h2 id="highlights-heading" class="font-serif text-3xl">Highlights</h2>
@@ -89,21 +99,42 @@ import {
     </dl>
   </section>
 
-  <section class="mt-12" aria-labelledby="certifications-heading">
-    <h2 id="certifications-heading" class="font-serif text-3xl">Certifications</h2>
-    <ul class="mt-4 space-y-3">
-      {
-        certifications.map((item) => (
-          <li class="flex flex-wrap items-baseline justify-between gap-2 border-b border-line pb-3">
-            <span>
-              {item.name}
-              <span class="text-muted"> · {item.by}</span>
-            </span>
-            <span class="font-mono text-xs text-muted">{item.year}</span>
-          </li>
-        ))
-      }
-    </ul>
+  <section class="mt-12" id="certifications" aria-labelledby="certifications-heading">
+    <h2 id="certifications-heading" class="font-serif text-3xl">Certifications &amp; courses</h2>
+    <p class="mt-4 text-sm leading-6 text-muted">
+      The full list lives with the learning log, including the 2026 DeepLearning.AI certificates. One credential from
+      the data work:
+    </p>
+    {
+      gcp && (
+        <p class="mt-4">
+          {
+            gcp.credentialUrl ? (
+              <a
+                class="font-serif text-xl text-ink underline decoration-line underline-offset-4 hover:text-accent"
+                href={gcp.credentialUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {gcp.name}
+                <span class="sr-only"> (credential, opens in a new tab)</span>
+              </a>
+            ) : (
+              <span class="font-serif text-xl">{gcp.name}</span>
+            )
+          }
+          <span class="text-muted">
+            {' '}
+            · {gcp.issuer} · {gcp.date}
+          </span>
+        </p>
+      )
+    }
+    <p class="mt-4">
+      <a class="text-sm text-accent underline decoration-line underline-offset-4" href="/learning/certifications">
+        All certifications and courses
+      </a>
+    </p>
   </section>
 
   <section class="mt-12" aria-labelledby="education-heading">

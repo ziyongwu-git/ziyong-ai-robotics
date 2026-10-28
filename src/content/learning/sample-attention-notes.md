@@ -8,6 +8,9 @@ tags:
 # course/source — where the note came from. The field name is `source`.
 source: "Sample source — replace with the real course, paper, or video"
 summary: "Placeholder note. This file shows the learning-log format. Replace every section with your own words."
+# Optional picture. A file in public/ (for example /covers/attention.svg) or an https URL.
+# Leave the line out and the site draws a pattern from the tags.
+cover: "/covers/attention.svg"
 ---
 
 > **Sample post.** Copy this file when you want a new note, then replace the text. The title, the summary, and this box mark it as an example.
