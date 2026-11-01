@@ -3,6 +3,7 @@ import '../styles/global.css';
 import { site } from '../config';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import Analytics from '@vercel/analytics/astro';
 
 interface Props {
   /** Browser-tab title. The site name is added for you, except on the home page. */
@@ -85,6 +86,12 @@ const person = {
     <meta name="twitter:description" content={description} />
     <link rel="alternate" type="application/rss+xml" title={`${site.name} — Learning log`} href={rssHref} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!--
+      Vercel Web Analytics, on every page. It counts visits after Analytics
+      is enabled for the Vercel project. It does not set a cookie.
+      The README section "Visits and traffic" says where to turn it on.
+    -->
+    <Analytics />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

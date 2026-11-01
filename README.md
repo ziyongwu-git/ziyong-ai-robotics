@@ -150,6 +150,8 @@ import YourDemo from '../../components/demos/YourDemo.tsx';
 
 `client:load` is the important part. It tells Astro to send the JavaScript for this component when the page loads. Without it, the widget is a still picture and the sliders do not move. The rest of the page stays ordinary HTML.
 
+`src/content/projects/see-think-move.mdx` is a worked example of that pattern: a write-up, a cover in `public/covers/see-think-move.svg`, and a React island. The rules for the toy live in `src/components/demos/tabletop.ts`. The drawing is `src/components/demos/TabletopVla.tsx`.
+
 `client:visible` (load when scrolled into view) and `client:idle` (load after the page is quiet) are the other common choices. Use `client:load` for a demo at the top of the page.
 
 If the widget's buttons look strangely spaced, add `className="not-prose"` to its outer element, the way `RobotArm.tsx` does. Article typography restyles buttons inside the write-up unless you opt out.
@@ -193,6 +195,20 @@ The site is static. You do not add a database or a server.
 6. Copy that URL into `url` in `src/config.ts` (no trailing slash) and push again. The sitemap and the RSS feed then point at the real domain.
 
 Later deploys happen when you push to the branch Vercel is watching, usually `main`.
+
+## Visits and traffic
+
+The site includes [Vercel Web Analytics](https://vercel.com/docs/analytics) so you can see page views after a deploy. The package is `@vercel/analytics`. `src/layouts/BaseLayout.astro` renders its `Analytics` component inside the page head on every page. That is the setup [Vercel’s Astro quickstart](https://vercel.com/docs/analytics/quickstart) recommends. No other analytics script is added.
+
+Vercel Web Analytics does not use cookies. A visit is counted with a hash that lasts one day, and that hash is not reused across days or across sites. This site does not add a cookie banner for it.
+
+The charts stay empty until the feature is turned on in the dashboard:
+
+1. Open this project at [vercel.com](https://vercel.com).
+2. Open the **Analytics** tab.
+3. Click **Enable**.
+
+The next deployment is the one that starts recording. After people visit the deployed site, open the same **Analytics** tab to see visitors, top pages, and referrers. `npm run dev` on your own machine does not fill those charts. The dashboard does, once the live site has traffic.
 
 ## If the build fails
 
