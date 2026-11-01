@@ -3,6 +3,7 @@ import '../styles/global.css';
 import { site } from '../config';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import Analytics from '@vercel/analytics/astro';
 
 interface Props {
   /** Browser-tab title. The site name is added for you, except on the home page. */
@@ -92,6 +93,7 @@ const person = {
       rel="stylesheet"
     />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(person).replace(/</g, '\\u003c')} />
+    <Analytics />
   </head>
   <body class="flex min-h-screen flex-col bg-paper text-ink antialiased">
     <a
