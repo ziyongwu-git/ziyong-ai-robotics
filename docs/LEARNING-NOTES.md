@@ -30,7 +30,7 @@ One caution: in an `.mdx` file, `{` starts a bit of code. If you want a literal 
 
 An island is Astro's name for one interactive piece on a page that is otherwise ordinary HTML.
 
-The two-link arm on the sample project is an island. The paragraphs around it are static HTML. The arm itself is a React component in `src/components/demos/RobotArm.tsx`. React is a library for widgets that update when someone moves a slider or clicks a button.
+The two-link arm, the tabletop, and the notebook search are islands. The paragraphs around each one are static HTML. The arm itself is a React component in `src/components/demos/RobotArm.tsx`. React is a library for widgets that update when someone moves a slider, runs a demo, or asks a question.
 
 The MDX file renders it like this:
 
@@ -63,7 +63,7 @@ Notes and projects can show a picture. If the file's frontmatter has no `cover`,
 
 If you set `cover`, the site uses that file instead. Put it in `public/covers/` and point at it with `/covers/your-file.jpg`. A file used that way keeps its own colors in both themes. The sample attention note is the example (`public/covers/attention.svg`). It is an original drawing, not a photo of a person.
 
-The moving sketch on the home page is also SVG and CSS. It is not the React arm. The React arm is only on the sample project, and only because that page says `client:load`.
+The moving sketch on the home page is also SVG and CSS. It is not a React demo. A React demo is only on the project page that renders it with `client:load`.
 
 ## Certifications
 

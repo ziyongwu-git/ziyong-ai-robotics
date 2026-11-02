@@ -16,3 +16,6 @@ dist/
 npm-debug.log*
 .DS_Store
 *.tsbuildinfo
+
+# JSON written by airflow/dags/build_notebook_index.py. Not used by the site.
+airflow/output/

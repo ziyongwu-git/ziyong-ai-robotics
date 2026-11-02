@@ -1,0 +1,45 @@
+<!--
+  Original drawing for the "Ask the notebook" project.
+  ASCII only, on purpose: a non-UTF8 byte makes the whole SVG fail.
+  It has its own colors. A file in public/ does not follow light and dark mode.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" fill="none">
+  <rect width="960" height="540" fill="#1c1915"/>
+  <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+    <path d="M32 0 H0 V32" stroke="#2c2824" stroke-width="1"/>
+  </pattern>
+  <rect width="960" height="540" fill="url(#grid)"/>
+  <circle cx="160" cy="110" r="110" fill="#16332f"/>
+  <circle cx="800" cy="430" r="140" fill="#3a241c"/>
+
+  <path d="M250 150 H330 M250 270 H330 M250 390 H330" stroke="#8fd4c8" stroke-width="2" stroke-linecap="round"/>
+  <path d="M510 150 V390" stroke="#8fd4c8" stroke-width="2" stroke-linecap="round"/>
+  <path d="M330 150 H510 M330 270 H510 M330 390 H510" stroke="#8fd4c8" stroke-width="2" stroke-linecap="round"/>
+  <path d="M510 270 H600" stroke="#f3b184" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="510" cy="270" r="5" fill="#f3b184"/>
+
+  <g font-family="ui-monospace, monospace" font-size="16">
+    <rect x="70" y="112" width="180" height="76" rx="18" fill="#14312d" stroke="#8fd4c8" stroke-width="2"/>
+    <text x="90" y="146" fill="#8fd4c8">extract</text>
+    <text x="90" y="170" fill="#f4efe6">three sources</text>
+
+    <rect x="70" y="232" width="180" height="76" rx="18" fill="#14312d" stroke="#8fd4c8" stroke-width="2"/>
+    <text x="90" y="266" fill="#8fd4c8">chunk</text>
+    <text x="90" y="290" fill="#f4efe6">short passages</text>
+
+    <rect x="70" y="352" width="180" height="76" rx="18" fill="#3a241c" stroke="#f3b184" stroke-width="2"/>
+    <text x="90" y="386" fill="#f3b184">score terms</text>
+    <text x="90" y="410" fill="#f4efe6">not vectors</text>
+
+    <rect x="600" y="214" width="168" height="112" rx="20" fill="#0f5c52"/>
+    <text x="624" y="258" fill="#d9efe9">index</text>
+    <text x="624" y="292" fill="#fffdf8" font-size="22">ready</text>
+  </g>
+
+  <g>
+    <rect x="620" y="56" width="280" height="140" rx="22" fill="#fffdf8"/>
+    <text x="644" y="96" fill="#9a3412" font-family="ui-monospace, monospace" font-size="14">ASK</text>
+    <text x="644" y="132" fill="#1c1915" font-family="Georgia, serif" font-size="26">Where do the</text>
+    <text x="644" y="166" fill="#0f5c52" font-family="ui-monospace, monospace" font-size="16">vectors go?</text>
+  </g>
+</svg>

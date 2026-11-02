@@ -50,6 +50,7 @@ npm run preview
 | `src/lib/` | Small helpers (dates, loading posts, sorting certificates, generated covers). |
 | `public/` | Files copied as-is. The favicon is here. Pictures for notes go in `public/covers/`. |
 | `docs/` | Notes about the tools. These pages are not on the website. |
+| `airflow/` | A sample Airflow DAG that chunks the notes into a JSON index. Not part of `npm run build` or the Vercel deploy. See `airflow/README.md`. |
 | `astro.config.ts` | Astro settings: static output, React, MDX, the sitemap. |
 | `dist/` | The built site. Generated. Do not edit it. |
 | `node_modules/` | Downloaded tools. Generated. Do not edit it. |
@@ -151,6 +152,8 @@ import YourDemo from '../../components/demos/YourDemo.tsx';
 `client:load` is the important part. It tells Astro to send the JavaScript for this component when the page loads. Without it, the widget is a still picture and the sliders do not move. The rest of the page stays ordinary HTML.
 
 `src/content/projects/see-think-move.mdx` is a worked example of that pattern: a write-up, a cover in `public/covers/see-think-move.svg`, and a React island. The rules for the toy live in `src/components/demos/tabletop.ts`. The drawing is `src/components/demos/TabletopVla.tsx`.
+
+`src/content/projects/ask-the-notebook.mdx` is another worked example: a small RAG demo with an Airflow-shaped graph. The passages and the BM25 math are in `src/components/demos/notebook.ts`. The drawing is `src/components/demos/AskNotebook.tsx`. A separate Python DAG lives in `airflow/` and is not run by the site build.
 
 `client:visible` (load when scrolled into view) and `client:idle` (load after the page is quiet) are the other common choices. Use `client:load` for a demo at the top of the page.
 

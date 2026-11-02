@@ -1,0 +1,89 @@
+---
+title: "Ask the notebook"
+summary: "A toy Ask Astro. Run a small Airflow-style DAG, then ask a question and watch BM25 lift cited sentences out of the notes. No model and no API key."
+tags:
+  - ai
+  - data
+status: shipped
+featured: true
+date: 2026-11-02
+cover: "/covers/ask-the-notebook.svg"
+demo: "/projects/ask-the-notebook#demo"
+---
+
+import AskNotebook from '../../components/demos/AskNotebook.tsx';
+
+Ask Astro is Astronomer's open-source assistant for questions about Apache Airflow. The part I recognize is not the chat box. It is the pipeline under the box. Airflow DAGs fetch documents, cut them into chunks, embed the chunks, and load a vector database. The assistant is supposed to answer from that index, with the sources attached.
+
+That is a data pipeline pointed at a language model. Pipelines are the work I already know how to read.
+
+## RAG, in plain language
+
+Retrieval-augmented generation, RAG for short, means the model is not asked to answer from memory alone. Something searches a pile of documents first. The model writes from what came back, and the reply can name those documents. Lewis and colleagues wrote the pattern up at NeurIPS in 2020. The Ask Astro README points at that paper.
+
+The search is the grounding. If the search is stale, or the chunk is the wrong size, the written answer is grounded on the wrong page. That is why the unglamorous half, the ingest, is the half an orchestrator is good at.
+
+## What Ask Astro actually runs
+
+The [repository](https://github.com/astronomer/ask-astro) describes three loops. I am paraphrasing the README, not a private deployment.
+
+**Ingest.** A set of Airflow DAGs pulls a source, splits Markdown, reStructuredText, and Python with LangChain, embeds the chunks with an OpenAI model, and writes the vectors to Weaviate. The README's source list is the Airflow docs, Astronomer docs, the Astronomer blog, the Astronomer Registry, Airflow GitHub pull requests, OpenLineage, and a Stack Overflow dump. The bulk DAG `ask-astro-load-bulk` saves extracted documents as parquet the first time, so a later run can try a new chunk size or a new database without downloading everything again. Astronomer wrote this up as [operationalizing ingest](https://www.astronomer.io/blog/ask-astro-operationalizing-data-ingest-for-retrieval-augmented-generation-with-llms-part-3/).
+
+**Question time.** This part is an API, not a DAG. The README's chain asks a model for two reworded prompts, embeds those plus the original, and pulls up to 100 documents for each from Weaviate. A Cohere reranker keeps 8. A smaller model drops the ones that are off topic. A larger model writes the answer. The README names `gpt-3.5-turbo` for the cheap steps and `gpt-4o` for the final answer.
+
+**Feedback.** A person can mark an answer correct or incorrect. A model scores helpfulness, publicness, and whether it stayed on topic. When both say the pair is good, a DAG writes the question and answer back into Weaviate, so a later question can retrieve it. The [introduction](https://www.astronomer.io/blog/ask-astro-open-source-llm-application-apache-airflow/) is the short version. The 2023 post links a public app at `ask.astronomer.io`. That address now redirects to Astronomer's product docs, so I am treating the repository and the write-ups as the sources.
+
+## Where Airflow sits, and where a model call sits
+
+A [DAG](https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dags.html) is a directed acyclic graph of tasks. An edge means "wait until upstream has succeeded." In Ask Astro, Airflow's job is the ingest and the feedback. It does not invent the sentence. It delivers the records the sentence is grounded on. The scheduler, the retries, and the log are the same habits as any other pipeline.
+
+There is a newer, different pattern. The provider [`apache-airflow-providers-common-ai`](https://airflow.apache.org/docs/apache-airflow-providers-common-ai/stable/index.html) can make the model call itself a task. `LLMOperator` and the `@task.llm` decorator send a prompt through an Airflow connection. The docs say the provider needs Airflow 2.11 or later, and some extras need Airflow 3. That is worth knowing. It is not what the Ask Astro ingest DAGs are doing. Those DAGs move documents. The model sits in the API at question time.
+
+## What this page actually runs
+
+The widget below is not Ask Astro. Nothing is embedded. No model is called. There is no network request and no API key.
+
+What it keeps:
+
+- The shape of the ingest DAG. Three extracts run together, then chunk, then score, then write. A task waits for its upstream tasks. The log is the script of that replay.
+- A real search. The passages are bundled in the page. BM25, a term-weighting formula, ranks them in the browser.
+- Cited sentences. The answer is copied out of the top passages. It is not rewritten.
+- A small feedback beat. "Keep this answer" remembers the pair until you refresh. Ask Astro would upsert it into Weaviate. This tab forgets it.
+
+What it drops:
+
+- Vectors, Weaviate, Cohere, and every model name in the README. The score task counts words and says so on the log line.
+- Query rewriting. Ask Astro asks a model for two extra phrasings. This page searches the words you typed.
+- Any claim that the ranking is semantic. "Arm" will not find "manipulator." If the words are not in a passage, the page says it has nothing to quote.
+
+<h2 id="demo">Interactive demo</h2>
+
+<AskNotebook client:load />
+
+Run the DAG, then try the suggested questions. Ask something the notes do not contain. The honest miss is part of the demo. "Keep this answer," then ask the same thing again and see the kept pair come back. Refresh and it is gone.
+
+<h2 id="how-i-built-it">How I built it</h2>
+
+The page is this MDX file. The widget is a React island, `src/components/demos/AskNotebook.tsx`, loaded with `client:load`, the same pattern as the tabletop and the two-link arm. Astro sends that component's JavaScript to the browser and leaves these paragraphs as ordinary HTML.
+
+The passages, the BM25 math, and the frame list for the graph live in `src/components/demos/notebook.ts`. The drawing file stays about drawing. A title word counts extra, so a question that echoes a passage's name beats a longer passage that only mentions the words. A trailing "s" is ignored, so "vectors" matches "vector." That is the whole stemmer, and the file says so.
+
+There is no API key. The browser does the search. Colors use the site's CSS variables, so the light and dark themes both apply. If the browser asks for reduced motion, Run skips the timer and jumps every task to success.
+
+`scripts/check-notebook.ts` re-runs the questions and the frame order without a browser. It checks that "What is Ask Astro?" quotes the Astronomer passage, that an unknown question is not quoted, and that `split_chunks` does not run before the extracts succeed.
+
+The Python file `airflow/dags/build_notebook_index.py` is the same idea as a real DAG: read the markdown, split it, count terms, write JSON. The site build does not call it, and Vercel does not deploy that folder. Run it with the standard library if you want to see the index on disk. If Airflow is installed, importing the file registers a DAG named `build_notebook_index`. The score task still does not call a model. A comment marks the line where an embedding call would go.
+
+The courses on the [certifications](/learning/certifications) page, Agentic AI and Building and Evaluating Data Agents among them, are why retrieval is on my mind. The About page already lists Airflow-style orchestration (Meta Dataswarm). This demo is those two lines on one screen, at a size I can read.
+
+## Sources
+
+These are the pages I read while deciding what to draw. The passages in the demo paraphrase them. The demo is not a copy of Ask Astro's code.
+
+- Astronomer, Ask Astro repository. [github.com/astronomer/ask-astro](https://github.com/astronomer/ask-astro). The README is the source for the ingest list, the six-step question chain, the model names, and the feedback rule. The bulk DAG is [`ask-astro-load.py`](https://github.com/astronomer/ask-astro/blob/main/airflow/dags/ingestion/ask-astro-load.py).
+- Astronomer, "Ask Astro: An open source LLM Application with Apache Airflow," 2023. [Blog](https://www.astronomer.io/blog/ask-astro-open-source-llm-application-apache-airflow/).
+- Astronomer, "LLM Data Ingestion for RAG: Ask Astro Part 3." [Blog](https://www.astronomer.io/blog/ask-astro-operationalizing-data-ingest-for-retrieval-augmented-generation-with-llms-part-3/).
+- Patrick Lewis and colleagues, "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks," NeurIPS 2020. [Paper](https://proceedings.neurips.cc/paper/2020/hash/6b493230205f780e1bc26945df7481e5-Abstract.html).
+- Andreessen Horowitz, "Emerging Architectures for LLM Applications." [Essay](https://a16z.com/emerging-architectures-for-llm-applications/). The Ask Astro README calls the project a reference implementation of this architecture.
+- Apache Airflow, "DAGs." [Docs](https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dags.html).
+- Apache Airflow, Common AI provider. [Overview](https://airflow.apache.org/docs/apache-airflow-providers-common-ai/stable/index.html). [LLMOperator and the task.llm decorator](https://airflow.apache.org/docs/apache-airflow-providers-common-ai/stable/operators/llm.html).
