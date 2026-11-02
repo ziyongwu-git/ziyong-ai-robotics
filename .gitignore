@@ -9,8 +9,10 @@ dist/
 .env
 .env.*
 
-# Python virtualenvs, including the clinic-finder example.
+# Python virtualenvs and bytecode, including the clinic-finder example.
 .venv/
+__pycache__/
+*.pyc
 
 # Vercel CLI metadata.
 .vercel/
