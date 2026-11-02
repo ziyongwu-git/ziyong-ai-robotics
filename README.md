@@ -153,7 +153,7 @@ import YourDemo from '../../components/demos/YourDemo.tsx';
 
 `src/content/projects/see-think-move.mdx` is a worked example of that pattern: a write-up, a cover in `public/covers/see-think-move.svg`, and a React island. The rules for the toy live in `src/components/demos/tabletop.ts`. The drawing is `src/components/demos/TabletopVla.tsx`.
 
-`src/content/projects/ask-the-notebook.mdx` is another worked example: a RAG demo whose pipeline you can reorder. The documents and the search math are in `src/components/demos/notebook.ts`. The canvas is `src/components/demos/AskNotebook.tsx`. A separate Python DAG lives in `airflow/` and is not run by the site build.
+`src/content/projects/ask-the-notebook.mdx` is another worked example: a RAG demo drawn as a DAG you can connect. The documents and the search math are in `src/components/demos/notebook.ts`. The canvas is `src/components/demos/AskNotebook.tsx`. A separate Python DAG lives in `airflow/` and is not run by the site build.
 
 `client:visible` (load when scrolled into view) and `client:idle` (load after the page is quiet) are the other common choices. Use `client:load` for a demo at the top of the page.
 

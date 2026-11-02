@@ -2,10 +2,10 @@
  * Pipeline and search for the "Ask the notebook" project.
  *
  * Ask Astro loads documents with Airflow, then a separate API retrieves
- * them. This file is the browser version of that shape. A visitor builds
- * the DAG (extract, clean, chunk, filter, score, index). Running it really
- * does those steps on the documents below. Asking a question ranks the
- * chunks that run produced.
+ * them. This file is the browser version of that shape. A visitor draws
+ * a DAG: nodes are tasks, edges are dependencies. The run walks that graph
+ * in topological order. Tasks in the same wave run together. Asking a
+ * question ranks whatever the index task kept.
  *
  * There is no embedding model and no generated prose. BM25 and a plain
  * keyword count are the only rankers. Sentences in an answer are copied
@@ -49,7 +49,8 @@ export type ChunkSettings = { size: number; overlap: number };
 export type FilterSettings = { notes: boolean; projects: boolean; primer: boolean; tag: TagFilter };
 export type ScoreSettings = { method: RankMethod; topK: number; useTitle: boolean };
 
-export type PipelineTask =
+/** One task on the canvas. Several tasks may share a kind. The id is unique. */
+export type TaskNode =
   | { id: string; kind: 'extract'; settings: ExtractSettings }
   | { id: string; kind: 'clean'; settings: CleanSettings }
   | { id: string; kind: 'chunk'; settings: ChunkSettings }
@@ -57,28 +58,75 @@ export type PipelineTask =
   | { id: string; kind: 'score'; settings: ScoreSettings }
   | { id: string; kind: 'index'; settings: Record<string, never> };
 
-export type SampleRow = { title: string; detail: string };
+/** An edge means "target waits until source has succeeded." */
+export type TaskEdge = { id: string; source: string; target: string };
 
-export type TaskOutput = {
-  id: string;
-  kind: TaskKind;
-  summary: string;
-  /** Real time spent in the step, not the animation delay. */
-  durationMs: number;
-  rows: SampleRow[];
+export type NotebookGraph = { nodes: TaskNode[]; edges: TaskEdge[] };
+
+/** docs are whole source files. chunks are windows cut from them. */
+export type FlowUnit = 'docs' | 'chunks';
+
+export type GraphIssue = {
+  level: 'error' | 'warn';
+  message: string;
+  nodeIds: string[];
+  edgeIds: string[];
 };
 
-export type RunResult =
+export type DocExample = { title: string; source: string; snippet: string };
+export type ReasonExample = { title: string; snippet: string; reason: string };
+export type ChunkExample = { title: string; head: string; body: string; chars: number };
+export type HistogramBar = { label: string; count: number };
+export type Posting = { term: string; ids: string[] };
+
+export type StepDetail =
+  | { kind: 'extract'; examples: DocExample[] }
+  | { kind: 'clean'; dropped: ReasonExample[]; kept: DocExample[] }
+  | { kind: 'chunk'; examples: ChunkExample[]; histogram: HistogramBar[] }
+  | { kind: 'filter'; kept: ReasonExample[]; dropped: ReasonExample[] }
+  | { kind: 'score'; method: RankMethod; topK: number; passageCount: number }
+  | { kind: 'index'; termCount: number; topTerms: { term: string; count: number }[]; postings: Posting[] }
+  | { kind: 'skipped'; reason: string };
+
+export type StepResult = {
+  id: string;
+  kind: TaskKind;
+  state: 'success' | 'failed' | 'skipped';
+  badge: string;
+  /** What the step did, in one sentence. */
+  sentence: string;
+  /** Why that matters for retrieval. */
+  why: string;
+  inputCount: number;
+  outputCount: number;
+  durationMs: number;
+  detail: StepDetail;
+  passages: Passage[];
+  unit: FlowUnit | null;
+  scoring?: ScoreSettings;
+};
+
+export type TimelineBar = {
+  id: string;
+  kind: TaskKind;
+  level: number;
+  startMs: number;
+  durationMs: number;
+};
+
+export type DagRun =
   | {
       ok: true;
-      outputs: TaskOutput[];
+      steps: StepResult[];
+      /** Runnable tasks grouped into waves. A wave runs together. */
+      levels: string[][];
+      timeline: TimelineBar[];
       passages: Passage[];
-      scoring: ScoreSettings;
-      termCount: number;
-      totalMs: number;
+      scorers: { id: string; settings: ScoreSettings }[];
       label: string;
+      totalMs: number;
     }
-  | { ok: false; reason: string };
+  | { ok: false; issues: GraphIssue[] };
 
 export type Hit = {
   passage: Passage;
@@ -251,21 +299,89 @@ export function catalogEntry(kind: TaskKind) {
   return found;
 }
 
-export function createTask(kind: TaskKind): PipelineTask {
-  switch (kind) {
-    case 'extract':
-      return { id: 'extract', kind, settings: { notes: true, projects: true, primer: true } };
-    case 'clean':
-      return { id: 'clean', kind, settings: { mode: 'similar' } };
-    case 'chunk':
-      return { id: 'chunk', kind, settings: { size: 240, overlap: 40 } };
-    case 'filter':
-      return { id: 'filter', kind, settings: { notes: true, projects: true, primer: true, tag: 'any' } };
-    case 'score':
-      return { id: 'score', kind, settings: { method: 'bm25', topK: 3, useTitle: true } };
-    case 'index':
-      return { id: 'index', kind, settings: {} };
+export function makeNode(id: string, kind: TaskKind, settings?: TaskNode['settings']): TaskNode {
+  if (kind === 'extract') {
+    return { id, kind, settings: (settings as ExtractSettings) ?? { notes: true, projects: true, primer: true } };
   }
+  if (kind === 'clean') return { id, kind, settings: (settings as CleanSettings) ?? { mode: 'similar' } };
+  if (kind === 'chunk') return { id, kind, settings: (settings as ChunkSettings) ?? { size: 240, overlap: 40 } };
+  if (kind === 'filter') {
+    return { id, kind, settings: (settings as FilterSettings) ?? { notes: true, projects: true, primer: true, tag: 'any' } };
+  }
+  if (kind === 'score') {
+    return { id, kind, settings: (settings as ScoreSettings) ?? { method: 'bm25', topK: 3, useTitle: true } };
+  }
+  return { id, kind: 'index', settings: {} };
+}
+
+export function makeEdge(source: string, target: string): TaskEdge {
+  return { id: `${source}->${target}`, source, target };
+}
+
+export function freshId(kind: TaskKind, taken: readonly string[]): string {
+  let n = 1;
+  while (taken.includes(`${kind}-${n}`)) n += 1;
+  return `${kind}-${n}`;
+}
+
+/** Three extracts in parallel, then chunk, clean, one BM25 score, and an index. */
+export function parallelExtractGraph(): NotebookGraph {
+  return {
+    nodes: [
+      makeNode('ex-notes', 'extract', { notes: true, projects: false, primer: false }),
+      makeNode('ex-projects', 'extract', { notes: false, projects: true, primer: false }),
+      makeNode('ex-primer', 'extract', { notes: false, projects: false, primer: true }),
+      makeNode('chunk-1', 'chunk', { size: 240, overlap: 40 }),
+      makeNode('clean-1', 'clean', { mode: 'similar' }),
+      makeNode('score-bm25', 'score', { method: 'bm25', topK: 3, useTitle: true }),
+      makeNode('index-1', 'index'),
+    ],
+    edges: [
+      makeEdge('ex-notes', 'chunk-1'),
+      makeEdge('ex-projects', 'chunk-1'),
+      makeEdge('ex-primer', 'chunk-1'),
+      makeEdge('chunk-1', 'clean-1'),
+      makeEdge('clean-1', 'score-bm25'),
+      makeEdge('score-bm25', 'index-1'),
+    ],
+  };
+}
+
+/** One extract, then BM25 and keyword count side by side, both feeding the index. */
+export function dualScoreGraph(): NotebookGraph {
+  return {
+    nodes: [
+      makeNode('ex-all', 'extract', { notes: true, projects: true, primer: true }),
+      makeNode('chunk-1', 'chunk', { size: 240, overlap: 40 }),
+      makeNode('score-bm25', 'score', { method: 'bm25', topK: 3, useTitle: true }),
+      makeNode('score-keyword', 'score', { method: 'keyword', topK: 3, useTitle: true }),
+      makeNode('index-1', 'index'),
+    ],
+    edges: [
+      makeEdge('ex-all', 'chunk-1'),
+      makeEdge('chunk-1', 'score-bm25'),
+      makeEdge('chunk-1', 'score-keyword'),
+      makeEdge('score-bm25', 'index-1'),
+      makeEdge('score-keyword', 'index-1'),
+    ],
+  };
+}
+
+/** Notes only, large chunks, keyword ranker. A contrast to the parallel preset. */
+export function notesGraph(): NotebookGraph {
+  return {
+    nodes: [
+      makeNode('ex-notes', 'extract', { notes: true, projects: false, primer: false }),
+      makeNode('chunk-1', 'chunk', { size: 700, overlap: 0 }),
+      makeNode('score-keyword', 'score', { method: 'keyword', topK: 2, useTitle: false }),
+      makeNode('index-1', 'index'),
+    ],
+    edges: [
+      makeEdge('ex-notes', 'chunk-1'),
+      makeEdge('chunk-1', 'score-keyword'),
+      makeEdge('score-keyword', 'index-1'),
+    ],
+  };
 }
 
 /** The pipeline the page opens with, and the one Reset restores. */
@@ -299,7 +415,7 @@ export function tinyPipeline(): PipelineTask[] {
   return [createTask('extract'), chunk, score, createTask('index')];
 }
 
-export function describeSettings(task: PipelineTask): string {
+export function describeSettings(task: TaskNode): string {
   switch (task.kind) {
     case 'extract': {
       const on = (['notes', 'projects', 'primer'] as const).filter((key) => task.settings[key]);
@@ -321,70 +437,254 @@ export function describeSettings(task: PipelineTask): string {
   }
 }
 
-/**
- * A reason the pipeline should not run, or null when it is runnable.
- * The messages are what the page shows. They name the fix.
- */
-export function validatePipeline(tasks: readonly PipelineTask[]): string | null {
-  if (tasks.length === 0) {
-    return 'The canvas is empty. Add an extract task and an index task, or reset to the default pipeline.';
-  }
-  const kinds = tasks.map((task) => task.kind);
-  if (new Set(kinds).size !== kinds.length) {
-    return 'Each task can only appear once. Remove the extra copy.';
-  }
-  const at = (kind: TaskKind) => kinds.indexOf(kind);
-  if (at('extract') === -1) {
-    return 'Add an extract task. The later steps need documents to start from.';
-  }
-  if (at('index') === -1) {
-    return 'Add an index task at the end. Without it there is nowhere to search.';
-  }
-  if (at('index') !== kinds.length - 1) {
-    return 'Move the index task to the end. Steps after it never get searched.';
-  }
-  const names: Record<TaskKind, string> = {
-    extract: 'Extract',
-    clean: 'Clean',
-    chunk: 'Chunk',
-    filter: 'Filter',
-    score: 'Score',
-    index: 'Index',
-  };
-  for (const kind of ['clean', 'chunk', 'filter', 'score', 'index'] as const) {
-    if (at(kind) !== -1 && at(kind) < at('extract')) {
-      return `${names[kind]} is before extract. Move extract above it so there is text to work on.`;
+const TASK_LABEL: Record<TaskKind, string> = {
+  extract: 'Extract',
+  clean: 'Clean',
+  chunk: 'Chunk',
+  filter: 'Filter',
+  score: 'Score',
+  index: 'Index',
+};
+
+function findCycle(graph: NotebookGraph): string[] | null {
+  const color = new Map<string, 0 | 1 | 2>();
+  const stack: string[] = [];
+  const outgoing = new Map<string, string[]>();
+  for (const node of graph.nodes) outgoing.set(node.id, []);
+  for (const edge of graph.edges) outgoing.get(edge.source)?.push(edge.target);
+
+  function visit(id: string): string[] | null {
+    color.set(id, 1);
+    stack.push(id);
+    for (const next of outgoing.get(id) ?? []) {
+      const mark = color.get(next) ?? 0;
+      if (mark === 1) return stack.slice(stack.indexOf(next));
+      if (mark === 0) {
+        const found = visit(next);
+        if (found) return found;
+      }
     }
+    stack.pop();
+    color.set(id, 2);
+    return null;
   }
-  const extract = tasks.find((task) => task.kind === 'extract');
-  if (extract && extract.kind === 'extract') {
-    const { notes, projects, primer } = extract.settings;
-    if (!notes && !projects && !primer) {
-      return 'Extract has every source turned off. Turn on notes, projects, or the primer.';
+
+  for (const node of graph.nodes) {
+    if ((color.get(node.id) ?? 0) === 0) {
+      const found = visit(node.id);
+      if (found) return found;
     }
-  }
-  const filter = tasks.find((task) => task.kind === 'filter');
-  if (filter && filter.kind === 'filter') {
-    const { notes, projects, primer } = filter.settings;
-    if (!notes && !projects && !primer) {
-      return 'The filter keeps no sources. Turn at least one back on, or remove the filter.';
-    }
-  }
-  const chunk = tasks.find((task) => task.kind === 'chunk');
-  if (chunk && chunk.kind === 'chunk' && chunk.settings.overlap >= chunk.settings.size) {
-    return 'Overlap has to be smaller than the chunk size. Otherwise the window never moves forward.';
   }
   return null;
 }
 
-export function moveTask(tasks: readonly PipelineTask[], id: string, direction: -1 | 1): PipelineTask[] {
-  const index = tasks.findIndex((task) => task.id === id);
-  const next = index + direction;
-  if (index < 0 || next < 0 || next >= tasks.length) return [...tasks];
-  const copy = [...tasks];
-  const [item] = copy.splice(index, 1);
-  copy.splice(next, 0, item);
-  return copy;
+function reaches(start: readonly string[], edges: readonly TaskEdge[], direction: 'forward' | 'back'): Set<string> {
+  const next = new Map<string, string[]>();
+  for (const edge of edges) {
+    const from = direction === 'forward' ? edge.source : edge.target;
+    const to = direction === 'forward' ? edge.target : edge.source;
+    const list = next.get(from) ?? [];
+    list.push(to);
+    next.set(from, list);
+  }
+  const seen = new Set<string>(start);
+  const queue = [...start];
+  while (queue.length > 0) {
+    const id = queue.shift();
+    if (!id) break;
+    for (const hop of next.get(id) ?? []) {
+      if (seen.has(hop)) continue;
+      seen.add(hop);
+      queue.push(hop);
+    }
+  }
+  return seen;
+}
+
+/**
+ * Problems a visitor can fix before pressing Run.
+ * Errors block the run. Warnings mark tasks a run will skip.
+ */
+export function validateGraph(graph: NotebookGraph): GraphIssue[] {
+  const issues: GraphIssue[] = [];
+  const byId = new Map(graph.nodes.map((node) => [node.id, node]));
+  if (graph.nodes.length === 0) {
+    issues.push({
+      level: 'error',
+      message: 'The canvas is empty. Drag on an extract task and an index task, or reset to the parallel preset.',
+      nodeIds: [],
+      edgeIds: [],
+    });
+    return issues;
+  }
+
+  const cycle = findCycle(graph);
+  if (cycle) {
+    const edgeIds = graph.edges
+      .filter((edge, index) => {
+        const next = cycle[(cycle.indexOf(edge.source) + 1) % cycle.length];
+        return cycle.includes(edge.source) && edge.target === next && index >= 0;
+      })
+      .map((edge) => edge.id);
+    issues.push({
+      level: 'error',
+      message: `This is a cycle (${cycle.join(' → ')}). A DAG cannot loop. Delete one of those edges.`,
+      nodeIds: cycle,
+      edgeIds,
+    });
+  }
+
+  const extracts = graph.nodes.filter((node) => node.kind === 'extract');
+  const indexes = graph.nodes.filter((node) => node.kind === 'index');
+  if (extracts.length === 0) {
+    issues.push({
+      level: 'error',
+      message: 'Add an extract task. That is the source. Later steps need documents to start from.',
+      nodeIds: [],
+      edgeIds: [],
+    });
+  }
+  if (indexes.length === 0) {
+    issues.push({
+      level: 'error',
+      message: 'Add an index task, and connect it downstream of the extracts. Without it there is nowhere to search.',
+      nodeIds: [],
+      edgeIds: [],
+    });
+  }
+
+  for (const node of extracts) {
+    if (node.kind !== 'extract') continue;
+    const incoming = graph.edges.filter((edge) => edge.target === node.id);
+    if (incoming.length > 0) {
+      issues.push({
+        level: 'error',
+        message: `${node.id} is an extract. It reads the page's own files, so nothing should point into it.`,
+        nodeIds: [node.id],
+        edgeIds: incoming.map((edge) => edge.id),
+      });
+    }
+    const { notes, projects, primer } = node.settings;
+    if (!notes && !projects && !primer) {
+      issues.push({
+        level: 'error',
+        message: `${node.id} has every source turned off. Turn on notes, projects, or the primer.`,
+        nodeIds: [node.id],
+        edgeIds: [],
+      });
+    }
+  }
+
+  for (const node of graph.nodes) {
+    if (node.kind === 'chunk' && node.settings.overlap >= node.settings.size) {
+      issues.push({
+        level: 'error',
+        message: `${node.id}: overlap has to be smaller than the chunk size, or the window never moves forward.`,
+        nodeIds: [node.id],
+        edgeIds: [],
+      });
+    }
+    if (node.kind === 'filter' && !node.settings.notes && !node.settings.projects && !node.settings.primer) {
+      issues.push({
+        level: 'error',
+        message: `${node.id} keeps no sources. Turn at least one back on, or delete the filter.`,
+        nodeIds: [node.id],
+        edgeIds: [],
+      });
+    }
+  }
+
+  const fromExtract = reaches(extracts.map((node) => node.id), graph.edges, 'forward');
+  const toIndex = reaches(indexes.map((node) => node.id), graph.edges, 'back');
+  if (extracts.length > 0 && indexes.length > 0) {
+    const linked = indexes.some((node) => fromExtract.has(node.id));
+    if (!linked) {
+      issues.push({
+        level: 'error',
+        message: 'No index is downstream of an extract. Drag an edge from the extracts, through chunk and score, into the index.',
+        nodeIds: [...extracts.map((node) => node.id), ...indexes.map((node) => node.id)],
+        edgeIds: [],
+      });
+    }
+  }
+
+  for (const edge of graph.edges) {
+    const source = byId.get(edge.source);
+    const target = byId.get(edge.target);
+    if (!source || !target) continue;
+    const sourceUnit = unitOf(source, upstreamUnit(graph, source.id));
+    if (target.kind === 'chunk' && sourceUnit === 'chunks') {
+      issues.push({
+        level: 'error',
+        message: `${target.id} needs whole documents, and ${source.id} already emits chunks. Connect the chunk task to an extract or a clean step that still has documents.`,
+        nodeIds: [target.id, source.id],
+        edgeIds: [edge.id],
+      });
+    }
+    if (target.kind !== 'extract' && sourceUnit === 'bad') {
+      issues.push({
+        level: 'error',
+        message: `${edge.source} → ${edge.target} mixes documents and chunks. A task can take one shape of input.`,
+        nodeIds: [edge.source, edge.target],
+        edgeIds: [edge.id],
+      });
+    }
+  }
+
+  for (const node of graph.nodes) {
+    if (node.kind === 'extract') continue;
+    const incoming = graph.edges.filter((edge) => edge.target === node.id);
+    if (incoming.length === 0) {
+      issues.push({
+        level: 'error',
+        message: `${TASK_LABEL[node.kind]} (${node.id}) has no input. Drag an edge from an upstream task, or delete it.`,
+        nodeIds: [node.id],
+        edgeIds: [],
+      });
+    }
+    const onPath = fromExtract.has(node.id) && (indexes.length === 0 || toIndex.has(node.id));
+    if (incoming.length > 0 && !onPath && extracts.length > 0 && indexes.length > 0) {
+      issues.push({
+        level: 'warn',
+        message: `${node.id} is not on a path from an extract to an index, so a run will skip it.`,
+        nodeIds: [node.id],
+        edgeIds: [],
+      });
+    }
+  }
+
+  return issues;
+}
+
+/** Whether this edge is allowed. The string is the friendly refusal. */
+export function connectionProblem(graph: NotebookGraph, sourceId: string, targetId: string): string | null {
+  if (sourceId === targetId) return 'A task cannot connect to itself.';
+  if (graph.edges.some((edge) => edge.source === sourceId && edge.target === targetId)) return 'That edge is already there.';
+  const trial: NotebookGraph = { nodes: graph.nodes, edges: [...graph.edges, makeEdge(sourceId, targetId)] };
+  const created = trial.edges[trial.edges.length - 1];
+  const issues = validateGraph(trial).filter((issue) => issue.level === 'error' && (issue.edgeIds.includes(created.id) || issue.nodeIds.includes(targetId)));
+  return issues[0]?.message ?? null;
+}
+
+function upstreamUnit(graph: NotebookGraph, id: string, seen = new Set<string>()): FlowUnit | 'bad' | 'none' {
+  if (seen.has(id)) return 'bad';
+  seen.add(id);
+  const incoming = graph.edges.filter((edge) => edge.target === id);
+  if (incoming.length === 0) return 'none';
+  const units = incoming.map((edge) => {
+    const source = graph.nodes.find((node) => node.id === edge.source);
+    if (!source) return 'bad' as const;
+    return unitOf(source, upstreamUnit(graph, source.id, seen));
+  });
+  if (units.some((unit) => unit === 'bad' || unit === 'none')) return 'bad';
+  return units.every((unit) => unit === units[0]) ? units[0] : 'bad';
+}
+
+function unitOf(node: TaskNode, input: FlowUnit | 'bad' | 'none'): FlowUnit | 'bad' | 'none' {
+  if (node.kind === 'extract') return 'docs';
+  if (node.kind === 'chunk') return input === 'docs' ? 'chunks' : 'bad';
+  if (input === 'docs' || input === 'chunks') return input;
+  return 'bad';
 }
 
 /** Lowercase words. A trailing s is dropped so "vectors" matches "vector". */
@@ -569,21 +869,6 @@ export function windows(text: string, size: number, overlap: number): string[] {
   return parts;
 }
 
-function chunkPassages(passages: readonly Passage[], settings: ChunkSettings): Passage[] {
-  const chunks: Passage[] = [];
-  for (const passage of passages) {
-    const parts = windows(passage.text, settings.size, settings.overlap);
-    parts.forEach((text, index) => {
-      chunks.push({
-        ...passage,
-        id: parts.length === 1 ? passage.id : `${passage.id}#${index + 1}`,
-        text,
-      });
-    });
-  }
-  return chunks;
-}
-
 function tokenOverlap(left: readonly string[], right: readonly string[]): number {
   if (left.length === 0) return 0;
   const other = new Set(right);
@@ -592,21 +877,24 @@ function tokenOverlap(left: readonly string[], right: readonly string[]): number
   return hit / new Set(left).size;
 }
 
-function dedupe(passages: readonly Passage[], mode: CleanSettings['mode']): { kept: Passage[]; removed: Passage[] } {
+function dedupe(
+  passages: readonly Passage[],
+  mode: CleanSettings['mode'],
+): { kept: Passage[]; removed: { passage: Passage; reason: string }[] } {
   const kept: Passage[] = [];
-  const removed: Passage[] = [];
+  const removed: { passage: Passage; reason: string }[] = [];
   const seenExact = new Set<string>();
   for (const passage of passages) {
     const exact = passage.text.toLowerCase().replace(/\s+/g, ' ').trim();
     if (seenExact.has(exact)) {
-      removed.push(passage);
+      removed.push({ passage, reason: 'Same text as an earlier row.' });
       continue;
     }
     if (mode === 'similar') {
       const tokens = tokenize(passage.text);
       const crowded = kept.some((earlier) => tokenOverlap(tokens, tokenize(earlier.text)) >= SIMILAR);
       if (crowded) {
-        removed.push(passage);
+        removed.push({ passage, reason: 'Most of its words already appear in a kept row.' });
         continue;
       }
     }
@@ -627,140 +915,337 @@ function preview(text: string): string {
   return clean.length > 140 ? `${clean.slice(0, 137)}...` : clean;
 }
 
-function topTerms(passages: readonly Passage[], useTitle: boolean, limit = 5): SampleRow[] {
-  const index = buildIndex(passages, useTitle);
-  return [...index.df.entries()]
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .slice(0, limit)
-    .map(([term, count]) => ({ title: term, detail: `in ${count} passage${count === 1 ? '' : 's'}` }));
-}
-
 function clock<T>(work: () => T): { value: T; durationMs: number } {
   const start = performance.now();
   const value = work();
   return { value, durationMs: performance.now() - start };
 }
 
-function runLabel(tasks: readonly PipelineTask[]): string {
-  const chunk = tasks.find((task) => task.kind === 'chunk');
-  const score = tasks.find((task) => task.kind === 'score');
-  const size = chunk && chunk.kind === 'chunk' ? `${chunk.settings.size} char chunks` : 'no chunk task';
-  const method = score && score.kind === 'score' ? score.settings.method : 'bm25';
-  return `${size} · ${method}`;
+function mergePassages(lists: Passage[][]): Passage[] {
+  const seen = new Set<string>();
+  const merged: Passage[] = [];
+  for (const list of lists) {
+    for (const passage of list) {
+      if (seen.has(passage.id)) continue;
+      seen.add(passage.id);
+      merged.push(passage);
+    }
+  }
+  return merged;
+}
+
+function histogram(lengths: readonly number[]): HistogramBar[] {
+  const buckets = [
+    { label: '0–80', test: (n: number) => n < 80 },
+    { label: '80–160', test: (n: number) => n >= 80 && n < 160 },
+    { label: '160–240', test: (n: number) => n >= 160 && n < 240 },
+    { label: '240–400', test: (n: number) => n >= 240 && n < 400 },
+    { label: '400+', test: (n: number) => n >= 400 },
+  ];
+  return buckets.map((bucket) => ({ label: bucket.label, count: lengths.filter(bucket.test).length }));
+}
+
+function runnableIds(graph: NotebookGraph): Set<string> {
+  const extracts = graph.nodes.filter((node) => node.kind === 'extract').map((node) => node.id);
+  const indexes = graph.nodes.filter((node) => node.kind === 'index').map((node) => node.id);
+  const forward = reaches(extracts, graph.edges, 'forward');
+  const back = reaches(indexes, graph.edges, 'back');
+  const ids = new Set<string>();
+  for (const node of graph.nodes) {
+    if (forward.has(node.id) && back.has(node.id)) ids.add(node.id);
+  }
+  return ids;
+}
+
+function waves(graph: NotebookGraph, ids: Set<string>): string[][] {
+  const indegree = new Map<string, number>();
+  for (const id of ids) indegree.set(id, 0);
+  for (const edge of graph.edges) {
+    if (!ids.has(edge.source) || !ids.has(edge.target)) continue;
+    indegree.set(edge.target, (indegree.get(edge.target) ?? 0) + 1);
+  }
+  const levels: string[][] = [];
+  let ready = [...ids].filter((id) => (indegree.get(id) ?? 0) === 0).sort();
+  const seen = new Set<string>();
+  while (ready.length > 0) {
+    levels.push(ready);
+    const next: string[] = [];
+    for (const id of ready) {
+      seen.add(id);
+      for (const edge of graph.edges) {
+        if (edge.source !== id || !ids.has(edge.target)) continue;
+        const left = (indegree.get(edge.target) ?? 0) - 1;
+        indegree.set(edge.target, left);
+        if (left === 0) next.push(edge.target);
+      }
+    }
+    ready = next.sort();
+  }
+  if (seen.size !== ids.size) return [];
+  return levels;
+}
+
+function skippedStep(node: TaskNode, reason: string): StepResult {
+  return {
+    id: node.id,
+    kind: node.kind,
+    state: 'skipped',
+    badge: 'skipped',
+    sentence: reason,
+    why: 'Airflow marks a task skipped when there is nothing for it to do. It is not a silent success.',
+    inputCount: 0,
+    outputCount: 0,
+    durationMs: 0,
+    detail: { kind: 'skipped', reason },
+    passages: [],
+    unit: null,
+  };
+}
+
+function executeNode(node: TaskNode, input: Passage[]): { step: StepResult } {
+  if (node.kind === 'extract') {
+    const settings = node.settings;
+    const { value, durationMs } = clock(() => DOCUMENTS.filter((document) => allowedKind(settings, document.kind)).map(asPassage));
+    const sources = (['notes', 'projects', 'primer'] as const).filter((key) => settings[key]);
+    return {
+      step: {
+        id: node.id,
+        kind: node.kind,
+        state: 'success',
+        badge: `${value.length} docs`,
+        sentence: `Read ${value.length} document${value.length === 1 ? '' : 's'} from ${sources.join(', ') || 'no sources'}.`,
+        why: 'This is the ingest. Ask Astro’s DAGs pull docs, blogs, and forum posts before anything is embedded. Here the files are the ones already on this page.',
+        inputCount: 0,
+        outputCount: value.length,
+        durationMs,
+        passages: value,
+        unit: 'docs',
+        detail: {
+          kind: 'extract',
+          examples: value.slice(0, 3).map((passage) => ({ title: passage.title, source: passage.source, snippet: preview(passage.text) })),
+        },
+      },
+    };
+  }
+
+  if (node.kind === 'chunk') {
+    const settings = node.settings;
+    const { value, durationMs } = clock(() => {
+      const chunks: { passage: Passage; head: string }[] = [];
+      for (const passage of input) {
+        const parts = windows(passage.text, settings.size, settings.overlap);
+        parts.forEach((text, index) => {
+          const head = index === 0 ? '' : text.slice(0, Math.min(settings.overlap, Math.floor(text.length / 3)));
+          chunks.push({
+            head,
+            passage: { ...passage, id: parts.length === 1 ? passage.id : `${passage.id}#${index + 1}`, text },
+          });
+        });
+      }
+      return chunks;
+    });
+    const passages = value.map((item) => item.passage);
+    const avg = passages.length === 0 ? 0 : Math.round(passages.reduce((sum, passage) => sum + passage.text.length, 0) / passages.length);
+    return {
+      step: {
+        id: node.id,
+        kind: node.kind,
+        state: 'success',
+        badge: `${passages.length} chunks`,
+        sentence: `Cut ${input.length} documents into ${passages.length} windows, average ${avg} characters, overlap ${settings.overlap}.`,
+        why: 'Chunk size decides whether a citation is one fact or three topics mixed together. Ask Astro splits Markdown and code for the same reason, then embeds each piece.',
+        inputCount: input.length,
+        outputCount: passages.length,
+        durationMs,
+        passages,
+        unit: 'chunks',
+        detail: {
+          kind: 'chunk',
+          examples: value.slice(0, 3).map((item) => ({
+            title: item.passage.title,
+            head: item.head,
+            body: item.head ? item.passage.text.slice(item.head.length) : item.passage.text,
+            chars: item.passage.text.length,
+          })),
+          histogram: histogram(passages.map((passage) => passage.text.length)),
+        },
+      },
+    };
+  }
+
+  if (node.kind === 'clean') {
+    const { value, durationMs } = clock(() => dedupe(input, node.settings.mode));
+    return {
+      step: {
+        id: node.id,
+        kind: node.kind,
+        state: 'success',
+        badge: `removed ${value.removed.length}`,
+        sentence: `Dropped ${value.removed.length} duplicate${value.removed.length === 1 ? '' : 's'} and kept ${value.kept.length}.`,
+        why: 'Near-duplicate windows crowd the ranker. Ask Astro keeps chunks distinct so a citation points at one place.',
+        inputCount: input.length,
+        outputCount: value.kept.length,
+        durationMs,
+        passages: value.kept,
+        unit: input.length > 0 && input.some((passage) => passage.id.includes('#')) ? 'chunks' : 'docs',
+        detail: {
+          kind: 'clean',
+          dropped: value.removed.slice(0, 3).map((item) => ({ title: item.passage.title, snippet: preview(item.passage.text), reason: item.reason })),
+          kept: value.kept.slice(0, 2).map((passage) => ({ title: passage.title, source: passage.source, snippet: preview(passage.text) })),
+        },
+      },
+    };
+  }
+
+  if (node.kind === 'filter') {
+    const settings = node.settings;
+    const { value, durationMs } = clock(() => {
+      const kept: ReasonExample[] = [];
+      const dropped: ReasonExample[] = [];
+      const passages: Passage[] = [];
+      for (const passage of input) {
+        if (!allowedKind(settings, passage.kind)) {
+          dropped.push({ title: passage.title, snippet: preview(passage.text), reason: `Source “${passage.kind}” is switched off.` });
+          continue;
+        }
+        if (settings.tag !== 'any' && !passage.tags.includes(settings.tag)) {
+          dropped.push({ title: passage.title, snippet: preview(passage.text), reason: `Tag is ${passage.tags.join(', ') || 'none'}, not ${settings.tag}.` });
+          continue;
+        }
+        passages.push(passage);
+        kept.push({ title: passage.title, snippet: preview(passage.text), reason: `Kept: ${passage.kind}${settings.tag === 'any' ? '' : `, tag ${settings.tag}`}.` });
+      }
+      return { passages, kept, dropped };
+    });
+    return {
+      step: {
+        id: node.id,
+        kind: node.kind,
+        state: 'success',
+        badge: `kept ${value.passages.length}`,
+        sentence: `Kept ${value.passages.length} of ${input.length}. Dropped ${value.dropped.length}.`,
+        why: 'A filter is a WHERE clause on the corpus. Turn off the primer and a question about Weaviate has nothing left to quote.',
+        inputCount: input.length,
+        outputCount: value.passages.length,
+        durationMs,
+        passages: value.passages,
+        unit: input.some((passage) => passage.id.includes('#')) ? 'chunks' : 'docs',
+        detail: { kind: 'filter', kept: value.kept.slice(0, 3), dropped: value.dropped.slice(0, 3) },
+      },
+    };
+  }
+
+  if (node.kind === 'score') {
+    const settings = node.settings;
+    const { value, durationMs } = clock(() => buildIndex(input, settings.useTitle));
+    return {
+      step: {
+        id: node.id,
+        kind: node.kind,
+        state: 'success',
+        badge: `${settings.method} · top ${settings.topK}`,
+        sentence: `Ranked ${input.length} passages with ${settings.method}. The index still holds all of them. Top ${settings.topK} are what a question will show.`,
+        why: settings.method === 'bm25'
+          ? 'BM25 is the stand-in for Ask Astro’s vector search: rare words count more, and a long passage is discounted. Ask Astro then reranks. This page stops at the score.'
+          : 'A keyword count ignores length. It is here so you can see it disagree with BM25 when both scorers run.',
+        inputCount: input.length,
+        outputCount: input.length,
+        durationMs,
+        passages: input,
+        unit: input.some((passage) => passage.id.includes('#')) ? 'chunks' : 'docs',
+        scoring: { ...settings },
+        detail: { kind: 'score', method: settings.method, topK: settings.topK, passageCount: input.length },
+      },
+    };
+  }
+
+  const { value, durationMs } = clock(() => buildIndex(input, true));
+  const top = [...value.df.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 6);
+  const postings: Posting[] = top.slice(0, 4).map(([term]) => ({
+    term,
+    ids: input.filter((passage) => tokenize(`${passage.title} ${passage.text}`).includes(term)).slice(0, 4).map((passage) => passage.id),
+  }));
+  return {
+    step: {
+      id: node.id,
+      kind: 'index',
+      state: 'success',
+      badge: `${value.df.size} terms`,
+      sentence: `Froze ${input.length} passages and ${value.df.size} terms in this browser.`,
+      why: 'This is the page’s Weaviate. Ask Astro stores a vector per chunk. This index stores which terms occur in which passages, and the question box reads it.',
+      inputCount: input.length,
+      outputCount: input.length,
+      durationMs,
+      passages: input,
+      unit: input.some((passage) => passage.id.includes('#')) ? 'chunks' : 'docs',
+      detail: {
+        kind: 'index',
+        termCount: value.df.size,
+        topTerms: top.map(([term, count]) => ({ term, count })),
+        postings,
+      },
+    },
+  };
 }
 
 /**
- * Run the tasks in canvas order. Each step's summary and sample rows
- * come from the documents it actually touched.
+ * Run the DAG. Tasks in one wave start together.
+ * The durations are real compute time. The wave is what the timeline draws as overlap.
  */
-export function runPipeline(tasks: readonly PipelineTask[]): RunResult {
-  const reason = validatePipeline(tasks);
-  if (reason) return { ok: false, reason };
+export function runGraph(graph: NotebookGraph): DagRun {
+  const issues = validateGraph(graph).filter((issue) => issue.level === 'error');
+  if (issues.length > 0) return { ok: false, issues };
 
-  let passages: Passage[] = [];
-  let scoring: ScoreSettings = { ...DEFAULT_SCORE };
-  const outputs: TaskOutput[] = [];
+  const live = runnableIds(graph);
+  const levels = waves(graph, live);
+  const steps: StepResult[] = [];
+  const done = new Map<string, StepResult>();
 
-  for (const task of tasks) {
-    if (task.kind === 'extract') {
-      const settings = task.settings;
-      const { value, durationMs } = clock(() =>
-        DOCUMENTS.filter((document) => allowedKind(settings, document.kind)).map(asPassage),
-      );
-      passages = value;
-      const sources = (['notes', 'projects', 'primer'] as const).filter((key) => settings[key]).length;
-      outputs.push({
-        id: task.id,
-        kind: task.kind,
-        durationMs,
-        summary: `${sources} source${sources === 1 ? '' : 's'}, ${passages.length} docs extracted`,
-        rows: passages.slice(0, 4).map((passage) => ({
-          title: passage.title,
-          detail: `${passage.text.length} chars · ${passage.source}`,
-        })),
-      });
-      continue;
+  for (const node of graph.nodes) {
+    if (!live.has(node.id)) {
+      const step = skippedStep(node, 'Not on a path from an extract to an index.');
+      steps.push(step);
+      done.set(node.id, step);
     }
-
-    if (task.kind === 'chunk') {
-      const settings = task.settings;
-      const { value, durationMs } = clock(() => chunkPassages(passages, settings));
-      const avg = value.length === 0 ? 0 : Math.round(value.reduce((sum, passage) => sum + passage.text.length, 0) / value.length);
-      passages = value;
-      outputs.push({
-        id: task.id,
-        kind: task.kind,
-        durationMs,
-        summary: `${passages.length} chunks, avg ${avg} chars`,
-        rows: passages.slice(0, 3).map((passage) => ({ title: passage.title, detail: preview(passage.text) })),
-      });
-      continue;
-    }
-
-    if (task.kind === 'clean') {
-      const { value, durationMs } = clock(() => dedupe(passages, task.settings.mode));
-      passages = value.kept;
-      outputs.push({
-        id: task.id,
-        kind: task.kind,
-        durationMs,
-        summary: `removed ${value.removed.length} duplicate${value.removed.length === 1 ? '' : 's'}, ${passages.length} left`,
-        rows: (value.removed.length > 0 ? value.removed : passages).slice(0, 3).map((passage) => ({
-          title: value.removed.length > 0 ? `dropped · ${passage.title}` : passage.title,
-          detail: preview(passage.text),
-        })),
-      });
-      continue;
-    }
-
-    if (task.kind === 'filter') {
-      const settings = task.settings;
-      const before = passages.length;
-      const { value, durationMs } = clock(() =>
-        passages.filter((passage) => {
-          if (!allowedKind(settings, passage.kind)) return false;
-          if (settings.tag !== 'any' && !passage.tags.includes(settings.tag)) return false;
-          return true;
-        }),
-      );
-      passages = value;
-      outputs.push({
-        id: task.id,
-        kind: task.kind,
-        durationMs,
-        summary: `kept ${passages.length} of ${before}`,
-        rows: passages.slice(0, 3).map((passage) => ({
-          title: passage.title,
-          detail: `${passage.kind} · ${passage.tags.join(', ')}`,
-        })),
-      });
-      continue;
-    }
-
-    if (task.kind === 'score') {
-      scoring = { ...task.settings };
-      const { value, durationMs } = clock(() => buildIndex(passages, scoring.useTitle));
-      outputs.push({
-        id: task.id,
-        kind: task.kind,
-        durationMs,
-        summary: `${scoring.method}, top ${scoring.topK}, ${value.df.size} terms`,
-        rows: topTerms(passages, scoring.useTitle),
-      });
-      continue;
-    }
-
-    const { value, durationMs } = clock(() => buildIndex(passages, scoring.useTitle));
-    outputs.push({
-      id: task.id,
-      kind: task.kind,
-      durationMs,
-      summary: `index: ${passages.length} passages, ${value.df.size} terms`,
-      rows: passages.slice(0, 4).map((passage) => ({ title: passage.id, detail: passage.title })),
-    });
   }
 
-  const termCount = buildIndex(passages, scoring.useTitle).df.size;
-  const totalMs = outputs.reduce((sum, output) => sum + output.durationMs, 0);
-  return { ok: true, outputs, passages, scoring, termCount, totalMs, label: runLabel(tasks) };
+  for (const level of levels) {
+    for (const id of level) {
+      const node = graph.nodes.find((item) => item.id === id);
+      if (!node) continue;
+      const incoming = graph.edges.filter((edge) => edge.target === id);
+      const upstream = incoming.map((edge) => done.get(edge.source)?.passages ?? []);
+      const input = node.kind === 'extract' ? [] : mergePassages(upstream);
+      const { step } = executeNode(node, input);
+      steps.push(step);
+      done.set(id, step);
+    }
+  }
+
+  const indexSteps = steps.filter((step) => step.kind === 'index' && step.state === 'success');
+  const passages = mergePassages(indexSteps.map((step) => step.passages));
+  const scorers = steps
+    .filter((step) => step.kind === 'score' && step.state === 'success' && step.scoring)
+    .map((step) => ({ id: step.id, settings: step.scoring as ScoreSettings }));
+  const chunk = graph.nodes.find((node) => node.kind === 'chunk' && live.has(node.id));
+  const size = chunk && chunk.kind === 'chunk' ? `${chunk.settings.size} char chunks` : 'no chunk task';
+  const methods = scorers.map((scorer) => scorer.settings.method).join('+') || 'bm25';
+
+  const endAt = new Map<string, number>();
+  const timeline: TimelineBar[] = [];
+  levels.forEach((level, levelIndex) => {
+    const start = level.reduce((max, id) => {
+      const preds = graph.edges.filter((edge) => edge.target === id).map((edge) => endAt.get(edge.source) ?? 0);
+      return Math.max(max, ...preds, 0);
+    }, 0);
+    for (const id of level) {
+      const step = done.get(id);
+      const durationMs = step?.durationMs ?? 0;
+      timeline.push({ id, kind: step?.kind ?? 'index', level: levelIndex, startMs: start, durationMs });
+      endAt.set(id, start + durationMs);
+    }
+  });
+
+  const totalMs = steps.reduce((sum, step) => sum + step.durationMs, 0);
+  return { ok: true, steps, levels, timeline, passages, scorers, label: `${size} · ${methods}`, totalMs };
 }

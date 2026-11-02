@@ -45,9 +45,9 @@ The widget below is not Ask Astro. Nothing is embedded. No model is called. Ther
 
 What it keeps:
 
-- A pipeline you can edit. Extract, chunk, clean, filter, score, and index are tasks you add, reorder, and remove. A bad order, such as chunking before anything is extracted, refuses to run and says why.
-- Real step results. Each task reports what it did: how many documents, how many chunks, how many duplicates dropped, how many terms. Open a task for sample rows and the time the browser spent.
-- A real search over whatever that run indexed. BM25 or a plain keyword count, your choice. The answer is copied out of the top chunks. Change the chunk size and the scores move. Run history keeps the last few indexes so the same question can be scored on each.
+- A real DAG. Tasks are nodes. You drag edges between handles, including fan-out and fan-in: three extracts in parallel into one chunk task, or BM25 and a keyword count side by side into one index. A cycle, a missing source, or a chunk task that is handed chunks instead of documents refuses to run and names the node.
+- A wave at a time. Tasks with nothing left to wait for run together, the way Airflow’s graph view lights up a rank. The colors are Airflow’s: gray queued, lime running, green success, red failed, pink skipped.
+- A result for every step. The badge is the count. Open the node for a sentence, input and output counts, examples, and the time the browser spent. Chunks show the overlap and a length histogram. Score shows the top passages for the question you asked. The index shows a few postings, term to passage ids.
 
 What it drops:
 
@@ -59,21 +59,21 @@ What it drops:
 
 <AskNotebook client:load />
 
-Reset if you get lost. The other two presets are a notes-only keyword index and a tiny-chunk index. Run one, ask where the vectors go, then run the other and ask again. The compare list scores that question on each saved index.
+Reset restores three extracts in parallel. Two scorers puts BM25 next to a keyword count. Notes only drops the primer.
 
-Drag a task by its handle, including on a phone. Add, Up, and Down do the same thing without a drag, which is also how a keyboard gets there: focus a handle, press space, then the arrow keys. Press Edit on a task for its settings and, after a run, its sample rows. Ask something the notes do not contain. The honest miss is part of the demo.
+Drag a node, then drag from its right handle to the next task’s left handle. Tidy straightens the graph. On a phone the same graph is a list: Connect to, and Add after. Those menus are also in the panel, so a keyboard can build the DAG. Open a node after a run. Ask where the vectors go, then run Two scorers and ask again.
 
 <h2 id="how-i-built-it">How I built it</h2>
 
 The page is this MDX file. The widget is a React island, `src/components/demos/AskNotebook.tsx`, loaded with `client:load`, the same pattern as the tabletop and the two-link arm. Astro sends that component's JavaScript to the browser and leaves these paragraphs as ordinary HTML.
 
-The documents, the chunk windows, the dedupe, and both rankers live in `src/components/demos/notebook.ts`. The drawing file stays about the canvas. A title word can count extra, so a question that echoes a passage's name beats a longer passage that only mentions the words. A trailing "s" is ignored, so "vectors" matches "vector." That is the whole stemmer, and the file says so.
+The documents, the chunk windows, the dedupe, both rankers, and the DAG check live in `src/components/demos/notebook.ts`. The canvas is `src/components/demos/AskNotebook.tsx`. Tidy uses dagre, in `dagLayout.ts`, to place nodes left to right.
 
-Dragging uses dnd-kit. That library is imported only by this island, so the rest of the site does not download it. The Add, Up, and Down buttons are the fallback when a drag is awkward, which includes a keyboard and a small screen.
+The drawing uses React Flow. That library is imported only by this island, so the rest of the site does not download it. A phone gets a list with Connect and Add after, and those same menus sit in the node panel for a keyboard.
 
-There is no API key. The browser does the work. Colors use the site's CSS variables, so the light and dark themes both apply. If the browser asks for reduced motion, Run skips the timer and shows every task result at once. The durations on the tasks are still the real compute times.
+There is no API key. The browser does the work. The page colors follow the light and dark themes. The task pills keep Airflow’s state colors so queued, running, success, failed, and skipped stay recognizable. If the browser asks for reduced motion, Run skips the timer and shows every state at once. The durations are still the real compute times.
 
-`scripts/check-notebook.ts` re-runs the questions and a few pipelines without a browser. It checks that "What is Ask Astro?" quotes the Astronomer passage, that an unknown question is not quoted, that chunking before extract is refused, and that a shorter chunk window changes the retrieved text.
+`scripts/check-notebook.ts` re-runs the questions and the graphs without a browser. It checks that the three extracts share a wave, that a cycle is refused, that "What is Ask Astro?" quotes the Astronomer passage, and that the two scorers both return a hit.
 
 The Python file `airflow/dags/build_notebook_index.py` is the same idea as a real DAG: read the markdown, split it, count terms, write JSON. The site build does not call it, and Vercel does not deploy that folder. Run it with the standard library if you want to see the index on disk. If Airflow is installed, importing the file registers a DAG named `build_notebook_index`. The score task still does not call a model. A comment marks the line where an embedding call would go.
 
