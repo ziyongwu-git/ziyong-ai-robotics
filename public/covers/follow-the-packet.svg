@@ -1,0 +1,33 @@
+<!--
+  Original drawing for the Follow the packet project.
+  Its colors stay put in light and dark mode.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" fill="none">
+  <rect width="960" height="540" fill="#f3eee4"/>
+  <pattern id="pkt-dots" width="28" height="28" patternUnits="userSpaceOnUse">
+    <circle cx="1" cy="1" r="1.15" fill="#e3d7c6"/>
+  </pattern>
+  <rect width="960" height="540" fill="url(#pkt-dots)"/>
+  <circle cx="140" cy="420" r="100" fill="#f6e6d8"/>
+  <circle cx="820" cy="120" r="80" fill="#e7f3ef"/>
+
+  <line x1="90" y1="250" x2="870" y2="250" stroke="#e4d9c8" stroke-width="3"/>
+  <g font-family="ui-monospace, monospace" font-size="15" fill="#5c564c" text-anchor="middle">
+    <circle cx="90" cy="250" r="18" fill="#fffdf8" stroke="#1c1915" stroke-width="2"/>
+    <text x="90" y="300">Client</text>
+    <circle cx="250" cy="250" r="18" fill="#fffdf8" stroke="#1c1915" stroke-width="2"/>
+    <text x="250" y="300">Card</text>
+    <circle cx="410" cy="250" r="22" fill="#1c1915"/>
+    <text x="410" y="300">A2A</text>
+    <circle cx="590" cy="250" r="18" fill="#fffdf8" stroke="#1c1915" stroke-width="2"/>
+    <text x="590" y="300">Agent</text>
+    <circle cx="770" cy="250" r="18" fill="#fffdf8" stroke="#0f5c52" stroke-width="2"/>
+    <text x="770" y="300" fill="#0f5c52">MCP</text>
+  </g>
+  <rect x="372" y="214" width="76" height="32" rx="10" fill="#9a3412"/>
+  <text x="410" y="235" text-anchor="middle" fill="#fffdf8" font-family="ui-monospace, monospace" font-size="14">msg</text>
+
+  <rect x="150" y="360" width="660" height="110" rx="22" fill="#fffdf8" stroke="#e4d9c8"/>
+  <text x="180" y="408" fill="#9a3412" font-family="ui-monospace, monospace" font-size="16">SendMessage</text>
+  <text x="180" y="442" fill="#1c1915" font-family="Georgia, serif" font-size="22">one question, then the artifact</text>
+</svg>
