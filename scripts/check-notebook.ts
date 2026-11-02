@@ -1,5 +1,5 @@
 /**
- * Re-run the notebook search and the DAG replay without a browser.
+ * Re-run the pipeline and the search without a browser.
  *
  *   node --experimental-strip-types scripts/check-notebook.ts
  *
@@ -7,13 +7,18 @@
  * If a question here lands on the wrong passage, the demo will too.
  */
 import {
-  PASSAGES,
+  DOCUMENTS,
+  KEYWORD_MIN,
   QUOTE_MIN,
-  REPLAY_FRAMES,
-  keptPassage,
+  createTask,
+  defaultPipeline,
+  notesPipeline,
   reply,
-  replayFrames,
+  runPipeline,
+  tinyPipeline,
   tokenize,
+  validatePipeline,
+  type PipelineTask,
 } from '../src/components/demos/notebook.ts';
 
 function check(name: string, ok: boolean, detail = ''): void {
@@ -21,75 +26,112 @@ function check(name: string, ok: boolean, detail = ''): void {
   throw new Error(`${name} failed${detail ? `: ${detail}` : ''}`);
 }
 
-function top(query: string) {
-  const result = reply(query);
-  const id = result.hits[0]?.passage.id ?? '(none)';
-  const quote = result.quotes.map((item) => item.text).join(' ');
-  return { result, id, quote };
+function mustRun(tasks: PipelineTask[]) {
+  const result = runPipeline(tasks);
+  if (!result.ok) throw new Error(`pipeline refused: ${result.reason}`);
+  return result;
 }
 
-const astro = top('What is Ask Astro?');
-check('Ask Astro lands on the definition', astro.id === 'ask-astro-what', astro.id);
-check('Ask Astro is quoted', astro.result.confident && /astronomer/i.test(astro.quote), astro.quote);
+function ask(tasks: PipelineTask[], query: string) {
+  const result = mustRun(tasks);
+  const answer = reply(query, result.passages, result.scoring);
+  const quote = answer.quotes.map((item) => item.text).join(' ');
+  const top = answer.hits[0];
+  return { result, answer, quote, top };
+}
 
-const vectors = top('Where do the vectors go?');
-check('vectors land on ingest', vectors.id === 'ingest-steps', vectors.id);
-check('Weaviate is quoted', /weaviate/i.test(vectors.quote), vectors.quote);
+const standard = ask(defaultPipeline(), 'What is Ask Astro?');
+check('Ask Astro is quoted', standard.answer.confident && /astronomer/i.test(standard.quote), standard.quote);
+check('Ask Astro chunk comes from that document', standard.top?.passage.id.startsWith('doc-ask-astro') === true, standard.top?.passage.id);
 
-const feedback = top('What does feedback write back?');
-check('feedback lands on the feedback passage', feedback.id === 'feedback-loop', feedback.id);
-check('write-back mentions Weaviate', /weaviate/i.test(feedback.quote), feedback.quote);
+const vectors = ask(defaultPipeline(), 'Where do the vectors go?');
+check('vectors quote Weaviate', /weaviate/i.test(vectors.quote), vectors.quote);
+check('vectors come from the ingest document', vectors.top?.passage.id.startsWith('doc-ingest') === true, vectors.top?.passage.id);
 
-const attention = top('What is attention?');
-check('attention lands on the note', attention.id === 'attention-note', attention.id);
+const attention = ask(defaultPipeline(), 'What is attention?');
 check('attention quotes the weighted sum', /weighted sum/i.test(attention.quote), attention.quote);
 
-const reach = top('How far can a two-link arm reach?');
-check('reach lands on the arm note', reach.id === 'arm-note', reach.id);
+const reach = ask(defaultPipeline(), 'How far can a two-link arm reach?');
 check('reach quotes the ring', /ring/i.test(reach.quote), reach.quote);
 
-const page = top('How does this page answer?');
-check('this page lands on its own passage', page.id === 'this-page', page.id);
+const page = ask(defaultPipeline(), 'How does this page answer?');
 check('this page quotes BM25', /bm25/i.test(page.quote), page.quote);
 
-const dag = top('What is a DAG in Airflow?');
-check('DAG lands on the Airflow passage', dag.id === 'airflow-dag', dag.id);
+const cake = ask(defaultPipeline(), 'bake a cake');
+check('an unknown question is not quoted', !cake.answer.confident && cake.answer.quotes.length === 0);
 
-const cohere = top('What does the Cohere reranker keep?');
-check('Cohere lands on the query chain', cohere.id === 'query-chain', cohere.id);
-
-const decorator = top('What is the task.llm decorator?');
-check('task.llm lands on the provider passage', decorator.id === 'common-ai', decorator.id);
-
-const sources = top('What sources does Ask Astro ingest?');
-check('sources land on the source list', sources.id === 'sources-list', sources.id);
-check('sources quote names a real source', /stack overflow/i.test(sources.quote), sources.quote);
-
-const dataswarm = top('What is Dataswarm?');
-check('Dataswarm lands on the skills passage', dataswarm.id === 'dataswarm', dataswarm.id);
-
-const cake = reply('bake a cake');
-check('an unknown question is not quoted', !cake.confident && cake.quotes.length === 0);
-
-const blank = reply('   ');
+const blank = reply('   ', standard.result.passages, standard.result.scoring);
 check('a blank question does nothing', !blank.confident && blank.hits.length === 0);
 
-const stops = reply('what is the');
-check('a question with only stopwords does nothing', !stops.confident && stops.hits.length === 0);
+const notes = ask(notesPipeline(), 'Where do the vectors go?');
+check('notes only does not quote Weaviate', !/weaviate/i.test(notes.quote), notes.quote);
+const notesAttention = ask(notesPipeline(), 'What is attention?');
+check('notes only still finds attention', /weighted sum/i.test(notesAttention.quote), notesAttention.quote);
+check('notes only uses the keyword ranker', notes.result.scoring.method === 'keyword');
 
-const saved = keptPassage('How do I fold a xylophone-note?', [{ text: 'You do not.', passageId: 'x' }], 'saved-1');
-const found = reply('xylophone-note', [...PASSAGES, saved]);
-check('a kept answer is searchable in this tab', found.confident && found.hits[0]?.passage.id === 'saved-1', found.hits[0]?.passage.id);
+const small = ask(tinyPipeline(), 'Where do the vectors go?');
+const wideChunk = createTask('chunk');
+if (wideChunk.kind !== 'chunk') throw new Error('chunk');
+wideChunk.settings = { size: 900, overlap: 0 };
+const wide = ask([createTask('extract'), wideChunk, createTask('score'), createTask('index')], 'Where do the vectors go?');
+check('tiny chunks are more numerous than one big window', small.result.passages.length > wide.result.passages.length);
+check(
+  'chunk size changes the retrieved text or its score',
+  small.top?.passage.text !== wide.top?.passage.text || small.top?.score !== wide.top?.score,
+  `${small.top?.score} vs ${wide.top?.score}`,
+);
+check('both chunk sizes still cite Weaviate', /weaviate/i.test(small.quote) && /weaviate/i.test(wide.quote));
 
-const frames = replayFrames();
-check('replay is stable', JSON.stringify(frames) === JSON.stringify(REPLAY_FRAMES));
-check('first frame runs the three extracts', frames[0].status.extract_notes === 'running' && frames[0].status.extract_projects === 'running' && frames[0].status.extract_primer === 'running');
-check('split waits for the extracts', frames[0].status.split_chunks === 'waiting');
-check('split runs only once extracts succeeded', frames[1].status.extract_notes === 'success' && frames[1].status.split_chunks === 'running');
-check('the last frame is all success', Object.values(frames[frames.length - 1].status).every((status) => status === 'success'));
-check('score does not run before split succeeds', frames.every((frame) => frame.status.score_terms !== 'running' || frame.status.split_chunks === 'success'));
-check('the quote threshold is the one the tests assume', QUOTE_MIN === 1.15);
-check('tokens drop stopwords and keep 4o', tokenize('What is gpt-4o?').join(',') === 'gpt,4o');
-check('a trailing s is softened', tokenize('writes vectors').join(',') === 'write,vector');
+const top1 = createTask('score');
+if (top1.kind !== 'score') throw new Error('score');
+top1.settings = { method: 'bm25', topK: 1, useTitle: true };
+const onlyOne = ask([createTask('extract'), createTask('chunk'), top1, createTask('index')], 'What is Ask Astro?');
+check('top-k 1 returns a single hit', onlyOne.answer.hits.length === 1, String(onlyOne.answer.hits.length));
 
-console.log(`notebook checks passed (${PASSAGES.length} passages, ${frames.length} frames)`);
+const robotics = defaultPipeline().map((task) => {
+  if (task.kind !== 'filter') return task;
+  return { ...task, settings: { ...task.settings, tag: 'robotics' as const } };
+});
+const armOnly = ask(robotics, 'How far can a two-link arm reach?');
+const hidden = ask(robotics, 'What is attention?');
+check('a robotics filter still quotes the arm', /ring/i.test(armOnly.quote), armOnly.quote);
+check('a robotics filter hides the attention note', !hidden.answer.confident);
+
+const overlap = createTask('chunk');
+const clean = createTask('clean');
+if (overlap.kind !== 'chunk' || clean.kind !== 'clean') throw new Error('dedupe tasks');
+overlap.settings = { size: 180, overlap: 150 };
+clean.settings = { mode: 'similar' };
+const messy = mustRun([createTask('extract'), overlap, createTask('index')]);
+const tidied = mustRun([createTask('extract'), overlap, clean, createTask('index')]);
+const removed = tidied.outputs.find((output) => output.kind === 'clean');
+check('high overlap produces fewer chunks after clean', tidied.passages.length < messy.passages.length);
+check('clean reports how many it removed', Boolean(removed && /removed [1-9]/.test(removed.summary)), removed?.summary);
+
+const indexed = mustRun(defaultPipeline());
+const indexOut = indexed.outputs.find((output) => output.kind === 'index');
+const chunkOut = indexed.outputs.find((output) => output.kind === 'chunk');
+const extractOut = indexed.outputs.find((output) => output.kind === 'extract');
+check('extract names a doc count', /docs extracted/.test(extractOut?.summary ?? ''), extractOut?.summary);
+check('chunk names an average length', /chunks, avg \d+ chars/.test(chunkOut?.summary ?? ''), chunkOut?.summary);
+check('index names passages and terms', /index: \d+ passages, \d+ terms/.test(indexOut?.summary ?? ''), indexOut?.summary);
+check('every task records a duration', indexed.outputs.every((output) => output.durationMs >= 0 && output.rows.length > 0));
+check('sample rows are short', indexed.outputs.every((output) => output.rows.every((row) => row.detail.length < 200)));
+
+check('chunk before extract is refused', /extract/i.test(validatePipeline([createTask('chunk'), createTask('extract'), createTask('index')]) ?? ''));
+check('a missing index is refused', /index/i.test(validatePipeline([createTask('extract'), createTask('chunk')]) ?? ''));
+check('the default pipeline is valid', validatePipeline(defaultPipeline()) === null);
+check('an empty canvas is refused', validatePipeline([]) !== null);
+
+const off = createTask('extract');
+if (off.kind !== 'extract') throw new Error('extract');
+off.settings = { notes: false, projects: false, primer: false };
+check('extract with no sources is refused', /source/i.test(validatePipeline([off, createTask('index')]) ?? ''));
+
+check('quote thresholds stay the ones the tests assume', QUOTE_MIN === 1.15 && KEYWORD_MIN === 0.9);
+check('tokens keep 4o and soften a plural', tokenize('What is gpt-4o? writes').join(',') === 'gpt,4o,write');
+check('the library has every source kind', ['notes', 'projects', 'primer'].every((kind) => DOCUMENTS.some((document) => document.kind === kind)));
+
+console.log(
+  `notebook checks passed (${DOCUMENTS.length} docs, default index ${indexed.passages.length} passages, ${indexed.termCount} terms)`,
+);
