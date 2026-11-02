@@ -45,32 +45,35 @@ The widget below is not Ask Astro. Nothing is embedded. No model is called. Ther
 
 What it keeps:
 
-- The shape of the ingest DAG. Three extracts run together, then chunk, then score, then write. A task waits for its upstream tasks. The log is the script of that replay.
-- A real search. The passages are bundled in the page. BM25, a term-weighting formula, ranks them in the browser.
-- Cited sentences. The answer is copied out of the top passages. It is not rewritten.
-- A small feedback beat. "Keep this answer" remembers the pair until you refresh. Ask Astro would upsert it into Weaviate. This tab forgets it.
+- A pipeline you can edit. Extract, chunk, clean, filter, score, and index are tasks you add, reorder, and remove. A bad order, such as chunking before anything is extracted, refuses to run and says why.
+- Real step results. Each task reports what it did: how many documents, how many chunks, how many duplicates dropped, how many terms. Open a task for sample rows and the time the browser spent.
+- A real search over whatever that run indexed. BM25 or a plain keyword count, your choice. The answer is copied out of the top chunks. Change the chunk size and the scores move. Run history keeps the last few indexes so the same question can be scored on each.
 
 What it drops:
 
-- Vectors, Weaviate, Cohere, and every model name in the README. The score task counts words and says so on the log line.
+- Vectors, Weaviate, Cohere, and every model name in the README. The score task counts words and says so.
 - Query rewriting. Ask Astro asks a model for two extra phrasings. This page searches the words you typed.
-- Any claim that the ranking is semantic. "Arm" will not find "manipulator." If the words are not in a passage, the page says it has nothing to quote.
+- Any claim that the ranking is semantic. "Arm" will not find "manipulator." If the words are not in a chunk, the page says it has nothing to quote.
 
 <h2 id="demo">Interactive demo</h2>
 
 <AskNotebook client:load />
 
-Run the DAG, then try the suggested questions. Ask something the notes do not contain. The honest miss is part of the demo. "Keep this answer," then ask the same thing again and see the kept pair come back. Refresh and it is gone.
+Reset if you get lost. The other two presets are a notes-only keyword index and a tiny-chunk index. Run one, ask where the vectors go, then run the other and ask again. The compare list scores that question on each saved index.
+
+Drag a task by its handle, including on a phone. Add, Up, and Down do the same thing without a drag, which is also how a keyboard gets there: focus a handle, press space, then the arrow keys. Press Edit on a task for its settings and, after a run, its sample rows. Ask something the notes do not contain. The honest miss is part of the demo.
 
 <h2 id="how-i-built-it">How I built it</h2>
 
 The page is this MDX file. The widget is a React island, `src/components/demos/AskNotebook.tsx`, loaded with `client:load`, the same pattern as the tabletop and the two-link arm. Astro sends that component's JavaScript to the browser and leaves these paragraphs as ordinary HTML.
 
-The passages, the BM25 math, and the frame list for the graph live in `src/components/demos/notebook.ts`. The drawing file stays about drawing. A title word counts extra, so a question that echoes a passage's name beats a longer passage that only mentions the words. A trailing "s" is ignored, so "vectors" matches "vector." That is the whole stemmer, and the file says so.
+The documents, the chunk windows, the dedupe, and both rankers live in `src/components/demos/notebook.ts`. The drawing file stays about the canvas. A title word can count extra, so a question that echoes a passage's name beats a longer passage that only mentions the words. A trailing "s" is ignored, so "vectors" matches "vector." That is the whole stemmer, and the file says so.
 
-There is no API key. The browser does the search. Colors use the site's CSS variables, so the light and dark themes both apply. If the browser asks for reduced motion, Run skips the timer and jumps every task to success.
+Dragging uses dnd-kit. That library is imported only by this island, so the rest of the site does not download it. The Add, Up, and Down buttons are the fallback when a drag is awkward, which includes a keyboard and a small screen.
 
-`scripts/check-notebook.ts` re-runs the questions and the frame order without a browser. It checks that "What is Ask Astro?" quotes the Astronomer passage, that an unknown question is not quoted, and that `split_chunks` does not run before the extracts succeed.
+There is no API key. The browser does the work. Colors use the site's CSS variables, so the light and dark themes both apply. If the browser asks for reduced motion, Run skips the timer and shows every task result at once. The durations on the tasks are still the real compute times.
+
+`scripts/check-notebook.ts` re-runs the questions and a few pipelines without a browser. It checks that "What is Ask Astro?" quotes the Astronomer passage, that an unknown question is not quoted, that chunking before extract is refused, and that a shorter chunk window changes the retrieved text.
 
 The Python file `airflow/dags/build_notebook_index.py` is the same idea as a real DAG: read the markdown, split it, count terms, write JSON. The site build does not call it, and Vercel does not deploy that folder. Run it with the standard library if you want to see the index on disk. If Airflow is installed, importing the file registers a DAG named `build_notebook_index`. The score task still does not call a model. A comment marks the line where an embedding call would go.
 
