@@ -3,7 +3,7 @@
  *
  *   node --experimental-strip-types scripts/check-packet.ts
  *
- * The widget on the note and on /projects/follow-the-packet draws this file.
+ * The widget on the note and on /demos/follow-the-packet draws this file.
  */
 import {
   CLINICS,
