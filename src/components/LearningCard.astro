@@ -11,8 +11,10 @@
  * the tab order so keyboard users land on the title once.
  */
 import type { CollectionEntry } from 'astro:content';
+import BuiltOn from './BuiltOn.astro';
 import CoverArt from './CoverArt.astro';
 import TagList from './TagList.astro';
+import { certsFor } from '../lib/certifications';
 import { formatDate, isoDate } from '../lib/format';
 
 interface Props {
@@ -22,6 +24,7 @@ interface Props {
 
 const { post, layout = 'card' } = Astro.props;
 const href = `/learning/${post.id}`;
+const certs = certsFor(post.data.certification);
 const horizontal = layout === 'feature' || layout === 'row';
 ---
 
@@ -47,6 +50,9 @@ const horizontal = layout === 'feature' || layout === 'row';
       <a class="hover:text-accent" href={href}>{post.data.title}</a>
     </h3>
     <p class="mt-2 flex-1 text-sm leading-6 text-muted">{post.data.summary}</p>
+    <div class="mt-4">
+      <BuiltOn certs={certs} layout="compact" />
+    </div>
     <p class="mt-4 font-mono text-xs tracking-wide text-muted uppercase">Course / source</p>
     <p class="mt-1 text-sm">{post.data.source}</p>
   </div>

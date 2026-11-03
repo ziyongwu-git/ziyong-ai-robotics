@@ -1,4 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { familyIds, usesCertification } from './certifications';
 
 /**
  * Helpers for the two content folders.
@@ -23,8 +24,40 @@ export async function getProjects(): Promise<CollectionEntry<'projects'>[]> {
   });
 }
 
-/** Home page. A project appears here when its frontmatter says `featured: true`. */
+/** Home page. A demo appears here when its frontmatter says `featured: true`. */
 export async function getFeaturedProjects(): Promise<CollectionEntry<'projects'>[]> {
   const projects = await getProjects();
   return projects.filter((project) => project.data.featured === true);
+}
+
+/**
+ * Demos and notes that list this certificate, or a course nested under it.
+ * Demos come back first. Direct matches come before work that only lists a course.
+ */
+export async function workBuiltOn(certId: string): Promise<{
+  demos: CollectionEntry<'projects'>[];
+  notes: CollectionEntry<'learning'>[];
+}> {
+  const ids = familyIds(certId);
+  const [demos, notes] = await Promise.all([getProjects(), getLearningPosts()]);
+  const directFirst = (value: string | readonly string[]) =>
+    valueIncludes(value, certId) ? 0 : 1;
+  return {
+    demos: demos
+      .filter((item) => usesCertification(item.data.certification, ids))
+      .sort((a, b) => directFirst(a.data.certification) - directFirst(b.data.certification)),
+    notes: notes
+      .filter((item) => usesCertification(item.data.certification, ids))
+      .sort((a, b) => directFirst(a.data.certification) - directFirst(b.data.certification)),
+  };
+}
+
+function valueIncludes(value: string | readonly string[], id: string): boolean {
+  return usesCertification(value, [id]);
+}
+
+/** How many demos and notes sit on this certificate, counting its courses. */
+export async function workCounts(certId: string): Promise<{ demos: number; notes: number }> {
+  const work = await workBuiltOn(certId);
+  return { demos: work.demos.length, notes: work.notes.length };
 }

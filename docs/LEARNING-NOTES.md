@@ -40,7 +40,7 @@ import RobotArm from '../../components/demos/RobotArm.tsx';
 <RobotArm client:load />
 ```
 
-`client:load` means "send the JavaScript for this component when the page loads." Without that directive, Astro draws the arm once during the build and the sliders do not move. The home page does not load that component at all. The picture there is a plain SVG, so visitors who never open the demo do not download it.
+`client:load` means "send the JavaScript for this component when the page loads." Without that directive, Astro draws the arm once during the build and the sliders do not move. The home page loads the tabletop widget (`TabletopVla`) so a visitor can try a demo without opening another page. The sketch beside the introduction is still a plain SVG. The notebook DAG is not loaded until someone opens that demo.
 
 Two other directives you may want later:
 
@@ -53,7 +53,27 @@ Two other directives you may want later:
 
 A content collection is a folder of posts plus a checklist.
 
-`src/content/learning/` holds the notes. `src/content/projects/` holds the projects. `src/content.config.ts` (next to the folder, not inside it) lists the fields each file must have. When you build, Astro checks every file. A missing title or a tag that is not in the allowed list stops the build, which is kinder than a blank page later.
+`src/content/learning/` holds the notes. `src/content/projects/` holds the demos. The folder is still named `projects`. The public pages are `/demos` and `/demos/<file-name>`. Old `/projects` addresses redirect there.
+
+`src/content.config.ts` (next to the folder, not inside it) lists the fields each file must have. When you build, Astro checks every file. A missing title, a tag that is not in the allowed list, or a `certification` that is missing or unknown stops the build, which is kinder than a blank page later.
+
+`certification` is required on both a note and a demo. It is the `id` of a DeepLearning.AI certificate in `src/data/certifications.ts`. One id, or a list of ids. The page draws a "Built on" card from it. The certificate name links to `/certificates/<id>`. The word Credential links to the public credential.
+
+For a note about agents, tools, and A2A or MCP, use:
+
+```yaml
+---
+title: "Your title"
+date: 2026-11-02
+tags:
+  - ai
+source: "DeepLearning.AI — A2A: The Agent2Agent Protocol"
+summary: "One or two sentences a reader can scan."
+certification: a2a-agent2agent-protocol
+---
+```
+
+That is the whole required set for a note: `title`, `date`, `tags`, `source`, `summary`, `certification`. `cover` is optional. If the interactive demo is its own page, put a file in `src/content/projects/` with the same `certification: a2a-agent2agent-protocol` plus `title`, `summary`, `tags`, and `status`. Optional demo fields are `featured`, `date`, `demo`, `repo`, and `cover`. The certificate page lists that demo above the note.
 
 You do not register a new file in the config. The config already says "read every `.md` and `.mdx` file in this folder."
 
@@ -63,11 +83,13 @@ Notes and projects can show a picture. If the file's frontmatter has no `cover`,
 
 If you set `cover`, the site uses that file instead. Put it in `public/covers/` and point at it with `/covers/your-file.jpg`. A file used that way keeps its own colors in both themes. The sample attention note is the example (`public/covers/attention.svg`). It is an original drawing, not a photo of a person.
 
-The moving sketch on the home page is also SVG and CSS. It is not a React demo. A React demo is only on the project page that renders it with `client:load`.
+The moving sketch on the home page is also SVG and CSS. The tabletop under it is a React demo, the same component as `/demos/see-think-move`, rendered with `client:load`. Other demos stay on their own pages until someone opens them.
 
 ## Certifications
 
-`src/data/certifications.ts` is a list, not a page. The home page shows the entries marked current. `/learning/certifications` shows every entry. You do not copy the list into the about page. About links to it.
+`src/data/certifications.ts` is the list. DeepLearning.AI entries (group `ai`) each have a page at `/certificates/<id>`, and a short `blurb`. `/certificates` is the hub. A note or a demo names one of those ids in `certification`. The home row shows the entries marked `current`.
+
+Older credentials stay on the About page. They do not get certificate pages, and a note cannot name them. `/learning/certifications` redirects to `/certificates`.
 
 ## What you can ignore for now
 

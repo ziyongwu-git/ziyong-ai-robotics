@@ -5,14 +5,23 @@ tags:
   - ai
   - robotics
   - data
+# The "see" step stands in for a vision encoder. Convolutional Neural Networks is the course about learning from images.
+certification: convolutional-neural-networks
 status: shipped
 featured: true
 date: 2026-11-01
 cover: "/covers/see-think-move.svg"
-demo: "/projects/see-think-move#demo"
+demo: "/demos/see-think-move#demo"
 ---
 
 import TabletopVla from '../../components/demos/TabletopVla.tsx';
+import Writeup from '../../components/Writeup.astro';
+
+<h2 id="demo">Interactive demo</h2>
+
+<TabletopVla client:load />
+
+<Writeup>
 
 A vision-language-action model, a VLA for short, is a robot controller with a camera and a sentence as its inputs and a short burst of motion as its output. Through 2025 that shape became a mainstream bet for robots that are supposed to do ordinary chores, not one memorized wave.
 
@@ -24,11 +33,11 @@ A robot that only replays a recorded motion breaks when the cup moves two inches
 - NVIDIA's [GR00T N1](https://developer.nvidia.com/blog/accelerate-generalist-humanoid-robot-development-with-nvidia-isaac-gr00t-n1/) splits the same idea in two. A slower vision-language part reads the scene. A faster action part streams movement. NVIDIA announced it in March 2025 ([newsroom](https://nvidianews.nvidia.com/news/nvidia-isaac-gr00t-n1-open-humanoid-robot-foundation-model-simulation-frameworks), [paper](https://arxiv.org/abs/2503.14734)).
 - DeepMind's [Gemini Robotics](https://deepmind.google/blog/gemini-robotics-brings-ai-into-the-physical-world/) treats actions as one more thing a multimodal model can produce ([paper](https://arxiv.org/abs/2503.20020)). The [1.5 follow-up](https://deepmind.google/blog/gemini-robotics-15-brings-ai-agents-into-the-physical-world/) spends a moment writing its reasoning before it moves ([paper](https://arxiv.org/abs/2510.03342)).
 
-The part I keep turning over is that the inputs are data I already know how to think about: images, labels, and a time series of positions. The output is a machine that moves. That is the overlap between the data work behind me and the robotics I am walking toward.
+The inputs are a picture and a sentence. The output is a short path for a gripper. This page is a small, inspectable version of that loop.
 
 ## What this page actually runs
 
-The widget below is not one of those models. Nothing is trained. There is no network and no server call. It is a small picture of the loop, so the steps are visible.
+The widget above is not one of those models. Nothing is trained. There is no network and no server call. It is a small picture of the loop, so the steps are visible.
 
 What it keeps:
 
@@ -45,15 +54,11 @@ What it drops:
 
 The flow-steps slider is the toy version of how many integration steps you spend. Four or more land on the block. Fewer stop while the path is still noisy, and the gripper can miss. That miss is a teaching exaggeration. Trained policies are run for a set budget until the motion looks smooth. They are not usually asked to stop at step two.
 
-<h2 id="demo">Interactive demo</h2>
-
-<TabletopVla client:load />
-
 Try "put the red block in the tray", then "stack blue on red", then "clear the table". Shuffle the blocks and run the same sentence again. That second run is the whole point of the idea: the instruction did not change, the picture did.
 
 ## How I built it
 
-The page is this MDX file. The widget is a React island, `src/components/demos/TabletopVla.tsx`, loaded with `client:load`, the same pattern as the two-link arm. Astro sends that component's JavaScript to the browser and leaves the paragraphs around it as ordinary HTML.
+The page is this MDX file. The widget is a React island, `src/components/demos/TabletopVla.tsx`, loaded with `client:load`, the same pattern as the two-link arm. It sits above this explanation so the demo is the first thing on the page. Astro sends that component's JavaScript to the browser and leaves the paragraphs around it as ordinary HTML.
 
 The rules, the curves, and the flow step live in `src/components/demos/tabletop.ts`, so the drawing file stays about drawing. A straight-line flow step is small enough to read: move each point a fraction of the way from the noise toward the geometric curve, and repeat. The hand's first point never moves, which is a stand-in for the robot knowing where its own gripper is.
 
@@ -69,3 +74,5 @@ These are the pages I read while deciding what to draw. I linked the project wri
 - NVIDIA, "GR00T N1: An Open Foundation Model for Generalist Humanoid Robots," March 2025. [Technical blog](https://developer.nvidia.com/blog/accelerate-generalist-humanoid-robot-development-with-nvidia-isaac-gr00t-n1/). [Newsroom](https://nvidianews.nvidia.com/news/nvidia-isaac-gr00t-n1-open-humanoid-robot-foundation-model-simulation-frameworks). [Paper](https://arxiv.org/abs/2503.14734).
 - Google DeepMind, "Gemini Robotics brings AI into the physical world," March 2025. [Blog](https://deepmind.google/blog/gemini-robotics-brings-ai-into-the-physical-world/). [Paper](https://arxiv.org/abs/2503.20020).
 - Google DeepMind, "Gemini Robotics 1.5 brings AI agents into the physical world," 2025. [Blog](https://deepmind.google/blog/gemini-robotics-15-brings-ai-agents-into-the-physical-world/). [Paper](https://arxiv.org/abs/2510.03342).
+
+</Writeup>

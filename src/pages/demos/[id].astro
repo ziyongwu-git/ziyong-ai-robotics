@@ -1,0 +1,134 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BuiltOn from '../../components/BuiltOn.astro';
+import PlaceholderNote from '../../components/PlaceholderNote.astro';
+import TagList from '../../components/TagList.astro';
+import { certificationIds, certsFor, usesCertification } from '../../lib/certifications';
+import { getLearningPosts } from '../../lib/content';
+import { formatDate, isoDate, statusLabel } from '../../lib/format';
+import type { ProjectStatus } from '../../config';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({
+    params: { id: project.id },
+  }));
+}
+
+const { id } = Astro.params;
+if (!id) {
+  throw new Error('Missing demo id.');
+}
+
+const project = await getEntry('projects', id);
+if (!project) {
+  throw new Error(`No demo entry for ${id}.`);
+}
+
+const { Content } = await render(project);
+const demo = project.data.demo;
+const repo = project.data.repo;
+const demoIsExternal = demo ? demo.startsWith('http') : false;
+const certs = certsFor(project.data.certification);
+const relatedNotes = (await getLearningPosts()).filter((post) =>
+  usesCertification(post.data.certification, certificationIds(project.data.certification)),
+);
+
+const statusTone: Record<ProjectStatus, string> = {
+  sample: 'bg-accent-soft',
+  idea: 'border border-line bg-paper',
+  'in-progress': 'bg-accent-soft',
+  shipped: 'bg-highlight-soft',
+};
+---
+
+<BaseLayout
+  title={project.data.title}
+  description={project.data.summary}
+  width="wide"
+  ogType="article"
+  published={project.data.date}
+>
+  <div class="max-w-3xl">
+    <p>
+      <a class="text-sm text-accent underline decoration-line underline-offset-4" href="/demos">All demos</a>
+    </p>
+    <div class="mt-6 flex flex-wrap items-center gap-2">
+      <span
+        class:list={[
+          'rounded-full px-2.5 py-1 font-mono text-xs tracking-wide text-ink uppercase',
+          statusTone[project.data.status],
+        ]}
+      >
+        {statusLabel(project.data.status)}
+      </span>
+      <TagList tags={project.data.tags} filterHref="/demos" />
+    </div>
+    <h1 class="mt-4 font-serif text-4xl leading-tight sm:text-5xl">{project.data.title}</h1>
+    <p class="mt-4 text-lg leading-8 text-muted">{project.data.summary}</p>
+    {
+      project.data.date && (
+        <p class="mt-3 text-sm text-muted">
+          <time datetime={isoDate(project.data.date)}>{formatDate(project.data.date)}</time>
+        </p>
+      )
+    }
+    <div class="mt-5">
+      <BuiltOn certs={certs} />
+    </div>
+    {
+      (demo || repo) && (
+        <div class="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+          {demo && (
+            <a
+              class="text-accent underline decoration-line underline-offset-4"
+              href={demo}
+              target={demoIsExternal ? '_blank' : undefined}
+              rel={demoIsExternal ? 'noopener noreferrer' : undefined}
+            >
+              {demoIsExternal ? 'Live demo' : 'Jump to the demo'}
+            </a>
+          )}
+          {repo && (
+            <a class="text-accent underline decoration-line underline-offset-4" href={repo} target="_blank" rel="noopener noreferrer">
+              Repository
+            </a>
+          )}
+        </div>
+      )
+    }
+    {
+      project.data.status === 'sample' && (
+        <div class="mt-6">
+          <PlaceholderNote>
+            This is a sample demo. It shows the file format and a working interactive widget. Replace the write-up with
+            your own demo, or delete the file when you no longer need the example.
+          </PlaceholderNote>
+        </div>
+      )
+    }
+  </div>
+  <div class="mt-8">
+    <Content />
+  </div>
+  {
+    relatedNotes.length > 0 && (
+      <section class="mt-12 max-w-3xl" aria-labelledby="related-notes">
+        <h2 id="related-notes" class="font-serif text-3xl">
+          Notes on this certificate
+        </h2>
+        <ul class="mt-4 space-y-3">
+          {relatedNotes.map((post) => (
+            <li class="rounded-2xl border border-line bg-card p-4">
+              <a class="font-serif text-xl text-ink hover:text-accent" href={`/learning/${post.id}`}>
+                {post.data.title}
+              </a>
+              <p class="mt-1 text-sm leading-6 text-muted">{post.data.summary}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</BaseLayout>

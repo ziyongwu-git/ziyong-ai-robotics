@@ -1,0 +1,93 @@
+---
+/**
+ * "Built on" badge for a demo or a note.
+ *
+ * `card` is the block at the top of a page. `compact` fits on a list card.
+ * The certificate name goes to the page on this site. "Credential" opens
+ * the DeepLearning.AI page in a new tab.
+ */
+import type { Certification } from '../data/certifications';
+
+interface Props {
+  certs: readonly Certification[];
+  layout?: 'card' | 'compact';
+}
+
+const { certs, layout = 'card' } = Astro.props;
+---
+
+{
+  certs.length > 0 && layout === 'card' && (
+    <aside class="rounded-3xl border border-line bg-card p-5" aria-label="Built on">
+      <div class="flex items-center gap-3">
+        <svg viewBox="0 0 36 36" class="h-9 w-9 text-highlight" aria-hidden="true">
+          <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" stroke-width="1.4" />
+          <path
+            d="M18 8.5 21.2 15l7 .6-5.3 4.4 1.7 6.8L18 23.2 11.4 26.8l1.7-6.8L7.8 15.6l7-.6Z"
+            fill="var(--accent)"
+          />
+        </svg>
+        <p class="font-mono text-xs tracking-[0.16em] text-accent uppercase">Built on</p>
+      </div>
+      <ul class="mt-4 space-y-4">
+        {certs.map((cert) => (
+          <li>
+            <a class="font-serif text-2xl text-ink underline decoration-line underline-offset-4 hover:text-accent" href={`/certificates/${cert.id}`}>
+              {cert.name}
+            </a>
+            <p class="mt-1 text-sm text-muted">
+              {cert.issuer} · {cert.date}
+            </p>
+            <p class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+              <a class="text-accent underline decoration-line underline-offset-4" href={`/certificates/${cert.id}`}>
+                Certificate page
+              </a>
+              {cert.credentialUrl && (
+                <a
+                  class="text-accent underline decoration-line underline-offset-4"
+                  href={cert.credentialUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Credential
+                  <span class="sr-only"> (opens in a new tab)</span>
+                </a>
+              )}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </aside>
+  )
+}
+
+{
+  certs.length > 0 && layout === 'compact' && (
+    <div class="rounded-2xl border border-line bg-paper px-3 py-2" aria-label="Built on">
+      <p class="font-mono text-[0.65rem] tracking-[0.16em] text-accent uppercase">Built on</p>
+      <ul class="mt-1 space-y-1">
+        {certs.map((cert) => (
+          <li class="text-sm leading-5">
+            <a class="font-medium text-ink underline decoration-line underline-offset-4 hover:text-accent" href={`/certificates/${cert.id}`}>
+              {cert.name}
+            </a>
+            {cert.credentialUrl && (
+              <>
+                <span class="text-muted"> · </span>
+                <a
+                  class="text-accent underline decoration-line underline-offset-4"
+                  href={cert.credentialUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Credential
+                  <span class="sr-only"> (opens in a new tab)</span>
+                </a>
+              </>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}

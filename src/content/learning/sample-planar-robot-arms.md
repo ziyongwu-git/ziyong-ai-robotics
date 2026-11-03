@@ -6,7 +6,10 @@ tags:
   - robotics
 # course/source — where the note came from. The field name is `source`.
 source: "Sample source — replace with the textbook section or lecture"
-summary: "Placeholder note on a two-link arm. The matching interactive demo lives under Projects."
+summary: "Placeholder note on a two-link arm. The matching interactive demo lives under Demos."
+# Required. A DeepLearning.AI id from src/data/certifications.ts.
+# Closest certificate on file. This note is planar kinematics, not a neural network.
+certification: deep-learning-specialization
 # cover: "/covers/my-picture.jpg"
 ---
 
@@ -24,4 +27,4 @@ The hand can reach a ring of points. Inside the inner ring it cannot fold tightl
 - The formula you trusted.
 - The point where it broke.
 
-The slider demo is the interactive version of this idea: [Two-link robot arm](/projects/sample-two-link-arm#demo).
+The slider demo is the interactive version of this idea: [Two-link robot arm](/demos/sample-two-link-arm#demo).

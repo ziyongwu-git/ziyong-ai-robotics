@@ -1,6 +1,6 @@
 # Ziyong Wu — personal site
 
-A personal notebook: a home page, a learning log, projects, and an about page. The home page leads with notes and projects. The resume-style background lives on About.
+A personal notebook: demos, notes, DeepLearning.AI certificates, and an about page. The home page leads with the demos. The resume-style background lives on About only.
 
 It is built with [Astro](https://astro.build), [Tailwind CSS](https://tailwindcss.com), and [MDX](https://mdxjs.com), with React available when a project needs something interactive (a slider, a chart, a small tool). The finished site is a folder of static files, which [Vercel](https://vercel.com) can host for free.
 
@@ -41,10 +41,10 @@ npm run preview
 | `src/pages/` | URLs. `index.astro` is the home page. `about.astro` is `/about`. A folder plus `index.astro` is a section, such as `/learning`. |
 | `src/layouts/BaseLayout.astro` | The shared shell: header, footer, and the tags search engines read. |
 | `src/components/` | Pieces reused by pages. React demos live in `src/components/demos/`. |
-| `src/content/learning/` | Learning-log posts. One `.md` or `.mdx` file per note. |
-| `src/content/projects/` | Project write-ups. Use `.mdx` when the page embeds a demo. |
-| `src/content.config.ts` | The checklist for those files (required title, allowed tags, and so on). It sits **next to** `content/`, not inside it. |
-| `src/data/certifications.ts` | Licenses and courses. One list, used by the home page, the learning log, and `/learning/certifications`. |
+| `src/content/learning/` | Notes. One `.md` or `.mdx` file per note. The public URL is `/learning/<file-name>`. |
+| `src/content/projects/` | Demos. The folder name stays `projects`. The public URL is `/demos/<file-name>`. Use `.mdx` when the page embeds a widget. |
+| `src/content.config.ts` | The checklist for those files (required title, required `certification`, allowed tags, and so on). It sits **next to** `content/`, not inside it. |
+| `src/data/certifications.ts` | Licenses and courses. DeepLearning.AI entries get a page at `/certificates/<id>`. Older credentials are listed on About only. |
 | `src/config.ts` | Your name, one-line positioning, public URL, and contact links. |
 | `src/styles/global.css` | Colors, fonts, and dark mode. |
 | `src/lib/` | Small helpers (dates, loading posts, sorting certificates, generated covers). |
@@ -61,15 +61,18 @@ The header links are the `nav` list in `src/config.ts`.
 
 | URL | Page |
 | --- | --- |
-| `/` | Home: the notebook, a short "currently learning" strip, latest notes, featured projects |
-| `/learning` | Learning log, newest first, with tag filters and a certifications sidebar |
+| `/` | Home: a live demo, then the demo gallery, notes, and the certificate row |
+| `/demos` | Demo index |
+| `/demos/<file-name>` | One demo. The widget is at the top. The explanation follows. |
+| `/learning` | Notes, newest first, with tag filters |
 | `/learning/<file-name>` | One note |
-| `/learning/certifications` | Full list of licenses and courses |
-| `/projects` | Project index |
-| `/projects/<file-name>` | One project |
-| `/about` | Bio, experience, skills, education, and contact |
-| `/rss.xml` | RSS feed for the learning log |
+| `/certificates` | DeepLearning.AI certificates, and the demos and notes on each |
+| `/certificates/<id>` | One certificate. `id` matches `src/data/certifications.ts`. |
+| `/about` | Bio, experience, skills, earlier credentials, education, and contact |
+| `/rss.xml` | RSS feed for the notes |
 | `/sitemap-index.xml` | Sitemap |
+
+`/projects` and `/projects/<file-name>` redirect to `/demos`. `/learning/certifications` redirects to `/certificates`. The header order is Home, Demos, Notes, Certificates, About.
 
 ## Add a learning-log post
 
@@ -87,6 +90,8 @@ tags:
 # course/source — the field name is source
 source: "Fast.ai Practical Deep Learning, lesson 2"
 summary: "Two sentences a reader can scan without opening the note."
+# Required. One DeepLearning.AI id, or a list. See the certificate table below.
+certification: data-agents
 # Optional picture. Leave the line out for a generated pattern.
 # cover: "/covers/my-picture.jpg"
 ---
@@ -96,21 +101,50 @@ Then write the note in Markdown under that block: headings (`##`), lists, links,
 
 Rules the build will enforce:
 
-- `title`, `date`, `tags`, `source`, and `summary` are required.
+- `title`, `date`, `tags`, `source`, `summary`, and `certification` are required.
 - `date` is `YYYY-MM-DD`.
 - `tags` is one or more of `ai`, `robotics`, `data`. To allow a new tag, add it to the `tags` array in `src/config.ts`.
 - `source` is the course, paper, video, or book. The label on the page is "Course / source".
+- `certification` is an `id` from `src/data/certifications.ts`, and it has to be a DeepLearning.AI certificate. One id, or a list:
+
+  ```yaml
+  certification:
+    - agentic-ai
+    - data-agents
+  ```
+
+  The build stops with a message that names the allowed ids if the field is missing, misspelled, or points at an older credential such as Google Cloud. The page shows a "Built on" card. The name links to `/certificates/<id>`. "Credential" opens the DeepLearning.AI page.
 - `cover` is optional. Put an image in `public/covers/` and set `cover: "/covers/my-picture.jpg"`, or use an `https://` URL. Leave the line out and the site draws a pattern from the tags (AI, robotics, data). A file in `public/` does not follow the light/dark switch, so give a photo or a drawing its own background. The sample attention note uses `public/covers/attention.svg` as the example. The pattern covers are original drawings in the code, not stock photos.
 
 Save the file. The dev server should show the note on `/learning` and on the home page (the three newest). If it does not appear, stop the server and run `npm run dev` again.
 
 The two files whose titles start with `[Sample]` are examples. Delete them when you no longer want them on the site.
 
-## Add a project
+### A future agent note (A2A and MCP)
 
-Same idea, in `src/content/projects/`.
+Do not invent this page here if another change is already adding it. When that note lands, its frontmatter should be:
 
-Use a `.md` file when the project is writing plus links. Use `.mdx` when you also embed a widget. The sample project is `.mdx` because it contains the arm demo.
+```yaml
+---
+title: "Your title"
+date: 2026-11-02
+tags:
+  - ai
+source: "DeepLearning.AI — A2A: The Agent2Agent Protocol"
+summary: "One or two sentences a reader can scan."
+certification: a2a-agent2agent-protocol
+---
+```
+
+`a2a-agent2agent-protocol` is the id for A2A: The Agent2Agent Protocol. The certificate page at `/certificates/a2a-agent2agent-protocol` lists every note and demo that uses that id. Demos are listed first.
+
+If the interactive "Follow the packet" piece should also appear under Demos, add a second file in `src/content/projects/` (see the next section) with the same `certification: a2a-agent2agent-protocol`, and link the note at `/demos/<file-name>`.
+
+## Add a demo
+
+Same idea, in `src/content/projects/`. The site calls these demos. The URL is `/demos/<file-name>`, not `/projects/`.
+
+Use a `.md` file when the page is writing plus links. Use `.mdx` when you also embed a widget. The sample arm is `.mdx` because it contains the sliders.
 
 ```yaml
 ---
@@ -118,21 +152,23 @@ title: "Sensor log viewer"
 summary: "What it does, in one or two sentences."
 tags:
   - data
+certification: data-agents
 status: in-progress
 featured: true
 date: 2026-11-02
-demo: "https://example.com/my-demo"
+demo: "/demos/sensor-log-viewer#demo"
 repo: "https://github.com/ziyongwu-git/my-repo"
 ---
 ```
 
+- `certification` is required, same rule as on a note.
 - `status` is one of `idea`, `in-progress`, `shipped`, or `sample`. Use `sample` only for format examples. The page shows a placeholder banner when the status is `sample`.
-- `featured: true` puts the project on the home page. Omit it, or set `false`, to keep the project on the projects page only.
+- `featured: true` puts the demo on the home page. Omit it, or set `false`, to keep it on the demos page only.
 - `date` is optional. Newer dates are listed first.
 - `demo` and `repo` are optional. Leave the line out when you do not have a link. A link must start with `/` (a page on this site), `http://`, or `https://`.
-- `cover` works the same way as on a learning note.
+- `cover` works the same way as on a note.
 
-`/projects/sample-two-link-arm` is the example, including a working demo. Delete that file when you are done with it, and delete `src/components/demos/RobotArm.tsx` and `kinematics.ts` if nothing else imports them.
+`/demos/sample-two-link-arm` is the example, including a working demo. Delete that file when you are done with it, and delete `src/components/demos/RobotArm.tsx` and `kinematics.ts` if nothing else imports them.
 
 ## Embed an interactive demo
 
@@ -141,17 +177,28 @@ A demo is a React component: a function that returns the widget, and that can re
 1. Create `src/components/demos/YourDemo.tsx`. Copy `RobotArm.tsx` if you want a starting shape. The math for the arm is in `kinematics.ts`, next to it, so the drawing file stays readable.
 2. In the project file (it must be `.mdx`), import the component and render it.
 
-The path is counted from the project file. `src/content/projects/your-file.mdx` goes up two folders to reach `src/`:
+The path is counted from the demo file. `src/content/projects/your-file.mdx` goes up two folders to reach `src/`:
 
 ```mdx
 import YourDemo from '../../components/demos/YourDemo.tsx';
+import Writeup from '../../components/Writeup.astro';
+
+<h2 id="demo">Interactive demo</h2>
 
 <YourDemo client:load />
+
+<Writeup>
+
+The explanation goes here, under the widget.
+
+</Writeup>
 ```
 
 `client:load` is the important part. It tells Astro to send the JavaScript for this component when the page loads. Without it, the widget is a still picture and the sliders do not move. The rest of the page stays ordinary HTML.
 
-`src/content/projects/see-think-move.mdx` is a worked example of that pattern: a write-up, a cover in `public/covers/see-think-move.svg`, and a React island. The rules for the toy live in `src/components/demos/tabletop.ts`. The drawing is `src/components/demos/TabletopVla.tsx`.
+Put the widget first, then `<Writeup>`. The widget uses the width of the page. The words stay in a narrower column. `<Writeup>` is `src/components/Writeup.astro`.
+
+`src/content/projects/see-think-move.mdx` is a worked example of that pattern: a write-up, a cover in `public/covers/see-think-move.svg`, and a React island. The rules for the toy live in `src/components/demos/tabletop.ts`. The drawing is `src/components/demos/TabletopVla.tsx`. The home page also loads that widget, so the first thing a visitor can do is play with it.
 
 `src/content/projects/ask-the-notebook.mdx` is another worked example: a RAG demo drawn as a DAG you can connect. The documents and the search math are in `src/components/demos/notebook.ts`. The canvas is `src/components/demos/AskNotebook.tsx`. A separate Python DAG lives in `airflow/` and is not run by the site build.
 
@@ -165,19 +212,36 @@ In an `.mdx` file, `{` starts code. When you mention a snippet in a sentence, wr
 
 Edit `src/data/certifications.ts`. Copy an existing block. The comment at the top of that file explains each field.
 
-- `current: true` puts a certificate on the home page strip and the learning-log sidebar. Use it for recent certificates, not for a course that is nested under a specialization.
-- `parentId` nests a course under another entry. The Deep Learning Specialization is the example: its four courses set `parentId: 'deep-learning-specialization'`.
-- `expired` is a date such as `Oct 2021`, only when the credential has lapsed. PMP is marked that way.
-- Leave `credentialUrl` out when there is no public link. Do not invent a course or a description of what it taught.
+DeepLearning.AI ids you can use in `certification`:
 
-`/learning/certifications` prints the whole list in two groups. About links to that page.
+| id | Certificate |
+| --- | --- |
+| `a2a-agent2agent-protocol` | A2A: The Agent2Agent Protocol |
+| `dspy` | DSPy: Build and Optimize Agentic Apps |
+| `post-training-llms` | Post-training of LLMs |
+| `data-agents` | Building and Evaluating Data Agents |
+| `agentic-ai` | Agentic AI |
+| `deep-learning-specialization` | Deep Learning Specialization |
+| `convolutional-neural-networks` | Convolutional Neural Networks |
+| `structuring-ml-projects` | Structuring Machine Learning Projects |
+| `improving-deep-neural-networks` | Improving Deep Neural Networks |
+| `neural-networks-deep-learning` | Neural Networks and Deep Learning |
+
+- `id` is the slug. The page is `/certificates/<id>`.
+- `blurb` is required on a DeepLearning.AI entry. One or two plain sentences for that page.
+- `current: true` puts a top-level DeepLearning.AI certificate on the home row. Do not set it on a nested course, and do not set it on an older credential.
+- `parentId` nests a course under another entry. The Deep Learning Specialization is the example: its four courses set `parentId: 'deep-learning-specialization'`. Work that names a course also shows on the specialization page.
+- `expired` is a date such as `Oct 2021`, only when the credential has lapsed. PMP is marked that way.
+- Leave `credentialUrl` out when there is no public link. Do not invent a course.
+
+`/certificates` is the hub. Each certificate page lists demos first, then notes. Older credentials (Google Cloud, PMP, edX, Oracle, SAS) are on the About page only. They are not valid `certification` values.
 
 ## Change words, links, and colors
 
-- Name, positioning, public URL, email, LinkedIn, and GitHub: `src/config.ts`. Email is `ziyong.w@gmail.com` (a `mailto` link in the footer and on About). LinkedIn is `https://www.linkedin.com/in/ziyongwu/`. GitHub is `https://github.com/ziyongwu-git`. Do not add a phone number or a street address.
+- Name, one-line description, public URL, email, LinkedIn, and GitHub: `src/config.ts`. Email is `ziyong.w@gmail.com` (a `mailto` link in the footer and on About). LinkedIn is `https://www.linkedin.com/in/ziyongwu/`. GitHub is `https://github.com/ziyongwu-git`. Do not add a phone number or a street address. The header and the home page do not list employers, years, or roles. That copy stays in `src/profile.ts` and on About.
 - The resume-style copy (roles, dates, skills, education): `src/profile.ts`. Add a line only when you can point at the source. The public location line stays "Seattle area".
 - Licenses and courses: `src/data/certifications.ts`, not `profile.ts`.
-- Colors and fonts: the two variable blocks at the top of `src/styles/global.css`. The home-page sketch is `src/components/HeroFigure.astro`. Its motion stops when the browser is set to reduced motion.
+- Colors and fonts: the two variable blocks at the top of `src/styles/global.css`. The home-page sketch is `src/components/HeroFigure.astro`. Its motion stops when the browser is set to reduced motion. The live tabletop on the home page does the same.
 
 The public URL in `src/config.ts` (`url`) is what the sitemap and RSS feed use. It has no trailing slash.
 
@@ -218,11 +282,12 @@ The next deployment is the one that starts recording. After people visit the dep
 Read the last lines of the terminal. The content checker is the usual cause:
 
 - A tag other than `ai`, `robotics`, or `data`.
-- A missing `title`, `date`, `source`, or `summary` on a note.
+- A missing `title`, `date`, `source`, `summary`, or `certification` on a note.
+- A missing `certification` on a demo, or an id that is not a DeepLearning.AI certificate in `src/data/certifications.ts`. The message lists the ids that work.
 - A date not written as `YYYY-MM-DD`.
-- A project `status` outside `idea`, `in-progress`, `shipped`, `sample`.
+- A demo `status` outside `idea`, `in-progress`, `shipped`, `sample`.
 - A `demo`, `repo`, or `cover` path that does not start with `/`, `http://`, or `https://`.
-- A certification date that is not like `Oct 2026`, a repeated `id`, or a `parentId` that does not match another entry. The error names the certificate.
+- A certification date that is not like `Oct 2026`, a repeated `id`, a missing `blurb` on a DeepLearning.AI entry, or a `parentId` that does not match another entry. The error names the certificate.
 
 Fix the file it names and run `npm run build` again.
 

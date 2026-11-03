@@ -1,29 +1,40 @@
 /**
  * Licenses and certifications.
  *
- * This is the only list the site uses. The home page, the learning log,
- * and /learning/certifications all read it. About links here rather than
- * keeping a second copy.
+ * This is the only list the site uses.
  *
- * Add a certificate by copying one block in the array. Write the name,
- * issuer, date, and link as they appear on the credential. Do not invent
- * courses, and do not describe what a course taught.
+ * DeepLearning.AI entries (group: "ai") each get a page at /certificates/<id>.
+ * A note or a demo points at one with the frontmatter field `certification`.
+ * The id in that field is the `id` in this file. The build fails if the id
+ * is missing or is not one of these DeepLearning.AI ids.
+ *
+ * Older credentials (group: "earlier") are shown on the About page only.
+ * Do not use them in `certification` frontmatter.
+ *
+ * Add a certificate by copying one block. Write the name, issuer, date, and
+ * link as they appear on the credential. Do not invent a course. A DeepLearning.AI
+ * entry also needs `blurb`: one or two plain sentences, based on the public
+ * course page, not a lesson-by-lesson retelling.
  *
  * Fields:
- * - id: a unique key (letters, numbers, dashes). Not shown on the site.
+ * - id: a unique key (letters, numbers, dashes). This is the slug in
+ *   /certificates/<id> and the value of `certification` in a note or demo.
  * - name, issuer: shown as written.
  * - date: three-letter month and year, such as "Oct 2026".
  *   Newer dates are shown first. The same month keeps the order in this file.
  * - credentialUrl: the public credential page. Leave the line out if there is no link.
- * - group: "ai" (2026 AI and machine-learning work) or "earlier" (data, cloud, and older).
- * - current: true shows it on the home "Currently learning" strip and the learning-log rail.
- *   Use this for recent top-level certificates, not for courses nested under a specialization.
+ * - group: "ai" (DeepLearning.AI) or "earlier" (data, cloud, and older, About only).
+ * - blurb: required for group "ai". A short plain description for the certificate page.
+ * - current: true puts a top-level DeepLearning.AI certificate on the home row.
+ *   Do not set it on a course nested under a specialization, and do not set it
+ *   on an older credential.
  * - parentId: set this to a specialization's id to nest a course underneath it.
  * - expired: a date such as "Oct 2021", only when the credential has lapsed.
  * - skills: optional short labels. Leave them out unless you want them shown.
  * - logo: optional. A file in public/ ("/covers/badge.svg") or an https URL.
  *
- * The entries below were read from LinkedIn on Oct 28, 2026.
+ * The entries below were read from LinkedIn on Oct 28, 2026, except
+ * A2A: The Agent2Agent Protocol, added November 2, 2026.
  */
 
 export type CertificationGroup = 'ai' | 'earlier';
@@ -38,11 +49,24 @@ export type Certification = {
   current?: boolean;
   parentId?: string;
   expired?: string;
+  /** Plain description for a DeepLearning.AI certificate page. Required when group is "ai". */
+  blurb?: string;
   skills?: readonly string[];
   logo?: string;
 };
 
 export const certifications: readonly Certification[] = [
+  {
+    id: 'a2a-agent2agent-protocol',
+    name: 'A2A: The Agent2Agent Protocol',
+    issuer: 'DeepLearning.AI',
+    date: 'Nov 2026',
+    credentialUrl: 'https://www.deeplearning.ai/accomplishments/02f269b7-3a41-49ef-b969-a8c30810e648',
+    group: 'ai',
+    current: true,
+    blurb:
+      'How agents built with different frameworks discover each other and talk, using the Agent2Agent protocol. Built with Google Cloud and IBM Research. A2A is how agents collaborate; MCP is how an agent reaches tools and data.',
+  },
   {
     id: 'dspy',
     name: 'DSPy: Build and Optimize Agentic Apps',
@@ -51,6 +75,8 @@ export const certifications: readonly Certification[] = [
     credentialUrl: 'https://www.deeplearning.ai/accomplishments/f4aa3b02-1cdd-4066-a94d-10ed3ab703ab',
     group: 'ai',
     current: true,
+    blurb:
+      'A short course on DSPy: write a language-model program as small modules, then tune it instead of hand-editing prompts.',
   },
   {
     id: 'post-training-llms',
@@ -60,6 +86,8 @@ export const certifications: readonly Certification[] = [
     credentialUrl: 'https://www.deeplearning.ai/accomplishments/0ff17c48-ff60-4a8f-a0a3-aa610251b5dc',
     group: 'ai',
     current: true,
+    blurb:
+      'How a pretrained language model is adapted afterward, with supervised fine-tuning, preference tuning, and reinforcement learning.',
   },
   {
     id: 'data-agents',
@@ -69,6 +97,8 @@ export const certifications: readonly Certification[] = [
     credentialUrl: 'https://www.deeplearning.ai/accomplishments/e21e6fa7-a05d-4319-ab9b-e441494fc81b',
     group: 'ai',
     current: true,
+    blurb:
+      'How to build an agent that answers from data, and how to check that the answer stays grounded in what it retrieved.',
   },
   {
     id: 'agentic-ai',
@@ -78,6 +108,7 @@ export const certifications: readonly Certification[] = [
     credentialUrl: 'https://www.deeplearning.ai/certificates/23ee1276-c1ea-41f3-84cf-424ec09031c5',
     group: 'ai',
     current: true,
+    blurb: 'How to build a system that plans, uses tools, and checks its own work across more than one step.',
   },
   {
     id: 'deep-learning-specialization',
@@ -87,6 +118,8 @@ export const certifications: readonly Certification[] = [
     credentialUrl: 'https://www.deeplearning.ai/certificates/6fe275db-f74a-4f06-a856-a54ac5fc3aec',
     group: 'ai',
     current: true,
+    blurb:
+      'The specialization certificate for neural networks: how they learn, how to tune them, how to structure a project, and how convolutional networks read images.',
   },
   {
     id: 'convolutional-neural-networks',
@@ -96,6 +129,7 @@ export const certifications: readonly Certification[] = [
     credentialUrl: 'https://www.deeplearning.ai/certificates/bc4f03ff-1c0e-48a7-8074-e707e3f1bd20',
     group: 'ai',
     parentId: 'deep-learning-specialization',
+    blurb: 'How a network learns from images. Convolution is the tool it uses to pick up visual patterns.',
   },
   {
     id: 'structuring-ml-projects',
@@ -105,6 +139,7 @@ export const certifications: readonly Certification[] = [
     credentialUrl: 'https://www.deeplearning.ai/certificates/c4a08be6-02b2-476d-91a1-6c93edc7c190',
     group: 'ai',
     parentId: 'deep-learning-specialization',
+    blurb: 'How to look at a machine-learning project, see what is holding it back, and choose the next experiment.',
   },
   {
     id: 'improving-deep-neural-networks',
@@ -114,6 +149,8 @@ export const certifications: readonly Certification[] = [
     credentialUrl: 'https://www.deeplearning.ai/certificates/13a17bc2-eeee-44c5-a1ad-3b7c09d42cb8',
     group: 'ai',
     parentId: 'deep-learning-specialization',
+    blurb:
+      'How to train a network more reliably: initialization, regularization, and the choices that change optimization.',
   },
   {
     id: 'neural-networks-deep-learning',
@@ -123,6 +160,7 @@ export const certifications: readonly Certification[] = [
     credentialUrl: 'https://www.deeplearning.ai/certificates/e55b3575-c00e-4e9e-85c8-b5c09a30f443',
     group: 'ai',
     parentId: 'deep-learning-specialization',
+    blurb: 'What a neural network is, and how a forward pass and a backward pass fit together.',
   },
   {
     id: 'gcp-professional-data-engineer',
