@@ -1,0 +1,238 @@
+---
+title: "How agents talk to agents: A2A and MCP"
+date: 2026-11-02
+tags:
+  - ai
+  - data
+source: "A2A Protocol specification 1.0 and the Model Context Protocol specification, plus the Python packages listed below. Checked 2 Nov 2026."
+summary: "Why two agents built in different libraries still need a shared envelope, how MCP and A2A sit on different layers, and a small clinic finder that does both. The browser toy is a simulation."
+certification: a2a-agent2agent-protocol
+cover: "/covers/agents-talk.svg"
+---
+
+import FollowPacket from '../../components/demos/FollowPacket.tsx';
+import { CardSketch, LayerStack, TaskLife } from '../../components/notes/A2aFigures.tsx';
+
+I keep hitting the same wall. I can write one agent that answers one kind of question, and another agent that answers a different kind, and they still cannot hand work to each other when they were built in different libraries. One of them thinks in LangGraph messages. The other thinks in whatever events its own framework uses. I want the prompts, the tools, and the memory to stay private. I also want a shared way to say "please do this" and "here is the result."
+
+That shared way is a protocol, not another framework. Two of them cover two different gaps, and they stack. This note is the version I want to be able to re-read in six months. The clinic finder at the bottom is a toy I can run. The widget is a simulation of the same path, drawn so the packets are visible.
+
+## The problem
+
+An agent is a program that decides, often by calling a model, whether to answer or to use a tool, then loops. The useful ones are narrow. A plan reader should not also be the thing that searches a clinic directory. A clinic directory should not also be the thing that summarizes a paper.
+
+If both agents live in one process and one library, I can call them as functions. That stops working as soon as the second agent is written by someone else, in another language, on another machine. I should not have to import their code, see their prompt, or share their memory. I need a description of what they can do, and a message format we both already agreed on.
+
+Without that, every new pairing is a one-off adapter. The adapter knows too much, and it breaks when either side changes.
+
+## Two layers
+
+I draw the split like this.
+
+**MCP** (Model Context Protocol) is how an agent reaches a tool or a file. The agent is the client. The tool is the server. The server lists tools, the client calls one by name, and the result comes back as content the model can read. The tool does not know which agent called it, and it does not know about any other agent.
+
+**A2A** (Agent2Agent) is how an agent reaches another agent. The caller sees a card, then messages and tasks. It does not see the callee's prompt, its tool list, or its memory. The callee is opaque on purpose.
+
+<LayerStack />
+
+The clinic finder later in this note is both. On the outside it is an A2A server, so a plan reader written in some other stack can ask it for a clinic. On the inside it is an MCP client, so the directory is a separate program. A caller of the agent never talks MCP. The directory never talks A2A.
+
+They are not rivals. Using only MCP, I can give one agent a pile of tools, including a tool that secretly calls another agent, but then the caller has to know that tool's schema. Using only A2A, two agents can delegate, but neither of them has a standard way to read a file or a directory. The stack I want is A2A between agents and MCP between an agent and its tools.
+
+## Agent Cards and discovery
+
+Before a client sends a question, it reads a JSON document the agent publishes at `/.well-known/agent-card.json`. I confirmed that path in the 1.0 specification and in `a2a-sdk` 1.3.0, which stores it as `AGENT_CARD_WELL_KNOWN_PATH`.
+
+The card is a business card, not a transcript. In 1.0 the required pieces I keep tripping over are:
+
+- `name`, `description`, and `version`
+- `supportedInterfaces`, an ordered list. The first entry is the one a client should try first. Each entry has a `url`, a `protocolBinding` (`JSONRPC`, `GRPC`, or `HTTP+JSON`), and a `protocolVersion`. The old single `url` field on the card is gone.
+- `capabilities`, including `streaming` and `pushNotifications`
+- `defaultInputModes` and `defaultOutputModes`, as media types such as `text/plain`
+- `skills`, each with an id, a name, a description, and optional tags and examples
+
+<CardSketch />
+
+The description is doing real work. A caller that has several cards and has to pick one will read that sentence. If I write "a helpful assistant," a router has nothing to match. If I write "finds a clinic by city and specialty," a question about a pediatrician has somewhere to land. The toy at the bottom lets me edit that sentence and watch a mock router change its mind. The score is a word overlap, not a model. The point is the same one a real router hits: the card text is the hint.
+
+## Messages, parts, tasks, artifacts
+
+A **message** is one turn. In 1.0 its role is `ROLE_USER` or `ROLE_AGENT`. The body is a list of **parts**. A part holds exactly one of `text`, `raw` (base64 bytes), `url`, or `data`. There is no `kind` field. I had to unlearn that. Older write-ups used a discriminator. The 1.0 spec, and a response I captured from the SDK, both put the text directly on the part: an object with a `text` field.
+
+A **task** is the unit of work. The server mints the task id and a `contextId` that groups later turns. The states I want in my head:
+
+- `TASK_STATE_SUBMITTED`, the server has accepted it
+- `TASK_STATE_WORKING`, someone is doing it
+- `TASK_STATE_INPUT_REQUIRED` and `TASK_STATE_AUTH_REQUIRED`, paused, not finished
+- `TASK_STATE_COMPLETED`, `TASK_STATE_FAILED`, `TASK_STATE_CANCELED`, `TASK_STATE_REJECTED`, finished
+
+<TaskLife />
+
+An **artifact** is the output, also made of parts. Status updates are how the agent says "still going" or "I need something from you." The thing I would file away is the artifact. In the clinic finder the artifact is named `clinic_answer` and its part is the sentence.
+
+A client may send a follow-up on the same task only while the task is not finished. A message aimed at a completed task is rejected. A new question is a new task. If I want the conversation to stay grouped, I send the same `contextId` and leave the task id off.
+
+## How the bytes move
+
+The binding I actually ran is JSON-RPC 2.0 over HTTP. The method names in 1.0 are PascalCase, matching the gRPC names. The one that starts work is `SendMessage`. The streaming one is `SendStreamingMessage`. The others I would remember: `GetTask`, `ListTasks`, `CancelTask`, `SubscribeToTask`, and the four push-notification methods (`CreateTaskPushNotificationConfig` and its get, list, and delete). `GetExtendedAgentCard` is how a client asks for a card that is only shown after auth.
+
+`SendMessage` blocks by default. The HTTP call stays open until the task is completed, failed, canceled, rejected, or paused for input or auth. Set `returnImmediately` to true on the request configuration if you want the task id back immediately and you will poll with `GetTask`.
+
+Streaming is Server-Sent Events. The response content type is `text/event-stream`. Each event is a JSON-RPC result. The body is one of a task, a `statusUpdate`, or an `artifactUpdate`. The stream I recorded from the SDK, with `A2A-Version: 1.0`, came out in this order: the task in `TASK_STATE_SUBMITTED`, a working update, the artifact, then `TASK_STATE_COMPLETED`. The spec says the stream starts with the task and closes when the task is terminal.
+
+Push notifications are for work that should not hold a connection. The client registers a webhook, and the agent later POSTs the same kind of event. I did not stand a webhook up. The card in the example says `pushNotifications: false`, and the server does not advertise a capability it does not implement.
+
+One sharp edge, because I hit it. If the HTTP request omits `A2A-Version`, `a2a-sdk` 1.3.0 treats the call as version 0.3 and refuses it with JSON-RPC code `-32009` (`VersionNotSupportedError`). The header for this spec is `A2A-Version: 1.0`. The official client sets that header for you. A hand-written `curl` has to set it too.
+
+## A clinic finder, small enough to run
+
+I wanted one path I could run without an API key, so the "model" is a short class that emits a tool call and then reads the tool's JSON. The tool is real. The directory is eight invented clinics, the same rows as the widget. The agent is LangGraph, built with LangChain's `create_agent`. The A2A shell is the official Python SDK.
+
+The full files are in `examples/a2a-mcp-doctor-finder`. They are not part of the site build. `python demo.py` installs nothing by itself. After `pip install -r requirements.txt` it prints the versions, asks for a pediatrician in Seattle, checks the memory pitfall below, and calls the agent over A2A.
+
+> **Versions I installed and ran, 2 Nov 2026, Python 3.12.3.** The packages say Python 3.10 or newer. I did not re-run them on 3.10 or 3.11.
+>
+> - A2A specification 1.0.0, the page labeled latest at a2a-protocol.org
+> - `a2a-sdk` 1.3.0 (PyPI, 27 Oct 2026), extra `http-server`
+> - `mcp` 2.3.0, the official MCP Python SDK. The server class is `MCPServer`. `FastMCP` is the old name and the import path is gone.
+> - `langchain` 1.4.8 with the `mcp` extra, and `langgraph` 1.2.19
+> - `fastmcp` 4.1.5 came in with that extra. LangChain's `MCPAdapter` uses it as the MCP client. The server in the example is still `mcp.MCPServer`.
+> - MCP tools in the widget follow the 2026-07-28 spec, including `resultType: "complete"`. I saw the adapter unwrap that into a text block. I did not print the raw stdio frame.
+>
+> `langchain.mcp` is marked beta and warns once on import. That warning is expected.
+>
+> I did not deploy LangSmith. Their Agent Server docs, as I read them the same day, describe an A2A endpoint at `/a2a/{assistant_id}` that speaks the 1.0 JSON-RPC binding. That is the path I would use if the agent already lived there. For a process on my own machine I used the SDK directly. `a2a.server.apps` is not in 1.3.0, so the old `A2AStarletteApplication` wrapper is gone. A LangGraph sample I looked at still imports it. I did not copy that sample.
+
+The directory is an MCP server. `MCPServer` turns the type hints and the docstring into the tool schema.
+
+```python
+from mcp.server import MCPServer
+
+mcp = MCPServer("clinic-directory")
+
+@mcp.tool(name="find_clinics")
+def find_clinics(city: str | None = None, state: str | None = None, specialty: str | None = None) -> str:
+    """Find fictional clinics. Provide a city, a state, or a specialty."""
+    return json.dumps(directory(city=city, state=state, specialty=specialty))
+
+if __name__ == "__main__":
+    mcp.run(transport="stdio")
+```
+
+LangChain's adapter launches that file and hands the tools to `create_agent`. A string path is rejected on purpose, so the path has to be a `Path`. The model below is the stand-in. A real model would be a model name in that same argument. `bind_tools` has to exist, because `create_agent` calls it.
+
+```python
+from pathlib import Path
+from langchain.agents import create_agent
+from langchain.mcp import MCPAdapter
+
+async with MCPAdapter(Path("mcp_server.py")) as adapter:
+    tools = await adapter.list_tools()
+    agent = create_agent(
+        ScriptedClinicModel(),
+        tools,
+        system_prompt="Answer only with clinics the find_clinics tool returns.",
+        name="ClinicFinder",
+    )
+```
+
+The A2A card uses `supported_interfaces`, not a top-level URL. Python fields are snake_case. The JSON on the wire is camelCase. `DefaultRequestHandler` is the v2 handler in this SDK, and it requires the card.
+
+```python
+from a2a.server.request_handlers import DefaultRequestHandler
+from a2a.server.routes import create_agent_card_routes, create_jsonrpc_routes
+from a2a.server.tasks import InMemoryTaskStore
+from a2a.types import AgentCapabilities, AgentCard, AgentInterface, AgentSkill
+from starlette.applications import Starlette
+
+card = AgentCard(
+    name="Clinic Finder",
+    description="Finds a fictional clinic by city and specialty.",
+    version="1.0.0",
+    supported_interfaces=[
+        AgentInterface(url="http://127.0.0.1:8765/", protocol_binding="JSONRPC", protocol_version="1.0")
+    ],
+    default_input_modes=["text/plain"],
+    default_output_modes=["text/plain"],
+    capabilities=AgentCapabilities(streaming=True, push_notifications=False),
+    skills=[AgentSkill(id="find_clinics", name="Find clinics", description="Look up a fictional clinic.", tags=["clinic"])],
+)
+handler = DefaultRequestHandler(
+    agent_executor=ClinicAgentExecutor(agent),
+    task_store=InMemoryTaskStore(),
+    agent_card=card,
+)
+app = Starlette(routes=[*create_agent_card_routes(card), *create_jsonrpc_routes(handler, rpc_url="/")])
+```
+
+The executor's job is the task lifecycle. The first event has to be the task itself. Then a working update, then the artifact, then completed. Mixing a bare message into that stream is rejected by the SDK.
+
+```python
+task = context.current_task or new_task_from_user_message(message)
+await event_queue.enqueue_event(task)
+updater = TaskUpdater(event_queue, task.id, task.context_id)
+await updater.start_work()
+# ... run the graph, then:
+await updater.add_artifact([new_text_part(text)], name="clinic_answer")
+await updater.complete()
+```
+
+The client fetches the card from the URL and sends one blocking message. With `streaming=False` I got a single task, already completed, and the sentence was on the artifact.
+
+```python
+from a2a.client import ClientConfig, create_client
+from a2a.helpers import new_text_message
+from a2a.types import Role, SendMessageRequest
+
+client = await create_client(base_url, client_config=ClientConfig(streaming=False))
+request = SendMessageRequest(
+    message=new_text_message("Is there a pediatrician in Seattle?", role=Role.ROLE_USER)
+)
+async for chunk in client.send_message(request):
+    if chunk.HasField("task"):
+        text = get_artifact_text(chunk.task.artifacts[0])
+```
+
+With `streaming=True` the same executor yields four chunks: submitted, working, the artifact, completed. I printed that order from a live server before I trusted it.
+
+If the agent is already deployed on LangSmith Agent Server, I would not write this shell. I would read the card the server publishes and send `SendMessage` to `/a2a/{assistant_id}`. I have not done that deployment, so I am not going to pretend I know how their tracing looks from the inside.
+
+## Follow the packet
+
+The widget is the same story, paused on each hop. Pick a question or type one. The strip is the client, the card, the A2A server, the agent, and the MCP tool. The panel is the JSON for the hop you are on. Streaming off shows one blocking `SendMessage` response at the end, and says so while the server is still holding the connection. Streaming on shows the SSE events instead.
+
+It is a simulation. The directory is the eight fictional clinics. A few regular expressions pick out a city and a specialty. If you ask for a cardiologist in Tucson, the tool returns an empty list and the sentence refuses to invent one. If you type something with no city and no specialty, the task stops at `TASK_STATE_INPUT_REQUIRED` and the tool is never called.
+
+The same toy sits on its own page at [/demos/follow-the-packet](/demos/follow-the-packet).
+
+<h2 id="demo">Interactive demo</h2>
+
+<FollowPacket client:load />
+
+## Where I would get this wrong
+
+**The card has to match the behavior.** I set `streaming` true on the example because `SendStreamingMessage` works, and `pushNotifications` false because I never built the webhook. Declaring the opposite trains every client to call a method the server will reject, or to avoid a method the server could have honored. `cancel` in the example raises `UnsupportedOperationError`. I did not send `CancelTask` in the demo, so I am not going to claim a particular error code for that call.
+
+**The description is the routing hint.** In the widget, "a helpful assistant" makes the mock orchestrator skip the clinic finder even for a pediatrician in Seattle. Rewriting the clinic card so that it talks about a health plan makes a plan question land on the clinic agent, which cannot answer it. The text over-promised. A real orchestrator that reads the card has the same failure mode.
+
+**Ground the sentence in the tool.** The script builds the reply by reading the JSON the tool returned. An empty list is an answer. It is not a hole to fill with a plausible clinician. The system prompt on the LangGraph agent says the same thing, for the day I swap the script for a real model. The prompt is not a guarantee. The tool result is the part I can check.
+
+**A thread id is not memory.** On langgraph 1.2.19 I passed the same `thread_id` twice. Without a checkpointer, the second turn could not see the first question. With `MemorySaver`, it could. The call does not fail when the checkpointer is missing. It just forgets. The A2A executor in the example does not pass a checkpointer, so each task is one turn even if the caller reuses a `contextId`. Remembering across tasks would mean compiling the graph with a checkpointer and keying it off that context id. I have not done that part.
+
+## What I want to remember
+
+- MCP faces the tools. A2A faces the other agent. One process can be a client of the first and a server of the second.
+- The card at `/.well-known/agent-card.json` is the contract. `supportedInterfaces` says where and how to connect. The description is what a router reads.
+- A task moves through named states. The reply I keep is an artifact. Status events are the progress.
+- `SendMessage` waits. `SendStreamingMessage` is a stream of SSE events. Push is a webhook, and only if the card says so. Send `A2A-Version: 1.0`.
+- Capabilities, card text, and tool results have to agree with what the agent actually does. A thread id does not remember anything unless a checkpointer is saving the state.
+
+## Sources
+
+These are the pages and the packages I checked while writing this, on 2 Nov 2026.
+
+- A2A specification 1.0.0, current latest: [a2a-protocol.org/latest/specification](https://a2a-protocol.org/latest/specification/). The v1.0 changes, including the method renames and `supportedInterfaces`: [what's new in v1.0](https://a2a-protocol.org/latest/whats-new-v1/).
+- `a2a-sdk` 1.3.0 on PyPI, and the types, routes, and client I imported from that install. Release notes: [a2a-python changelog](https://github.com/a2aproject/a2a-python/blob/main/CHANGELOG.md).
+- MCP specification, revision 2026-07-28, tools and `tools/call`: [modelcontextprotocol.io](https://modelcontextprotocol.io/specification/2026-07-28/server/tools). Python SDK 2.3.0, `MCPServer`: [py.sdk.modelcontextprotocol.io](https://py.sdk.modelcontextprotocol.io/whats-new/).
+- LangChain `MCPAdapter` and the note that `langchain-mcp-adapters` has moved into `langchain.mcp`: [LangChain MCP docs](https://docs.langchain.com/oss/python/langchain/mcp) and the [migration note](https://docs.langchain.com/oss/python/migrate/langchain-mcp-adapters).
+- LangSmith Agent Server's A2A endpoint, read and not deployed: [docs.langchain.com/langsmith/server-a2a](https://docs.langchain.com/langsmith/server-a2a).

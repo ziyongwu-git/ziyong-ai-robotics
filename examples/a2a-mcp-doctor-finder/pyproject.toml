@@ -1,0 +1,16 @@
+[project]
+name = "a2a-mcp-doctor-finder"
+version = "0.1.0"
+description = "A fictional clinic finder: an MCP tool, a scripted LangGraph agent, and an A2A 1.0 server. No API key."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "a2a-sdk[http-server]==1.3.0",
+  "mcp==2.3.0",
+  "langchain[mcp]==1.4.8",
+  "langgraph==1.2.19",
+  "fastmcp==4.1.5",
+]
+
+[tool.uv]
+package = false
