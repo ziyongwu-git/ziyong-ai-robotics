@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import {
   DEFAULT_DESCRIPTION,
   PLAN_DESCRIPTION,
@@ -49,8 +49,11 @@ export default function FollowPacket() {
   const posRef = useRef(1);
   const [pos, setPos] = useState(1);
   const regionRef = useRef<HTMLDivElement>(null);
+  const hopCount = useRef(0);
+  const armed = useRef(false);
 
   const hops = buildHops(question, description, streaming);
+  hopCount.current = hops.length;
   const hop: Hop = hops[Math.min(index, hops.length - 1)];
   const route = routeQuestion(question, description);
   const finished = index >= hops.length - 1;
@@ -99,29 +102,55 @@ export default function FollowPacket() {
     setPlaying(false);
   }
 
-  function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    const target = event.target as HTMLElement;
-    if (target.closest('input, textarea')) return;
-    if (event.key === 'ArrowRight') {
+  useEffect(() => {
+    const region = regionRef.current;
+    if (!region) return;
+
+    const arm = (event: PointerEvent) => {
+      const node = event.target;
+      armed.current = node instanceof Node && region.contains(node);
+    };
+
+    const onKey = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+      const active = document.activeElement;
+      if (
+        active instanceof HTMLElement &&
+        active.closest('input, textarea, select, [contenteditable="true"]')
+      ) {
+        return;
+      }
+      const inside = active instanceof Node && region.contains(active);
+      if (!inside && !armed.current) return;
       event.preventDefault();
       setPlaying(false);
-      setIndex((current) => Math.min(current + 1, hops.length - 1));
-    } else if (event.key === 'ArrowLeft') {
-      event.preventDefault();
-      setPlaying(false);
-      setIndex((current) => Math.max(current - 1, 0));
-    }
-  }
+      setIndex((current) =>
+        event.key === 'ArrowRight'
+          ? Math.min(current + 1, hopCount.current - 1)
+          : Math.max(current - 1, 0),
+      );
+    };
+
+    document.addEventListener('pointerdown', arm, true);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', arm, true);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, []);
 
   const packetX = 56 + pos * 132;
 
   return (
     <div
       ref={regionRef}
-      className="not-prose rounded-2xl border border-line bg-card p-4 text-ink sm:p-6"
+      tabIndex={0}
+      role="region"
+      aria-labelledby={titleId}
+      aria-keyshortcuts="ArrowLeft ArrowRight"
+      className="not-prose rounded-2xl border border-line bg-card p-4 text-ink outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent sm:p-6"
       data-hop={hop.id}
       data-streaming={streaming ? 'on' : 'off'}
-      onKeyDown={onKeyDown}
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 id={titleId} className="font-serif text-2xl">
@@ -130,8 +159,8 @@ export default function FollowPacket() {
         <p className="rounded-full bg-accent-soft px-3 py-1 text-sm">Simulation</p>
       </div>
       <p className="mt-2 text-sm leading-6 text-muted">
-        A scripted directory of fictional clinics. No language model and no network. Arrow keys step through the hops
-        when you are not typing in a field.
+        A scripted directory of fictional clinics. No language model and no network. Click the demo, then use the
+        left and right arrow keys to change hops. Typing in a field keeps the arrows for the text.
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Example questions">
