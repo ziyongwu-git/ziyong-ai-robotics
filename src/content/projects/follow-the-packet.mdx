@@ -4,15 +4,22 @@ summary: "A browser toy that walks one question through an Agent Card, an A2A ta
 tags:
   - ai
   - data
+certification: a2a-agent2agent-protocol
 status: shipped
 featured: true
 date: 2026-11-02
 cover: "/covers/follow-the-packet.svg"
 demo: "/demos/follow-the-packet#demo"
-certification: a2a-agent2agent-protocol
 ---
 
 import FollowPacket from '../../components/demos/FollowPacket.tsx';
+import Writeup from '../../components/Writeup.astro';
+
+<h2 id="demo">Interactive demo</h2>
+
+<FollowPacket client:load />
+
+<Writeup>
 
 An agent that wants help from another agent has to send something on a wire. This page is that wire, slowed down. You pick a question, and a packet moves from a client to an Agent Card, into an A2A task, through a tool call, and back as an artifact.
 
@@ -34,10 +41,6 @@ What it drops:
 - Discovery beyond one card. The well-known path is written out. Nothing is fetched.
 - Push notifications. The card in the panel says they are off.
 
-<h2 id="demo">Interactive demo</h2>
-
-<FollowPacket client:load />
-
 Try the pediatrician in Seattle, then the cardiologist in Tucson, then "What does my plan cover?" The third one should land on the plan reader. Then replace the clinic finder's description with "A helpful assistant." and ask about the pediatrician again.
 
 ## How I built it
@@ -47,3 +50,5 @@ The page is this file. The widget is `src/components/demos/FollowPacket.tsx`, lo
 Colors use the site's CSS variables, so the light and dark themes both apply. If the browser asks for reduced motion, Play stays off and the packet jumps to the next hop instead of sliding.
 
 The runnable agent, with a real MCP server and a real A2A SDK, is `examples/a2a-mcp-doctor-finder`. It uses the same eight clinics. It is not part of `npm run build`.
+
+</Writeup>
