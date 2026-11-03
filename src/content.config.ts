@@ -2,6 +2,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { projectStatuses, tags } from './config';
+import { certificationField } from './lib/certification-field';
 
 /**
  * Content collections.
@@ -59,6 +60,12 @@ const learning = defineCollection({
      */
     source: z.string(),
     summary: z.string(),
+    /**
+     * Required. A DeepLearning.AI id from src/data/certifications.ts,
+     * or a list of them. An A2A and MCP note uses a2a-agent2agent-protocol.
+     * The build fails if this is missing or is not one of those ids.
+     */
+    certification: certificationField('Note'),
     /** Optional picture. Leave it out for a generated pattern. See `optionalCover`. */
     cover: optionalCover,
   }),
@@ -74,11 +81,16 @@ const projects = defineCollection({
     summary: z.string(),
     tags: z.array(z.enum(tags)).min(1),
     status: z.enum(projectStatuses),
-    /** Optional. Featured projects are listed on the home page. */
+    /** Optional. Featured demos are listed on the home page. */
     featured: z.boolean().optional(),
     /** Optional. When set, newer dates are listed first. */
     date: z.coerce.date().optional(),
-    /** Optional demo URL or a path such as /projects/my-tool#demo. */
+    /**
+     * Required. A DeepLearning.AI id from src/data/certifications.ts,
+     * or a list of them. The build fails if this is missing or unknown.
+     */
+    certification: certificationField('Demo'),
+    /** Optional demo URL or a path such as /demos/my-tool#demo. */
     demo: optionalLink,
     /** Optional repository URL. */
     repo: optionalLink,

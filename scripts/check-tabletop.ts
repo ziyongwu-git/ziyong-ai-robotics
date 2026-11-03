@@ -3,7 +3,7 @@
  *
  *   node --experimental-strip-types scripts/check-tabletop.ts
  *
- * The widget on /projects/see-think-move is a drawing of this same file.
+ * The widget on /demos/see-think-move is a drawing of this same file.
  * If a sentence here fails, the demo will fail the same way.
  */
 import {

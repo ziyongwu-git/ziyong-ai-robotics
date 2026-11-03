@@ -198,7 +198,7 @@ export const DOCUMENTS: readonly Document[] = [
   {
     id: 'doc-page',
     title: 'How this page answers',
-    href: '/projects/ask-the-notebook#how-i-built-it',
+    href: '/demos/ask-the-notebook#how-i-built-it',
     source: 'This page',
     kind: 'primer',
     tags: ['ai', 'data'],
@@ -220,22 +220,22 @@ export const DOCUMENTS: readonly Document[] = [
     source: 'Learning log · sample note',
     kind: 'notes',
     tags: ['robotics'],
-    text: 'A two-link arm lives on a flat plane and can reach a ring of points. Inside the inner ring it cannot fold tightly enough. Outside the outer ring it cannot stretch far enough. Forward kinematics turns joint angles into a hand position. Inverse kinematics names a point and solves for the angles. The learning note on planar robot arms is a sample, and it points at the two-link arm project, where the same idea is a slider instead of a paragraph.',
+    text: 'A two-link arm lives on a flat plane and can reach a ring of points. Inside the inner ring it cannot fold tightly enough. Outside the outer ring it cannot stretch far enough. Forward kinematics turns joint angles into a hand position. Inverse kinematics names a point and solves for the angles. The learning note on planar robot arms is a sample, and it points at the two-link arm demo, where the same idea is a slider instead of a paragraph.',
   },
   {
-    id: 'doc-dataswarm',
-    title: 'Airflow-style orchestration',
-    href: '/about',
-    source: 'About · skills',
+    id: 'doc-graph',
+    title: 'The graph on this page',
+    href: '/certificates/data-agents',
+    source: 'Certificate · Building and Evaluating Data Agents',
     kind: 'notes',
-    tags: ['data'],
-    text: 'The About page lists Airflow-style orchestration (Meta Dataswarm) under cloud and platforms. That line is why this demo is a DAG of tasks and dependencies. This site is not a Dataswarm deployment, and it does not run the Ask Astro DAGs. The shared idea is the graph: a task waits for the tasks upstream of it, and a run leaves a log you can open.',
+    tags: ['data', 'ai'],
+    text: 'Ask the notebook is a small data agent you can redraw. Tasks form a directed graph. An edge means a task waits until the task upstream of it has finished. The score step quotes passages from the notes and the primer. It does not call a language model. The certificate this demo is built on is Building and Evaluating Data Agents, which is about agents that answer from data and about checking those answers.',
   },
   {
     id: 'doc-see',
     title: 'See, think, move',
-    href: '/projects/see-think-move',
-    source: 'Projects',
+    href: '/demos/see-think-move',
+    source: 'Demos',
     kind: 'projects',
     tags: ['ai', 'robotics'],
     text: 'See, think, move is a toy picture of a vision-language-action loop. A real model of that kind takes a camera image and a sentence and returns a short burst of motion. The widget on that page is not trained and makes no server call. It shows the blocks, a sentence of what to do next, and a path that starts noisy and is pulled toward a clean curve. The rules live next to the drawing so they can be re-run without a browser.',
@@ -243,11 +243,11 @@ export const DOCUMENTS: readonly Document[] = [
   {
     id: 'doc-arm-project',
     title: 'Two-link robot arm',
-    href: '/projects/sample-two-link-arm',
-    source: 'Projects · sample',
+    href: '/demos/sample-two-link-arm',
+    source: 'Demos · sample',
     kind: 'projects',
     tags: ['robotics', 'data'],
-    text: 'The sample project Two-link robot arm is the pattern for a project page on this site. The words are Markdown. The sliders are a React island loaded with client:load. The project status is sample, so the page shows a placeholder banner. The planar robot arms note points at the same demo. Moving a slider solves the joint angles for a point you pick.',
+    text: 'The sample demo Two-link robot arm is the pattern for a demo page on this site. The words are Markdown. The sliders are a React island loaded with client:load. The status is sample, so the page shows a placeholder banner. The planar robot arms note points at the same demo. Moving a slider solves the joint angles for a point you pick.',
   },
 ];
 
@@ -261,7 +261,7 @@ export const SUGGESTIONS: readonly string[] = [
 ];
 
 export const TASK_CATALOG: readonly { kind: TaskKind; taskId: string; title: string; blurb: string }[] = [
-  { kind: 'extract', taskId: 'extract_sources', title: 'Extract', blurb: 'Notes, projects, primer' },
+  { kind: 'extract', taskId: 'extract_sources', title: 'Extract', blurb: 'Notes, demos, primer' },
   { kind: 'chunk', taskId: 'split_chunks', title: 'Chunk', blurb: 'Size and overlap' },
   { kind: 'clean', taskId: 'clean_dedupe', title: 'Clean', blurb: 'Drop duplicates' },
   { kind: 'filter', taskId: 'filter_rows', title: 'Filter', blurb: 'Source or tag' },
@@ -568,7 +568,7 @@ export function validateGraph(graph: NotebookGraph): GraphIssue[] {
     if (!notes && !projects && !primer) {
       issues.push({
         level: 'error',
-        message: `${node.id} has every source turned off. Turn on notes, projects, or the primer.`,
+        message: `${node.id} has every source turned off. Turn on notes, demos, or the primer.`,
         nodeIds: [node.id],
         edgeIds: [],
       });

@@ -1,0 +1,119 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import LearningCard from '../../components/LearningCard.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { workBuiltOn } from '../../lib/content';
+import { certificationById, coursesUnder, learningCertificates } from '../../lib/certifications';
+
+export function getStaticPaths() {
+  return learningCertificates().map((cert) => ({
+    params: { id: cert.id },
+  }));
+}
+
+const { id } = Astro.params;
+if (!id) {
+  throw new Error('Missing certificate id.');
+}
+
+const cert = certificationById(id);
+if (!cert || cert.group !== 'ai') {
+  throw new Error(`No DeepLearning.AI certificate with id "${id}". Check src/data/certifications.ts.`);
+}
+if (!cert.blurb?.trim()) {
+  throw new Error(`"${cert.name}" needs a blurb in src/data/certifications.ts.`);
+}
+
+const parent = cert.parentId ? certificationById(cert.parentId) : undefined;
+const courses = coursesUnder(cert.id);
+const { demos, notes } = await workBuiltOn(cert.id);
+---
+
+<BaseLayout title={cert.name} description={cert.blurb}>
+  <p>
+    <a class="text-sm text-accent underline decoration-line underline-offset-4" href="/certificates">All certificates</a>
+  </p>
+  <p class="mt-6 font-mono text-xs tracking-[0.18em] text-accent uppercase">{cert.issuer}</p>
+  <h1 class="mt-3 font-serif text-4xl leading-tight sm:text-5xl">{cert.name}</h1>
+  <p class="mt-3 text-sm text-muted">{cert.date}</p>
+  <p class="mt-4 max-w-2xl text-lg leading-8 text-muted">{cert.blurb}</p>
+  <div class="mt-5 flex flex-wrap gap-3">
+    {
+      cert.credentialUrl && (
+        <a class="btn btn-solid" href={cert.credentialUrl} target="_blank" rel="noopener noreferrer">
+          Open the credential
+          <span class="sr-only"> (opens in a new tab)</span>
+        </a>
+      )
+    }
+    {
+      parent && (
+        <a class="btn btn-line" href={`/certificates/${parent.id}`}>
+          Part of {parent.name}
+        </a>
+      )
+    }
+  </div>
+
+  {
+    courses.length > 0 && (
+      <section class="mt-10" aria-labelledby="course-list">
+        <h2 id="course-list" class="font-serif text-3xl">
+          Courses
+        </h2>
+        <ul class="mt-4 divide-y divide-line border-y border-line">
+          {courses.map((course) => (
+            <li class="py-3">
+              <a class="font-medium text-ink underline decoration-line underline-offset-4 hover:text-accent" href={`/certificates/${course.id}`}>
+                {course.name}
+              </a>
+              <p class="mt-1 text-sm text-muted">{course.date}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <section class="mt-12" aria-labelledby="built-demos">
+    <h2 id="built-demos" class="font-serif text-3xl">
+      Demos
+    </h2>
+    {
+      demos.length === 0 ? (
+        <p class="mt-4 text-muted">
+          No demo uses <span class="font-mono text-sm">{cert.id}</span> yet. Add{' '}
+          <span class="font-mono text-sm">certification: {cert.id}</span> to a file in src/content/projects/ and it will
+          show up here.
+        </p>
+      ) : (
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          {demos.map((project) => (
+            <ProjectCard project={project} />
+          ))}
+        </div>
+      )
+    }
+  </section>
+
+  <section class="mt-12" aria-labelledby="built-notes">
+    <h2 id="built-notes" class="font-serif text-3xl">
+      Notes
+    </h2>
+    {
+      notes.length === 0 ? (
+        <p class="mt-4 text-muted">
+          No note uses <span class="font-mono text-sm">{cert.id}</span> yet. Add{' '}
+          <span class="font-mono text-sm">certification: {cert.id}</span> to a file in src/content/learning/ and it will
+          show up here.
+        </p>
+      ) : (
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          {notes.map((post) => (
+            <LearningCard post={post} />
+          ))}
+        </div>
+      )
+    }
+  </section>
+</BaseLayout>

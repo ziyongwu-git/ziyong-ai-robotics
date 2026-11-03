@@ -4,18 +4,27 @@ summary: "A toy Ask Astro. Run a small Airflow-style DAG, then ask a question an
 tags:
   - ai
   - data
+# A retrieve-then-answer pipeline that shows its passages. That is the shape of a data agent.
+certification: data-agents
 status: shipped
 featured: true
 date: 2026-11-02
 cover: "/covers/ask-the-notebook.svg"
-demo: "/projects/ask-the-notebook#demo"
+demo: "/demos/ask-the-notebook#demo"
 ---
 
 import AskNotebook from '../../components/demos/AskNotebook.tsx';
+import Writeup from '../../components/Writeup.astro';
+
+<h2 id="demo">Interactive demo</h2>
+
+<AskNotebook client:load />
+
+<Writeup>
 
 Ask Astro is Astronomer's open-source assistant for questions about Apache Airflow. The part I recognize is not the chat box. It is the pipeline under the box. Airflow DAGs fetch documents, cut them into chunks, embed the chunks, and load a vector database. The assistant is supposed to answer from that index, with the sources attached.
 
-That is a data pipeline pointed at a language model. Pipelines are the work I already know how to read.
+That is a data pipeline pointed at a language model. The pipeline is the part this page draws.
 
 ## RAG, in plain language
 
@@ -41,7 +50,7 @@ There is a newer, different pattern. The provider [`apache-airflow-providers-com
 
 ## What this page actually runs
 
-The widget below is not Ask Astro. Nothing is embedded. No model is called. There is no network request and no API key.
+The widget above is not Ask Astro. Nothing is embedded. No model is called. There is no network request and no API key.
 
 What it keeps:
 
@@ -55,17 +64,13 @@ What it drops:
 - Query rewriting. Ask Astro asks a model for two extra phrasings. This page searches the words you typed.
 - Any claim that the ranking is semantic. "Arm" will not find "manipulator." If the words are not in a chunk, the page says it has nothing to quote.
 
-<h2 id="demo">Interactive demo</h2>
-
-<AskNotebook client:load />
-
 Reset restores three extracts in parallel. Two scorers puts BM25 next to a keyword count. Notes only drops the primer.
 
 Drag a node, then drag from its right handle to the next task’s left handle. Tidy straightens the graph. On a phone the same graph is a list: Connect to, and Add after. Those menus are also in the panel, so a keyboard can build the DAG. Open a node after a run. Ask where the vectors go, then run Two scorers and ask again.
 
 <h2 id="how-i-built-it">How I built it</h2>
 
-The page is this MDX file. The widget is a React island, `src/components/demos/AskNotebook.tsx`, loaded with `client:load`, the same pattern as the tabletop and the two-link arm. Astro sends that component's JavaScript to the browser and leaves these paragraphs as ordinary HTML.
+The page is this MDX file. The widget is a React island, `src/components/demos/AskNotebook.tsx`, loaded with `client:load`, the same pattern as the tabletop and the two-link arm. It sits above this explanation. Astro sends that component's JavaScript to the browser and leaves these paragraphs as ordinary HTML.
 
 The documents, the chunk windows, the dedupe, both rankers, and the DAG check live in `src/components/demos/notebook.ts`. The canvas is `src/components/demos/AskNotebook.tsx`. Tidy uses dagre, in `dagLayout.ts`, to place nodes left to right.
 
@@ -77,7 +82,7 @@ There is no API key. The browser does the work. The page colors follow the light
 
 The Python file `airflow/dags/build_notebook_index.py` is the same idea as a real DAG: read the markdown, split it, count terms, write JSON. The site build does not call it, and Vercel does not deploy that folder. Run it with the standard library if you want to see the index on disk. If Airflow is installed, importing the file registers a DAG named `build_notebook_index`. The score task still does not call a model. A comment marks the line where an embedding call would go.
 
-The courses on the [certifications](/learning/certifications) page, Agentic AI and Building and Evaluating Data Agents among them, are why retrieval is on my mind. The About page already lists Airflow-style orchestration (Meta Dataswarm). This demo is those two lines on one screen, at a size I can read.
+This demo sits on [Building and Evaluating Data Agents](/certificates/data-agents): a pipeline that retrieves passages, then answers from those passages, and shows its work.
 
 ## Sources
 
@@ -90,3 +95,5 @@ These are the pages I read while deciding what to draw. The passages in the demo
 - Andreessen Horowitz, "Emerging Architectures for LLM Applications." [Essay](https://a16z.com/emerging-architectures-for-llm-applications/). The Ask Astro README calls the project a reference implementation of this architecture.
 - Apache Airflow, "DAGs." [Docs](https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dags.html).
 - Apache Airflow, Common AI provider. [Overview](https://airflow.apache.org/docs/apache-airflow-providers-common-ai/stable/index.html). [LLMOperator and the task.llm decorator](https://airflow.apache.org/docs/apache-airflow-providers-common-ai/stable/operators/llm.html).
+
+</Writeup>

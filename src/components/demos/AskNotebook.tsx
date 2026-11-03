@@ -745,7 +745,7 @@ function SettingsForm({ task, onChange }: { task: TaskNode; onChange: (task: Tas
               checked={task.settings[kind]}
               onChange={(event) => onChange({ ...task, settings: { ...task.settings, [kind]: event.target.checked } })}
             />
-            {kind === 'notes' ? 'Site notes' : kind === 'projects' ? 'Projects' : 'Ask Astro primer'}
+            {kind === 'notes' ? 'Site notes' : kind === 'projects' ? 'Demos' : 'Ask Astro primer'}
           </label>
         ))}
         {task.kind === 'filter' && (

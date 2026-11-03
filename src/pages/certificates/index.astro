@@ -1,0 +1,62 @@
+---
+import Band from '../../components/Band.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CertCard from '../../components/CertCard.astro';
+import { workCounts } from '../../lib/content';
+import { currentlyLearning, learningCertificates } from '../../lib/certifications';
+
+const top = currentlyLearning();
+const courses = learningCertificates().filter((item) => item.parentId);
+const withCounts = async (items: typeof top) =>
+  Promise.all(items.map(async (cert) => ({ cert, ...(await workCounts(cert.id)) })));
+const topCards = await withCounts(top);
+const courseCards = await withCounts(courses);
+---
+
+<BaseLayout
+  title="Certificates"
+  description="DeepLearning.AI certificates, and the demos and notes built on each one."
+>
+  <header class="grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+    <div class="max-w-2xl">
+      <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">DeepLearning.AI</p>
+      <h1 class="mt-3 font-serif text-4xl sm:text-5xl">Certificates</h1>
+      <p class="mt-4 text-lg leading-8 text-muted">
+        Each certificate has a page. The page lists the demos first, then the notes that name it. A linked title on
+        that page opens the credential.
+      </p>
+    </div>
+    <Band kind="certifications" />
+  </header>
+
+  <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {topCards.map(({ cert, demos, notes }) => <CertCard cert={cert} demos={demos} notes={notes} />)}
+  </div>
+
+  {
+    courseCards.length > 0 && (
+      <section class="mt-14" aria-labelledby="courses-heading">
+        <h2 id="courses-heading" class="font-serif text-3xl">
+          Courses in the specialization
+        </h2>
+        <p class="mt-2 max-w-2xl text-sm leading-6 text-muted">
+          These four sit under{' '}
+          <a class="text-accent underline decoration-line underline-offset-4" href="/certificates/deep-learning-specialization">
+            Deep Learning Specialization
+          </a>
+          . A demo can name the course, the specialization, or both.
+        </p>
+        <div class="mt-6 grid gap-4 sm:grid-cols-2">
+          {courseCards.map(({ cert, demos, notes }) => (
+            <CertCard cert={cert} demos={demos} notes={notes} nested />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <p class="mt-10 text-sm text-muted">
+    Older credentials, including Google Cloud, are on the{' '}
+    <a class="text-accent underline decoration-line underline-offset-4" href="/about#certifications">About page</a>.
+  </p>
+</BaseLayout>

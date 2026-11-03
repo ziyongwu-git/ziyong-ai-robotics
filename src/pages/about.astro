@@ -1,10 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { site } from '../config';
-import { certificationById } from '../lib/certifications';
-import { earlyCareer, education, experience, highlights, locationLabel, skillGroups } from '../profile';
+import CertRow from '../components/CertRow.astro';
+import { certificationsInGroup } from '../lib/certifications';
+import { earlyCareer, education, experience, highlights, skillGroups } from '../profile';
 
-const gcp = certificationById('gcp-professional-data-engineer');
+const earlier = certificationsInGroup('earlier');
 ---
 
 <BaseLayout
@@ -102,37 +103,21 @@ const gcp = certificationById('gcp-professional-data-engineer');
   <section class="mt-12" id="certifications" aria-labelledby="certifications-heading">
     <h2 id="certifications-heading" class="font-serif text-3xl">Certifications &amp; courses</h2>
     <p class="mt-4 text-sm leading-6 text-muted">
-      The full list lives with the learning log, including the 2026 DeepLearning.AI certificates. One credential from
-      the data work:
+      Credentials from the data, cloud, and earlier study. A linked title opens the credential. The 2026
+      DeepLearning.AI certificates, and the demos and notes built on them, are on their own page.
     </p>
-    {
-      gcp && (
-        <p class="mt-4">
-          {
-            gcp.credentialUrl ? (
-              <a
-                class="font-serif text-xl text-ink underline decoration-line underline-offset-4 hover:text-accent"
-                href={gcp.credentialUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {gcp.name}
-                <span class="sr-only"> (credential, opens in a new tab)</span>
-              </a>
-            ) : (
-              <span class="font-serif text-xl">{gcp.name}</span>
-            )
-          }
-          <span class="text-muted">
-            {' '}
-            · {gcp.issuer} · {gcp.date}
-          </span>
-        </p>
-      )
-    }
+    <ol class="mt-4 divide-y divide-line border-y border-line">
+      {
+        earlier.map((item) => (
+          <li class="py-4">
+            <CertRow item={item} />
+          </li>
+        ))
+      }
+    </ol>
     <p class="mt-4">
-      <a class="text-sm text-accent underline decoration-line underline-offset-4" href="/learning/certifications">
-        All certifications and courses
+      <a class="text-sm text-accent underline decoration-line underline-offset-4" href="/certificates">
+        DeepLearning.AI certificates
       </a>
     </p>
   </section>
@@ -153,6 +138,20 @@ const gcp = certificationById('gcp-professional-data-engineer');
       }
     </ul>
   </section>
+
+  <script
+    is:inline
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Person',
+      name: site.name,
+      jobTitle: 'Staff Data Engineer',
+      homeLocation: { '@type': 'Place', name: 'Seattle area' },
+      description:
+        'Staff data engineer in the Seattle area. Meta from 2019 to July 2026. Munich Re from 2016 to 2019.',
+    }).replace(/</g, '\\u003c')}
+  />
 
   <section class="mt-12" id="contact" aria-labelledby="contact-heading">
     <h2 id="contact-heading" class="font-serif text-3xl">Contact</h2>

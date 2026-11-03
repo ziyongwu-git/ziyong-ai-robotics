@@ -18,18 +18,19 @@ export type ProjectStatus = (typeof projectStatuses)[number];
 /** Header links. The path has to match a file in src/pages. */
 export const nav = [
   { href: '/', label: 'Home' },
-  { href: '/learning', label: 'Learning log' },
-  { href: '/projects', label: 'Projects' },
+  { href: '/demos', label: 'Demos' },
+  { href: '/learning', label: 'Notes' },
+  { href: '/certificates', label: 'Certificates' },
   { href: '/about', label: 'About' },
 ] as const;
 
 export const site = {
   name: 'Ziyong Wu',
   /** One line under the name, also used in the browser tab on the home page. */
-  role: 'Data engineer moving into AI and robotics',
-  /** Default sentence for search results and link previews. */
+  role: 'Notes and demos on AI, data, and robotics',
+  /** Default sentence for search results and link previews. Career details stay on About. */
   description:
-    'Public notebook of Ziyong Wu: course notes and small experiments on AI, robotics, and data. Data engineer in the Seattle area, previously at Meta (2019–July 2026) and Munich Re.',
+    'Public notebook of Ziyong Wu: interactive demos, course notes, and DeepLearning.AI certificates on AI, data, and robotics.',
   /**
    * Public URL of the deployed site, with no trailing slash.
    * After Vercel gives you a domain, replace this and deploy again.

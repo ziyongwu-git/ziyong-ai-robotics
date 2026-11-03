@@ -18,7 +18,13 @@ import { site } from './src/config';
 export default defineConfig({
   site: site.url,
   output: 'static',
-  integrations: [mdx(), react(), sitemap()],
+  integrations: [
+    mdx(),
+    react(),
+    sitemap({
+      filter: (page) => !page.includes('/projects') && !page.includes('/learning/certifications'),
+    }),
+  ],
   vite: {
     plugins: [tailwindcss()],
   },

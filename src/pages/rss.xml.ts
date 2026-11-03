@@ -13,7 +13,7 @@ export async function GET(context: APIContext) {
   const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
   return rss({
-    title: `${site.name} — Learning log`,
+    title: `${site.name} — Notes`,
     description: 'Notes on AI, robotics, and data.',
     site: context.site,
     customData: '<language>en-us</language>',

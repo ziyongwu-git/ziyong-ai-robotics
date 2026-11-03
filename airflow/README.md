@@ -2,7 +2,7 @@
 
 This folder is a picture of how the "Ask the notebook" index could be built with a real DAG. It is not part of the website.
 
-`npm run build` does not run it. Vercel does not deploy it. The page at `/projects/ask-the-notebook` already contains a small curated set of passages and searches them in the browser. Nothing here is imported by Astro.
+`npm run build` does not run it. Vercel does not deploy it. The page at `/demos/ask-the-notebook` already contains a small curated set of passages and searches them in the browser. Nothing here is imported by Astro.
 
 ## What it does
 

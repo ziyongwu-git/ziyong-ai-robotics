@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    { "source": "/projects", "destination": "/demos", "permanent": true },
+    { "source": "/projects/", "destination": "/demos", "permanent": true },
+    { "source": "/projects/:path*", "destination": "/demos/:path*", "permanent": true },
+    { "source": "/learning/certifications", "destination": "/certificates", "permanent": true },
+    { "source": "/learning/certifications/", "destination": "/certificates", "permanent": true }
+  ]
+}

@@ -1,0 +1,41 @@
+---
+/**
+ * One DeepLearning.AI certificate in the hub or on the home page.
+ * The whole card opens the certificate page on this site.
+ */
+import type { Certification } from '../data/certifications';
+
+interface Props {
+  cert: Certification;
+  demos: number;
+  notes: number;
+  nested?: boolean;
+}
+
+const { cert, demos, notes, nested = false } = Astro.props;
+const demoLabel = demos === 1 ? '1 demo' : `${demos} demos`;
+const noteLabel = notes === 1 ? '1 note' : `${notes} notes`;
+---
+
+<a
+  href={`/certificates/${cert.id}`}
+  class:list={[
+    'group flex h-full flex-col rounded-3xl border border-line bg-card hover:border-accent motion-safe:transition motion-safe:duration-300 motion-safe:hover:-translate-y-0.5',
+    nested ? 'p-4' : 'p-5',
+  ]}
+>
+  <p class="font-mono text-[0.65rem] tracking-[0.16em] text-accent uppercase">
+    {cert.issuer} · {cert.date}
+  </p>
+  <h3 class:list={['mt-2 font-serif text-ink group-hover:text-accent', nested ? 'text-xl' : 'text-2xl']}>
+    {cert.name}
+  </h3>
+  {
+    cert.blurb && !nested && (
+      <p class="mt-2 flex-1 text-sm leading-6 text-muted">{cert.blurb}</p>
+    )
+  }
+  <p class:list={['font-mono text-xs tracking-wide text-muted uppercase', nested || !cert.blurb ? 'mt-3' : 'mt-4']}>
+    {demoLabel} · {noteLabel}
+  </p>
+</a>

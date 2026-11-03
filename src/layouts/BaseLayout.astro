@@ -38,10 +38,8 @@ const person = {
   '@type': 'Person',
   name: site.name,
   description: site.role,
-  jobTitle: 'Staff Data Engineer',
   email: site.email,
   url: Astro.site?.href,
-  homeLocation: { '@type': 'Place', name: 'Seattle area' },
   sameAs: [site.linkedin, site.github],
 };
 ---
@@ -84,7 +82,7 @@ const person = {
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
-    <link rel="alternate" type="application/rss+xml" title={`${site.name} — Learning log`} href={rssHref} />
+    <link rel="alternate" type="application/rss+xml" title={`${site.name} — Notes`} href={rssHref} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <!--
       Vercel Web Analytics, on every page. It counts visits after Analytics
