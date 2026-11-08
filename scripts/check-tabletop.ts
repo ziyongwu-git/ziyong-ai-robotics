@@ -9,9 +9,11 @@
 import {
   FLOW_MAX,
   GRASP,
+  RED_ASIDE,
   blend,
   blockById,
   curve,
+  placeBlock,
   readGoal,
   scatter,
   settle,
@@ -86,5 +88,11 @@ const endGap = (path: typeof full) => {
 };
 check('a full budget lands on the curve', endGap(full) < 0.001);
 check('an early stop stays outside the grasp', endGap(early) > GRASP);
+
+const moved = placeBlock(startingTable(), 'red', RED_ASIDE.x, RED_ASIDE.y);
+check('moving red leaves the open table', !byId(moved.blocks, 'red').inTray);
+check('moving red changes its place', byId(moved.blocks, 'red').x !== byId(startingTable().blocks, 'red').x);
+const chased = settle('Put the red block in the tray', FLOW_MAX, moved);
+check('the tray instruction still reaches a moved red block', byId(chased.table.blocks, 'red').inTray, chased.sentence);
 
 console.log('tabletop checks passed');

@@ -27,7 +27,16 @@ export async function getProjects(): Promise<CollectionEntry<'projects'>[]> {
 /** Home page. A demo appears here when its frontmatter says `featured: true`. */
 export async function getFeaturedProjects(): Promise<CollectionEntry<'projects'>[]> {
   const projects = await getProjects();
-  return projects.filter((project) => project.data.featured === true);
+  return projects.filter((project) => project.data.featured === true && !isSampleProject(project));
+}
+
+/** Format examples stay on the site. They do not lead the home page. */
+export function isSampleProject(project: CollectionEntry<'projects'>): boolean {
+  return project.data.status === 'sample' || project.id.startsWith('sample-');
+}
+
+export function isSampleNote(post: CollectionEntry<'learning'>): boolean {
+  return post.id.startsWith('sample-') || post.data.title.startsWith('[Sample]');
 }
 
 /**

@@ -1,45 +1,52 @@
 <!--
-  Original drawing for the "Ask the notebook" project.
-  ASCII only, on purpose: a non-UTF8 byte makes the whole SVG fail.
-  It has its own colors. A file in public/ does not follow light and dark mode.
+  Original drawing for Ask the notebook.
+  Three extracts fan into one chunk. Two scorers then run side by side into one index.
+  ASCII only. A file in public/ keeps these colors in both themes.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" fill="none">
-  <rect width="960" height="540" fill="#1c1915"/>
-  <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
-    <path d="M32 0 H0 V32" stroke="#2c2824" stroke-width="1"/>
+  <rect width="960" height="540" fill="#f6f3ec"/>
+  <pattern id="ask-dots" width="28" height="28" patternUnits="userSpaceOnUse">
+    <circle cx="1" cy="1" r="1.15" fill="#e4dace"/>
   </pattern>
-  <rect width="960" height="540" fill="url(#grid)"/>
-  <circle cx="160" cy="110" r="110" fill="#16332f"/>
-  <circle cx="800" cy="430" r="140" fill="#3a241c"/>
+  <rect width="960" height="540" fill="url(#ask-dots)"/>
+  <circle cx="880" cy="64" r="70" fill="#d9efe9"/>
+  <circle cx="80" cy="480" r="64" fill="#f6e4d4"/>
 
-  <path d="M250 150 H330 M250 270 H330 M250 390 H330" stroke="#8fd4c8" stroke-width="2" stroke-linecap="round"/>
-  <path d="M510 150 V390" stroke="#8fd4c8" stroke-width="2" stroke-linecap="round"/>
-  <path d="M330 150 H510 M330 270 H510 M330 390 H510" stroke="#8fd4c8" stroke-width="2" stroke-linecap="round"/>
-  <path d="M510 270 H600" stroke="#f3b184" stroke-width="2.5" stroke-linecap="round"/>
-  <circle cx="510" cy="270" r="5" fill="#f3b184"/>
+  <path d="M214 100 C 280 100, 300 250, 318 250" stroke="#0a534a" stroke-width="2.5" fill="none"/>
+  <path d="M214 250 H 318" stroke="#0a534a" stroke-width="2.5"/>
+  <path d="M214 400 C 280 400, 300 250, 318 250" stroke="#0a534a" stroke-width="2.5" fill="none"/>
+  <path d="M498 250 C 540 250, 548 156, 560 156" stroke="#7c2d12" stroke-width="2.5" fill="none"/>
+  <path d="M498 250 C 540 250, 548 344, 560 344" stroke="#0a534a" stroke-width="2.5" fill="none"/>
+  <path d="M740 156 C 790 156, 800 250, 790 250" stroke="#7c2d12" stroke-width="2.5" fill="none"/>
+  <path d="M740 344 C 790 344, 800 250, 790 250" stroke="#0a534a" stroke-width="2.5" fill="none"/>
 
   <g font-family="ui-monospace, monospace" font-size="16">
-    <rect x="70" y="112" width="180" height="76" rx="18" fill="#14312d" stroke="#8fd4c8" stroke-width="2"/>
-    <text x="90" y="146" fill="#8fd4c8">extract</text>
-    <text x="90" y="170" fill="#f4efe6">three sources</text>
+    <rect x="36" y="64" width="178" height="72" rx="16" fill="#fffdf8" stroke="#0a534a" stroke-width="2"/>
+    <text x="54" y="94" fill="#0a534a">extract</text>
+    <text x="54" y="118" fill="#1c1915">notes</text>
 
-    <rect x="70" y="232" width="180" height="76" rx="18" fill="#14312d" stroke="#8fd4c8" stroke-width="2"/>
-    <text x="90" y="266" fill="#8fd4c8">chunk</text>
-    <text x="90" y="290" fill="#f4efe6">short passages</text>
+    <rect x="36" y="214" width="178" height="72" rx="16" fill="#fffdf8" stroke="#0a534a" stroke-width="2"/>
+    <text x="54" y="244" fill="#0a534a">extract</text>
+    <text x="54" y="268" fill="#1c1915">demos</text>
 
-    <rect x="70" y="352" width="180" height="76" rx="18" fill="#3a241c" stroke="#f3b184" stroke-width="2"/>
-    <text x="90" y="386" fill="#f3b184">score terms</text>
-    <text x="90" y="410" fill="#f4efe6">not vectors</text>
+    <rect x="36" y="364" width="178" height="72" rx="16" fill="#fffdf8" stroke="#0a534a" stroke-width="2"/>
+    <text x="54" y="394" fill="#0a534a">extract</text>
+    <text x="54" y="418" fill="#1c1915">primer</text>
 
-    <rect x="600" y="214" width="168" height="112" rx="20" fill="#0f5c52"/>
-    <text x="624" y="258" fill="#d9efe9">index</text>
-    <text x="624" y="292" fill="#fffdf8" font-size="22">ready</text>
-  </g>
+    <rect x="318" y="214" width="180" height="72" rx="16" fill="#d9efe9" stroke="#0a534a" stroke-width="2"/>
+    <text x="336" y="244" fill="#0a534a">chunk</text>
+    <text x="336" y="268" fill="#1c1915">together</text>
 
-  <g>
-    <rect x="620" y="56" width="280" height="140" rx="22" fill="#fffdf8"/>
-    <text x="644" y="96" fill="#9a3412" font-family="ui-monospace, monospace" font-size="14">ASK</text>
-    <text x="644" y="132" fill="#1c1915" font-family="Georgia, serif" font-size="26">Where do the</text>
-    <text x="644" y="166" fill="#0f5c52" font-family="ui-monospace, monospace" font-size="16">vectors go?</text>
+    <rect x="560" y="120" width="180" height="72" rx="16" fill="#fffdf8" stroke="#7c2d12" stroke-width="2"/>
+    <text x="578" y="150" fill="#7c2d12">score</text>
+    <text x="578" y="174" fill="#1c1915">BM25</text>
+
+    <rect x="560" y="308" width="180" height="72" rx="16" fill="#fffdf8" stroke="#0a534a" stroke-width="2"/>
+    <text x="578" y="338" fill="#0a534a">score</text>
+    <text x="578" y="362" fill="#1c1915">keyword</text>
+
+    <rect x="790" y="206" width="140" height="88" rx="16" fill="#0a534a"/>
+    <text x="808" y="244" fill="#d9efe9">index</text>
+    <text x="808" y="270" fill="#f6f3ec">both in</text>
   </g>
 </svg>

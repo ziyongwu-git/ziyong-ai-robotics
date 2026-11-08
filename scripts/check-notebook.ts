@@ -8,6 +8,7 @@ import {
   KEYWORD_MIN,
   QUOTE_MIN,
   dualScoreGraph,
+  linearScoreGraph,
   makeEdge,
   notesGraph,
   parallelExtractGraph,
@@ -57,6 +58,13 @@ check('an unknown question is not quoted', !cake.confident);
 const notes = mustRun(notesGraph());
 const hidden = reply('Where do the vectors go?', notes.passages, notes.scorers[0]?.settings);
 check('notes only does not quote Weaviate', !/weaviate/i.test(hidden.quotes.map((quote) => quote.text).join(' ')));
+
+const linear = mustRun(linearScoreGraph());
+check('one path has a single scorer', linear.scorers.length === 1 && linear.scorers[0]?.settings.method === 'bm25');
+check(
+  'one path never scores two tasks in a wave',
+  linear.levels.every((level) => level.filter((id) => id.startsWith('score-')).length <= 1),
+);
 
 const dual = mustRun(dualScoreGraph());
 check('two scorers run in one wave', dual.levels.some((level) => level.includes('score-bm25') && level.includes('score-keyword')));

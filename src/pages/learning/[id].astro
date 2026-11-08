@@ -6,6 +6,7 @@ import CoverArt from '../../components/CoverArt.astro';
 import TagList from '../../components/TagList.astro';
 import { certificationIds, certsFor, usesCertification } from '../../lib/certifications';
 import { getProjects } from '../../lib/content';
+import { experimentHint } from '../../lib/experiments';
 import { formatDate, isoDate } from '../../lib/format';
 
 export async function getStaticPaths() {
@@ -25,7 +26,8 @@ if (!post) {
   throw new Error(`No note for ${id}.`);
 }
 
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
+const outline = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
 const certs = certsFor(post.data.certification);
 const relatedDemos = (await getProjects()).filter((project) =>
   usesCertification(project.data.certification, certificationIds(post.data.certification)),
@@ -59,34 +61,47 @@ const relatedDemos = (await getProjects()).filter((project) =>
   </div>
   <h1 class="mt-4 font-serif text-4xl leading-tight sm:text-5xl">{post.data.title}</h1>
   <p class="mt-4 text-lg leading-8 text-muted">{post.data.summary}</p>
-  <p class="mt-4 text-sm">
-    <span class="font-mono text-xs tracking-wide text-muted uppercase">Course / source</span>
-    <span class="text-muted"> · </span>
-    {post.data.source}
+  <p class="mt-4 text-sm leading-6">
+    <span class="font-medium text-ink">Sources &amp; technical references. </span>
+    <span class="text-muted">{post.data.source}</span>
   </p>
+  {
+    outline.length > 0 && (
+      <nav class="mt-6 rounded-2xl border border-line bg-card p-4" aria-label="On this page">
+        <p class="font-mono text-xs tracking-[0.14em] text-muted uppercase">On this page</p>
+        <ol class="mt-2 space-y-1 text-sm">
+          {outline.map((heading) => (
+            <li class:list={[heading.depth === 3 && 'pl-4']}>
+              <a class="text-accent underline decoration-line underline-offset-4" href={`#${heading.slug}`}>
+                {heading.text}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    )
+  }
   <div class="mt-5">
     <BuiltOn certs={certs} />
   </div>
   {
     relatedDemos.length > 0 && (
-      <section class="mt-6" aria-labelledby="related-demos">
-        <h2 id="related-demos" class="font-serif text-2xl">
-          Demos on this certificate
-        </h2>
+      <section class="mt-6" aria-labelledby="try-demos">
+        <h2 id="try-demos" class="font-serif text-2xl">Try it</h2>
         <ul class="mt-3 space-y-3">
           {relatedDemos.map((project) => (
-            <li class="rounded-2xl border border-line bg-card p-4">
-              <a class="font-serif text-xl text-ink hover:text-accent" href={`/demos/${project.id}`}>
+            <li class="rounded-2xl border border-highlight bg-highlight-soft p-4">
+              <a class="font-serif text-xl text-ink hover:text-accent" href={`/demos/${project.id}#demo`}>
                 {project.data.title}
               </a>
-              <p class="mt-1 text-sm leading-6 text-muted">{project.data.summary}</p>
+              <p class="mt-1 text-sm leading-6">{experimentHint(project.id)}</p>
             </li>
           ))}
         </ul>
       </section>
     )
   }
-  <div class="prose mt-10 max-w-none">
+  <div class="prose mt-10">
     <Content />
   </div>
 </BaseLayout>

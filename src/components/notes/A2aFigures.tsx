@@ -5,30 +5,34 @@
  */
 import type { ReactNode } from 'react';
 
-function Frame({ label, children }: { label: string; children: ReactNode }) {
+function Frame({ label, caption, children }: { label: string; caption: string; children: ReactNode }) {
   return (
     <figure className="not-prose my-6">
       <svg viewBox="0 0 720 280" role="img" aria-label={label} className="h-auto w-full">
         {children}
       </svg>
+      <figcaption className="mt-2 max-w-[65ch] text-sm leading-6 text-muted">{caption}</figcaption>
     </figure>
   );
 }
 
 export function LayerStack() {
   return (
-    <Frame label="Two agents talk over A2A. The clinic agent calls a directory over MCP.">
+    <Frame
+      label="Two agents talk over A2A. The clinic agent calls a directory over MCP."
+      caption="Rounded boxes are agents. The rust pill is an A2A message. The dashed box is an MCP tool. The plan reader never sees the tool."
+    >
       <rect x="24" y="36" width="200" height="200" rx="24" fill="var(--card)" stroke="var(--line)" />
-      <text x="124" y="78" textAnchor="middle" fill="var(--accent)" fontSize="13" fontFamily="ui-monospace, monospace">
+      <text x="124" y="78" textAnchor="middle" fill="var(--accent)" fontSize="13" fontFamily="IBM Plex Mono, ui-monospace, monospace">
         AGENT
       </text>
-      <text x="124" y="112" textAnchor="middle" fill="var(--ink)" fontSize="20" fontFamily="Georgia, serif">
+      <text x="124" y="112" textAnchor="middle" fill="var(--ink)" fontSize="20" fontFamily="Fraunces, Georgia, serif">
         Plan reader
       </text>
-      <text x="124" y="148" textAnchor="middle" fill="var(--muted)" fontSize="14" fontFamily="Georgia, serif">
+      <text x="124" y="148" textAnchor="middle" fill="var(--muted)" fontSize="14" fontFamily="IBM Plex Sans, sans-serif">
         another framework
       </text>
-      <text x="124" y="188" textAnchor="middle" fill="var(--muted)" fontSize="14" fontFamily="Georgia, serif">
+      <text x="124" y="188" textAnchor="middle" fill="var(--muted)" fontSize="14" fontFamily="IBM Plex Sans, sans-serif">
         opaque from here
       </text>
 
@@ -36,39 +40,39 @@ export function LayerStack() {
       <path d="M292 104 L306 110 L292 116" fill="none" stroke="var(--ink)" strokeWidth="2" />
       <path d="M306 168 H236" stroke="var(--highlight)" strokeWidth="2" />
       <path d="M244 162 L230 168 L244 174" fill="none" stroke="var(--highlight)" strokeWidth="2" />
-      <text x="268" y="98" textAnchor="middle" fill="var(--accent)" fontSize="12" fontFamily="ui-monospace, monospace">
+      <text x="268" y="98" textAnchor="middle" fill="var(--accent)" fontSize="12" fontFamily="IBM Plex Mono, ui-monospace, monospace">
         A2A
       </text>
-      <text x="268" y="198" textAnchor="middle" fill="var(--highlight)" fontSize="12" fontFamily="ui-monospace, monospace">
+      <text x="268" y="198" textAnchor="middle" fill="var(--highlight)" fontSize="12" fontFamily="IBM Plex Mono, ui-monospace, monospace">
         artifact
       </text>
 
       <rect x="312" y="36" width="220" height="200" rx="24" fill="var(--accent-soft)" stroke="var(--line)" />
-      <text x="422" y="78" textAnchor="middle" fill="var(--accent)" fontSize="13" fontFamily="ui-monospace, monospace">
+      <text x="422" y="78" textAnchor="middle" fill="var(--accent)" fontSize="13" fontFamily="IBM Plex Mono, ui-monospace, monospace">
         AGENT
       </text>
-      <text x="422" y="112" textAnchor="middle" fill="var(--ink)" fontSize="20" fontFamily="Georgia, serif">
+      <text x="422" y="112" textAnchor="middle" fill="var(--ink)" fontSize="20" fontFamily="Fraunces, Georgia, serif">
         Clinic finder
       </text>
-      <text x="422" y="150" textAnchor="middle" fill="var(--muted)" fontSize="14" fontFamily="Georgia, serif">
+      <text x="422" y="150" textAnchor="middle" fill="var(--muted)" fontSize="14" fontFamily="IBM Plex Sans, sans-serif">
         LangGraph inside
       </text>
-      <text x="422" y="188" textAnchor="middle" fill="var(--muted)" fontSize="14" fontFamily="Georgia, serif">
+      <text x="422" y="188" textAnchor="middle" fill="var(--muted)" fontSize="14" fontFamily="IBM Plex Sans, sans-serif">
         tools stay private
       </text>
 
       <path d="M544 120 H600" stroke="var(--highlight)" strokeWidth="2" strokeDasharray="4 4" />
-      <text x="640" y="78" textAnchor="middle" fill="var(--highlight)" fontSize="12" fontFamily="ui-monospace, monospace">
+      <text x="640" y="78" textAnchor="middle" fill="var(--highlight)" fontSize="12" fontFamily="IBM Plex Mono, ui-monospace, monospace">
         MCP
       </text>
       <rect x="588" y="96" width="112" height="120" rx="18" fill="var(--card)" stroke="var(--highlight)" />
-      <text x="644" y="132" textAnchor="middle" fill="var(--ink)" fontSize="14" fontFamily="Georgia, serif">
+      <text x="644" y="132" textAnchor="middle" fill="var(--ink)" fontSize="14" fontFamily="Fraunces, Georgia, serif">
         directory
       </text>
-      <text x="644" y="158" textAnchor="middle" fill="var(--muted)" fontSize="13" fontFamily="Georgia, serif">
+      <text x="644" y="158" textAnchor="middle" fill="var(--muted)" fontSize="13" fontFamily="IBM Plex Sans, sans-serif">
         find_clinics
       </text>
-      <text x="644" y="182" textAnchor="middle" fill="var(--muted)" fontSize="13" fontFamily="Georgia, serif">
+      <text x="644" y="182" textAnchor="middle" fill="var(--muted)" fontSize="13" fontFamily="IBM Plex Sans, sans-serif">
         a JSON file
       </text>
     </Frame>
@@ -77,41 +81,44 @@ export function LayerStack() {
 
 export function CardSketch() {
   return (
-    <Frame label="A client fetches the Agent Card, then sends SendMessage to the URL on the card.">
+    <Frame
+      label="A client fetches the Agent Card, then sends SendMessage to the URL on the card."
+      caption="The client is a box. The card is the document it reads before it sends. GET goes out. JSON comes back."
+    >
       <rect x="28" y="48" width="180" height="170" rx="24" fill="var(--card)" stroke="var(--line)" />
-      <text x="118" y="100" textAnchor="middle" fill="var(--accent)" fontSize="13" fontFamily="ui-monospace, monospace">
+      <text x="118" y="100" textAnchor="middle" fill="var(--accent)" fontSize="13" fontFamily="IBM Plex Mono, ui-monospace, monospace">
         CLIENT
       </text>
-      <text x="118" y="136" textAnchor="middle" fill="var(--ink)" fontSize="18" fontFamily="Georgia, serif">
+      <text x="118" y="136" textAnchor="middle" fill="var(--ink)" fontSize="18" fontFamily="Fraunces, Georgia, serif">
         reads the card
       </text>
-      <text x="118" y="168" textAnchor="middle" fill="var(--muted)" fontSize="14" fontFamily="Georgia, serif">
+      <text x="118" y="168" textAnchor="middle" fill="var(--muted)" fontSize="14" fontFamily="IBM Plex Sans, sans-serif">
         then sends
       </text>
 
       <path d="M220 100 H300" stroke="var(--ink)" strokeWidth="2" />
-      <text x="260" y="88" textAnchor="middle" fill="var(--muted)" fontSize="12" fontFamily="ui-monospace, monospace">
+      <text x="260" y="88" textAnchor="middle" fill="var(--muted)" fontSize="12" fontFamily="IBM Plex Mono, ui-monospace, monospace">
         GET
       </text>
       <path d="M300 160 H220" stroke="var(--highlight)" strokeWidth="2" />
-      <text x="260" y="184" textAnchor="middle" fill="var(--highlight)" fontSize="12" fontFamily="ui-monospace, monospace">
+      <text x="260" y="184" textAnchor="middle" fill="var(--highlight)" fontSize="12" fontFamily="IBM Plex Mono, ui-monospace, monospace">
         JSON
       </text>
 
       <rect x="312" y="28" width="380" height="224" rx="24" fill="var(--accent-soft)" stroke="var(--line)" />
-      <text x="340" y="68" fill="var(--accent)" fontSize="13" fontFamily="ui-monospace, monospace">
+      <text x="340" y="68" fill="var(--accent)" fontSize="13" fontFamily="IBM Plex Mono, ui-monospace, monospace">
         /.well-known/agent-card.json
       </text>
-      <text x="340" y="108" fill="var(--ink)" fontSize="16" fontFamily="ui-monospace, monospace">
+      <text x="340" y="108" fill="var(--ink)" fontSize="16" fontFamily="IBM Plex Mono, ui-monospace, monospace">
         name, description, skills
       </text>
-      <text x="340" y="142" fill="var(--ink)" fontSize="16" fontFamily="ui-monospace, monospace">
+      <text x="340" y="142" fill="var(--ink)" fontSize="16" fontFamily="IBM Plex Mono, ui-monospace, monospace">
         supportedInterfaces[0]
       </text>
-      <text x="340" y="176" fill="var(--muted)" fontSize="15" fontFamily="ui-monospace, monospace">
+      <text x="340" y="176" fill="var(--muted)" fontSize="15" fontFamily="IBM Plex Mono, ui-monospace, monospace">
         JSONRPC · url · protocolVersion 1.0
       </text>
-      <text x="340" y="214" fill="var(--muted)" fontSize="15" fontFamily="ui-monospace, monospace">
+      <text x="340" y="214" fill="var(--muted)" fontSize="15" fontFamily="IBM Plex Mono, ui-monospace, monospace">
         capabilities.streaming true or false
       </text>
     </Frame>
@@ -120,8 +127,11 @@ export function CardSketch() {
 
 export function TaskLife() {
   return (
-    <Frame label="A task moves from submitted to working, then to completed, or pauses, or stops on an error.">
-      <g fontFamily="ui-monospace, monospace" fontSize="13">
+    <Frame
+      label="A task moves from submitted to working, then to completed, or pauses, or stops on an error."
+      caption="Pills are task states, in order. Working is filled ink. Completed is the teal box. A pause or a failure is named, not drawn as a success."
+    >
+      <g fontFamily="IBM Plex Mono, ui-monospace, monospace" fontSize="13">
         <rect x="24" y="96" width="150" height="56" rx="16" fill="var(--card)" stroke="var(--line)" />
         <text x="99" y="128" textAnchor="middle" fill="var(--ink)">
           SUBMITTED
@@ -137,15 +147,15 @@ export function TaskLife() {
           COMPLETED
         </text>
       </g>
-      <text x="292" y="64" textAnchor="middle" fill="var(--muted)" fontSize="14" fontFamily="Georgia, serif">
+      <text x="292" y="64" textAnchor="middle" fill="var(--muted)" fontSize="14" fontFamily="IBM Plex Sans, sans-serif">
         input-required or auth-required pauses the task
       </text>
       <path d="M292 78 V96" stroke="var(--line)" strokeWidth="2" />
-      <text x="490" y="196" textAnchor="middle" fill="var(--muted)" fontSize="14" fontFamily="Georgia, serif">
+      <text x="490" y="196" textAnchor="middle" fill="var(--muted)" fontSize="14" fontFamily="IBM Plex Sans, sans-serif">
         failed, canceled, and rejected are finished
       </text>
       <path d="M490 176 V152" stroke="var(--line)" strokeWidth="2" />
-      <text x="36" y="236" fill="var(--muted)" fontSize="14" fontFamily="Georgia, serif">
+      <text x="36" y="236" fill="var(--muted)" fontSize="14" fontFamily="IBM Plex Sans, sans-serif">
         The reply worth keeping is an artifact on the completed task.
       </text>
     </Frame>

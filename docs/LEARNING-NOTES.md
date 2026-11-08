@@ -83,7 +83,7 @@ Notes and projects can show a picture. If the file's frontmatter has no `cover`,
 
 If you set `cover`, the site uses that file instead. Put it in `public/covers/` and point at it with `/covers/your-file.jpg`. A file used that way keeps its own colors in both themes. The sample attention note is the example (`public/covers/attention.svg`). It is an original drawing, not a photo of a person.
 
-The moving sketch on the home page is also SVG and CSS. The tabletop under it is a React demo, the same component as `/demos/see-think-move`, rendered with `client:load`. Other demos stay on their own pages until someone opens them.
+The home page opens with the tabletop demo, the same component as `/demos/see-think-move`, rendered with `client:load`. Other demos stay on their own pages until someone opens them. Sample notes and the sample arm stay at their old addresses, under Sample archive.
 
 ## Certifications
 

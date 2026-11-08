@@ -347,6 +347,26 @@ export function parallelExtractGraph(): NotebookGraph {
   };
 }
 
+/**
+ * One extract, one chunk, one BM25 score, one index.
+ * The contrast for the parallel-scorer experiment: nothing runs beside anything else.
+ */
+export function linearScoreGraph(): NotebookGraph {
+  return {
+    nodes: [
+      makeNode('ex-all', 'extract', { notes: true, projects: true, primer: true }),
+      makeNode('chunk-1', 'chunk', { size: 240, overlap: 40 }),
+      makeNode('score-bm25', 'score', { method: 'bm25', topK: 3, useTitle: true }),
+      makeNode('index-1', 'index'),
+    ],
+    edges: [
+      makeEdge('ex-all', 'chunk-1'),
+      makeEdge('chunk-1', 'score-bm25'),
+      makeEdge('score-bm25', 'index-1'),
+    ],
+  };
+}
+
 /** One extract, then BM25 and keyword count side by side, both feeding the index. */
 export function dualScoreGraph(): NotebookGraph {
   return {

@@ -53,7 +53,9 @@ const horizontal = layout === 'feature' || layout === 'row';
     <div class="mt-4">
       <BuiltOn certs={certs} layout="compact" />
     </div>
-    <p class="mt-4 font-mono text-xs tracking-wide text-muted uppercase">Course / source</p>
-    <p class="mt-1 text-sm">{post.data.source}</p>
+    <p class="mt-4 text-sm leading-6">
+      <span class="font-medium text-ink">Sources &amp; technical references. </span>
+      <span class="text-muted">{post.data.source}</span>
+    </p>
   </div>
 </article>

@@ -11,7 +11,18 @@ cover: "/covers/agents-talk.svg"
 ---
 
 import FollowPacket from '../../components/demos/FollowPacket.tsx';
+import TryIt from '../../components/TryIt.astro';
 import { CardSketch, LayerStack, TaskLife } from '../../components/notes/A2aFigures.tsx';
+
+## What you will understand
+
+By the end you should be able to do three things with one clinic finder, not with a pile of definitions:
+
+- Say which job belongs to MCP and which job belongs to A2A.
+- Read an Agent Card and point at the sentence a router actually uses.
+- Follow one question from `SendMessage` through a tool call and back to an artifact, including two failures: an empty directory, and a card description that is too vague to route.
+
+The clinic finder is the worked example for the whole note. The browser toy is a simulation of that same path. It does not call a model.
 
 I keep hitting the same wall. I can write one agent that answers one kind of question, and another agent that answers a different kind, and they still cannot hand work to each other when they were built in different libraries. One of them thinks in LangGraph messages. The other thinks in whatever events its own framework uses. I want the prompts, the tools, and the memory to stay private. I also want a shared way to say "please do this" and "here is the result."
 
@@ -53,7 +64,11 @@ The card is a business card, not a transcript. In 1.0 the required pieces I keep
 
 <CardSketch />
 
-The description is doing real work. A caller that has several cards and has to pick one will read that sentence. If I write "a helpful assistant," a router has nothing to match. If I write "finds a clinic by city and specialty," a question about a pediatrician has somewhere to land. The toy at the bottom lets me edit that sentence and watch a mock router change its mind. The score is a word overlap, not a model. The point is the same one a real router hits: the card text is the hint.
+The description is doing real work. A caller that has several cards and has to pick one will read that sentence. If I write "a helpful assistant," a router has nothing to match. If I write "finds a clinic by city and specialty," a question about a pediatrician has somewhere to land. The score in the toy is a word overlap, not a model. The point is the same one a real router hits: the card text is the hint.
+
+<TryIt href="/demos/follow-the-packet#demo" title="Change the card, then watch the route">
+On Follow the packet, use the first experiment. Ask for a pediatrician in Seattle, then set the clinic card to “A helpful assistant.” The clinic finder score should fall to zero and the question should stay unrouted. Restore the clinic card and the same question should land on the finder again.
+</TryIt>
 
 ## Messages, parts, tasks, artifacts
 

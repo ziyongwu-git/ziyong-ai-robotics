@@ -1,33 +1,43 @@
 <!--
-  Original drawing for the Follow the packet project.
-  Its colors stay put in light and dark mode.
+  Original drawing for Follow the packet.
+  One message moves client, card, A2A task, agent, MCP tool.
+  ASCII only. Colors stay put in both themes.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" fill="none">
-  <rect width="960" height="540" fill="#f3eee4"/>
+  <rect width="960" height="540" fill="#f6f3ec"/>
   <pattern id="pkt-dots" width="28" height="28" patternUnits="userSpaceOnUse">
-    <circle cx="1" cy="1" r="1.15" fill="#e3d7c6"/>
+    <circle cx="1" cy="1" r="1.15" fill="#e4dace"/>
   </pattern>
   <rect width="960" height="540" fill="url(#pkt-dots)"/>
-  <circle cx="140" cy="420" r="100" fill="#f6e6d8"/>
-  <circle cx="820" cy="120" r="80" fill="#e7f3ef"/>
+  <circle cx="140" cy="90" r="70" fill="#f6e4d4"/>
+  <circle cx="820" cy="450" r="90" fill="#d9efe9"/>
 
-  <line x1="90" y1="250" x2="870" y2="250" stroke="#e4d9c8" stroke-width="3"/>
-  <g font-family="ui-monospace, monospace" font-size="15" fill="#5c564c" text-anchor="middle">
-    <circle cx="90" cy="250" r="18" fill="#fffdf8" stroke="#1c1915" stroke-width="2"/>
-    <text x="90" y="300">Client</text>
-    <circle cx="250" cy="250" r="18" fill="#fffdf8" stroke="#1c1915" stroke-width="2"/>
-    <text x="250" y="300">Card</text>
-    <circle cx="410" cy="250" r="22" fill="#1c1915"/>
-    <text x="410" y="300">A2A</text>
-    <circle cx="590" cy="250" r="18" fill="#fffdf8" stroke="#1c1915" stroke-width="2"/>
-    <text x="590" y="300">Agent</text>
-    <circle cx="770" cy="250" r="18" fill="#fffdf8" stroke="#0f5c52" stroke-width="2"/>
-    <text x="770" y="300" fill="#0f5c52">MCP</text>
-  </g>
-  <rect x="372" y="214" width="76" height="32" rx="10" fill="#9a3412"/>
-  <text x="410" y="235" text-anchor="middle" fill="#fffdf8" font-family="ui-monospace, monospace" font-size="14">msg</text>
+  <path d="M150 250 H 800" stroke="#e4dace" stroke-width="3"/>
+  <path d="M470 250 H 560" stroke="#7c2d12" stroke-width="3"/>
+  <path d="M548 242 L 564 250 L 548 258" stroke="#7c2d12" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 
-  <rect x="150" y="360" width="660" height="110" rx="22" fill="#fffdf8" stroke="#e4d9c8"/>
-  <text x="180" y="408" fill="#9a3412" font-family="ui-monospace, monospace" font-size="16">SendMessage</text>
-  <text x="180" y="442" fill="#1c1915" font-family="Georgia, serif" font-size="22">one question, then the artifact</text>
+  <rect x="70" y="200" width="110" height="100" rx="18" fill="#fffdf8" stroke="#1c1915" stroke-width="2"/>
+  <text x="125" y="246" text-anchor="middle" fill="#1c1915" font-family="ui-monospace, monospace" font-size="15">Client</text>
+  <text x="125" y="270" text-anchor="middle" fill="#5c564c" font-family="ui-monospace, monospace" font-size="12">asks</text>
+
+  <path d="M230 200 H 340 V 220 H 328 L 314 200 Z" fill="#fffdf8" stroke="#1c1915" stroke-width="2"/>
+  <text x="286" y="258" text-anchor="middle" fill="#1c1915" font-family="ui-monospace, monospace" font-size="15">Card</text>
+
+  <rect x="390" y="214" width="86" height="72" rx="36" fill="#1c1915"/>
+  <text x="433" y="256" text-anchor="middle" fill="#f6f3ec" font-family="ui-monospace, monospace" font-size="15">A2A</text>
+
+  <rect x="430" y="188" width="72" height="28" rx="8" fill="#7c2d12"/>
+  <text x="466" y="207" text-anchor="middle" fill="#fffdf8" font-family="ui-monospace, monospace" font-size="13">msg</text>
+
+  <rect x="600" y="200" width="120" height="100" rx="18" fill="#f6e4d4" stroke="#7c2d12" stroke-width="2"/>
+  <text x="660" y="246" text-anchor="middle" fill="#7c2d12" font-family="ui-monospace, monospace" font-size="15">Agent</text>
+  <text x="660" y="270" text-anchor="middle" fill="#1c1915" font-family="ui-monospace, monospace" font-size="12">opaque</text>
+
+  <rect x="770" y="200" width="130" height="100" rx="18" fill="#fffdf8" stroke="#0a534a" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="835" y="246" text-anchor="middle" fill="#0a534a" font-family="ui-monospace, monospace" font-size="15">MCP</text>
+  <text x="835" y="270" text-anchor="middle" fill="#1c1915" font-family="ui-monospace, monospace" font-size="12">tool</text>
+
+  <rect x="70" y="360" width="820" height="110" rx="22" fill="#fffdf8" stroke="#e4dace"/>
+  <text x="100" y="408" fill="#7c2d12" font-family="ui-monospace, monospace" font-size="16">one question on the wire</text>
+  <text x="100" y="444" fill="#1c1915" font-family="Georgia, serif" font-size="26">card, task, tool, artifact</text>
 </svg>

@@ -159,7 +159,12 @@ export type DemoState = {
   misses: number;
   cycles: number;
   actId: number;
+  /** Plain-language lines that stay after the picture moves on. */
+  journal: string[];
 };
+
+/** A spot on the open table, away from the red block's start and outside the tray. */
+export const RED_ASIDE = { x: 400, y: 292 };
 
 export type DemoAction =
   | { type: 'text'; text: string }
@@ -171,7 +176,9 @@ export type DemoAction =
   | { type: 'tick'; reduced: boolean }
   | { type: 'commit' }
   | { type: 'shuffle' }
-  | { type: 'reset' };
+  | { type: 'reset' }
+  | { type: 'moveBlock'; id: BlockId; x: number; y: number; record?: boolean }
+  | { type: 'finishNow' };
 
 export function startingTable(): Table {
   return {
@@ -204,6 +211,7 @@ export function initialDemo(): DemoState {
     misses: 0,
     cycles: 0,
     actId: 0,
+    journal: [],
   };
 }
 
@@ -222,6 +230,28 @@ function cloneTable(table: Table): Table {
     gripper: { ...table.gripper },
     blocks: table.blocks.map((item) => ({ ...item })),
   };
+}
+
+/**
+ * Put a block at a point on the table. Clears a stack, because a dragged
+ * block is no longer sitting on the one underneath. `inTray` follows the point.
+ */
+export function placeBlock(table: Table, id: BlockId, x: number, y: number): Table {
+  const next = cloneTable(table);
+  const item = blockById(next, id);
+  const half = scene.block / 2;
+  item.x = clamp(x, scene.table.x + half + 4, scene.table.x + scene.table.w - half - 4);
+  item.y = clamp(y, scene.table.y + half + 4, scene.table.y + scene.table.h - half - 4);
+  item.on = null;
+  item.z = 0;
+  item.inTray = insideTray(item.x, item.y);
+  return next;
+}
+
+function remember(journal: string[], line: string): string[] {
+  const text = line.trim();
+  if (!text || journal[journal.length - 1] === text) return journal;
+  return [...journal, text].slice(-8);
 }
 
 /** Tiny deterministic generator so a replay with the same seed matches. */
@@ -691,6 +721,7 @@ function finish(state: DemoState, sentence: string): DemoState {
     clean: [],
     noisy: [],
     flowFrame: 0,
+    journal: remember(state.journal, sentence),
   };
 }
 
@@ -773,6 +804,7 @@ function commitAct(state: DemoState): DemoState {
     seenCount: 1,
     phase: 'see',
     sentence: 'Looking again.',
+    journal: remember(state.journal, result.note),
   };
   if (misses >= 3) {
     return finish(
@@ -850,6 +882,7 @@ export function reduce(state: DemoState, action: DemoAction): DemoState {
         noiseSeed,
         table: shuffledTable(noiseSeed),
         sentence: 'Shuffled. The same instruction now has to read a new table.',
+        journal: ['Shuffled. The blocks changed places. The instruction did not.'],
       };
     }
     case 'reset':
@@ -859,9 +892,53 @@ export function reduce(state: DemoState, action: DemoAction): DemoState {
         flowSteps: state.flowSteps,
         noiseSeed: state.noiseSeed,
       };
+    case 'moveBlock':
+      return moveBlock(state, action.id, action.x, action.y, action.record === true);
+    case 'finishNow':
+      return finishNow(state);
     default:
       return state;
   }
+}
+
+/** Walk the whole instruction without timers. Used when motion is reduced. */
+function finishNow(state: DemoState): DemoState {
+  const done = settle(state.text, state.flowSteps, state.table);
+  const journal = [...state.journal];
+  for (const line of done.journal) {
+    if (journal[journal.length - 1] !== line) journal.push(line);
+  }
+  return {
+    ...done,
+    text: state.text,
+    flowSteps: state.flowSteps,
+    journal: journal.slice(-8),
+  };
+}
+
+function moveBlock(state: DemoState, id: BlockId, x: number, y: number, record: boolean): DemoState {
+  if (state.playing || (state.phase !== 'ready' && state.phase !== 'finished')) return state;
+  if (state.table.gripper.holding) return state;
+  const table = placeBlock(state.table, id, x, y);
+  const item = blockById(table, id);
+  const where = item.inTray ? 'That spot is inside the tray.' : 'That spot is on the open table.';
+  const line = `${item.id} block moved to ${Math.round(item.x)}, ${Math.round(item.y)}. ${where}`;
+  return {
+    ...state,
+    table,
+    phase: 'ready',
+    playing: false,
+    goal: null,
+    skill: null,
+    clean: [],
+    noisy: [],
+    tokens: [],
+    seenCount: 0,
+    flowFrame: 0,
+    note: '',
+    sentence: `The ${item.id} block is in a new place. Run the instruction. The tokens should name this spot, and the path should aim here.`,
+    journal: record ? remember(state.journal, line) : state.journal,
+  };
 }
 
 /** Walk a run the way the Step button does. Used by the check script. */

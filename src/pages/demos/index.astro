@@ -3,36 +3,55 @@ import Band from '../../components/Band.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 import TagFilter from '../../components/TagFilter.astro';
-import { getProjects } from '../../lib/content';
+import { getProjects, isSampleProject } from '../../lib/content';
 
 const projects = await getProjects();
+const shipped = projects.filter((project) => !isSampleProject(project));
+const samples = projects.filter((project) => isSampleProject(project));
 ---
 
 <BaseLayout
   title="Demos"
-  description="Interactive demos from Ziyong Wu's notebook: a two-link arm, a toy vision-language-action loop, and a RAG pipeline you can rewire."
+  description="Interactive demos from Ziyong Wu's notebook: a tabletop you can move, a packet you can reroute, and a notebook DAG you can branch."
 >
   <header class="grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
-    <div class="max-w-2xl">
+    <div class="max-w-[65ch]">
       <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">Experiments</p>
       <h1 class="mt-3 font-serif text-4xl sm:text-5xl">Demos</h1>
       <p class="mt-4 text-lg leading-8 text-muted">
-        Small tools you can move. Open one and the widget is at the top of the page. The explanation follows.
+        Toys you can run in the browser. Open one and the widget is first, with a first experiment and a record of what
+        changed. The explanation follows.
       </p>
     </div>
     <Band kind="projects" />
   </header>
   <div class="mt-10">
     {
-      projects.length === 0 ? (
+      shipped.length === 0 ? (
         <p class="text-muted">No demos yet.</p>
       ) : (
         <TagFilter>
-          {projects.map((project) => (
-            <ProjectCard project={project} layout={projects.length === 1 ? 'feature' : 'card'} />
+          {shipped.map((project) => (
+            <ProjectCard project={project} layout={shipped.length === 1 ? 'feature' : 'card'} />
           ))}
         </TagFilter>
       )
     }
   </div>
+
+  {
+    samples.length > 0 && (
+      <section class="mt-16" id="samples" aria-labelledby="sample-demos">
+        <h2 id="sample-demos" class="font-serif text-3xl">Sample archive</h2>
+        <p class="mt-2 max-w-[65ch] text-sm leading-6 text-muted">
+          These pages show the file format. They are not finished work. The addresses stay so older links still open.
+        </p>
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          {samples.map((project) => (
+            <ProjectCard project={project} />
+          ))}
+        </div>
+      </section>
+    )
+  }
 </BaseLayout>
