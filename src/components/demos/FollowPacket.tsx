@@ -9,6 +9,7 @@ import {
   routeQuestion,
   type Hop,
 } from './packet';
+import { FirstExperiment, Legend, Swatch, TechnicalDetail } from './Workbench';
 
 /**
  * Animated walk through one A2A task that calls an MCP tool.
@@ -30,6 +31,15 @@ function useReducedMotion(): boolean {
   return reduced;
 }
 
+function StationShape({ id, on }: { id: string; on: boolean }) {
+  const ring = on ? 'ring-2 ring-accent ring-offset-2 ring-offset-card' : '';
+  if (id === 'client') return <span className={`inline-block h-10 w-10 rounded-md border-2 border-ink bg-card ${ring}`} />;
+  if (id === 'card') return <span className={`inline-block h-10 w-8 rounded-sm border-2 border-ink bg-card ${ring}`} />;
+  if (id === 'server') return <span className={`inline-block h-10 w-12 rounded-full bg-ink ${ring}`} />;
+  if (id === 'agent') return <span className={`inline-block h-10 w-10 rounded-md border border-accent bg-accent-soft ${ring}`} />;
+  return <span className={`inline-block h-10 w-10 rounded-md border-2 border-dashed border-highlight bg-card ${ring}`} />;
+}
+
 function choiceClass(on: boolean): string {
   return `min-h-11 rounded-full px-3 py-2 text-left text-sm ${
     on ? 'bg-ink text-paper' : 'border border-line bg-paper text-ink'
@@ -43,6 +53,7 @@ export default function FollowPacket() {
   const [question, setQuestion] = useState<string>(PRESETS[0]);
   const [draft, setDraft] = useState('');
   const [description, setDescription] = useState(DEFAULT_DESCRIPTION);
+  const [routeNote, setRouteNote] = useState('');
   const [streaming, setStreaming] = useState(false);
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -141,6 +152,32 @@ export default function FollowPacket() {
 
   const packetX = 56 + pos * 132;
 
+  function applyVagueCard() {
+    const before = routeQuestion(PRESETS[0], DEFAULT_DESCRIPTION);
+    const finder = before.scores.find((item) => item.id === 'finder');
+    setDraft('');
+    setQuestion(PRESETS[0]);
+    setDescription('A helpful assistant.');
+    setIndex(0);
+    setPlaying(false);
+    setRouteNote(
+      `With the clinic card, “${PRESETS[0]}” scores the clinic finder ${finder?.score ?? 0} and ${
+        before.winnerId === 'finder' ? 'routes there' : 'does not route there'
+      }. The card is now “A helpful assistant.” Read the scores: the overlapping words are gone, so the handoff should stop.`,
+    );
+  }
+
+  function restoreClinicCard() {
+    setDescription(DEFAULT_DESCRIPTION);
+    setQuestion(PRESETS[0]);
+    setDraft('');
+    setIndex(0);
+    setPlaying(false);
+    setRouteNote(
+      'The clinic card is back. The same pediatrician question should score the clinic finder again, because the description names a clinic, a city, and a pediatrician.',
+    );
+  }
+
   return (
     <div
       ref={regionRef}
@@ -162,6 +199,25 @@ export default function FollowPacket() {
         A scripted directory of fictional clinics. No language model and no network. Click the demo, then use the
         left and right arrow keys to change hops. Typing in a field keeps the arrows for the text.
       </p>
+
+      <FirstExperiment
+        title="Change the card, then watch the route"
+        actions={
+          <>
+            <button type="button" className="btn btn-solid min-h-11" onClick={applyVagueCard}>
+              Make the card vague
+            </button>
+            <button type="button" className="btn btn-line min-h-11" onClick={restoreClinicCard}>
+              Restore the clinic card
+            </button>
+          </>
+        }
+      >
+        Ask for a pediatrician in Seattle with the clinic card, then replace that card with “A helpful assistant.”
+        The score is a count of overlapping words, not a model. A vague sentence should drop the clinic finder to
+        zero and leave the question unrouted.
+      </FirstExperiment>
+      {routeNote ? <p className="mt-3 text-sm leading-6">{routeNote}</p> : null}
 
       <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Example questions">
         {PRESETS.map((preset) => (
@@ -263,27 +319,37 @@ export default function FollowPacket() {
         <p className="mt-2 text-sm text-muted">Reduced motion is on, so Play stays off and each step appears at once.</p>
       ) : null}
 
-      <svg viewBox="0 0 640 96" className="mt-4 h-auto w-full" role="img" aria-label={`Packet at ${STATIONS[hop.station].label}`}>
-        <line x1="56" y1="36" x2="584" y2="36" stroke="var(--line)" strokeWidth="2" />
-        {STATIONS.map((station, stationIndex) => {
-          const x = 56 + stationIndex * 132;
-          const on = stationIndex === hop.station;
-          return (
-            <g key={station.id}>
-              <circle cx={x} cy="36" r={on ? 16 : 12} fill={on ? 'var(--ink)' : 'var(--card)'} stroke="var(--ink)" strokeWidth="1.5" />
-              <text x={x} y="72" textAnchor="middle" fill="var(--muted)" fontSize="12" fontFamily="ui-monospace, monospace">
-                {station.label}
-              </text>
-            </g>
-          );
-        })}
-        <g transform={`translate(${packetX} 36)`}>
-          <rect x="-18" y="-10" width="36" height="20" rx="6" fill="var(--accent)" />
-          <text textAnchor="middle" y="4" fill="var(--paper)" fontSize="10" fontFamily="ui-monospace, monospace">
-            msg
-          </text>
-        </g>
-      </svg>
+      <div className="relative mt-4" aria-hidden="true">
+        <div className="absolute top-5 right-[10%] left-[10%] h-px bg-line" />
+        <ol className="relative grid grid-cols-5 gap-1">
+          {STATIONS.map((station, stationIndex) => {
+            const on = stationIndex === hop.station;
+            return (
+              <li key={station.id} className="flex flex-col items-center gap-2">
+                <StationShape id={station.id} on={on} />
+                <span className={`text-center text-xs ${on ? 'font-medium text-ink' : 'text-muted'}`}>{station.label}</span>
+              </li>
+            );
+          })}
+        </ol>
+        <div
+          className="pointer-events-none absolute top-1.5"
+          style={{ left: `calc(${(packetX - 56) / (132 * 4)} * 80% + 10% - 1.4rem)` }}
+        >
+          <span className="inline-flex h-7 items-center rounded-md bg-accent px-2 font-mono text-[10px] text-paper">msg</span>
+        </div>
+      </div>
+      <p className="sr-only">Packet at {STATIONS[hop.station].label}.</p>
+      <Legend
+        items={[
+          { swatch: <Swatch className="rounded-md border-2 border-ink bg-card" />, label: 'Client, sends the question' },
+          { swatch: <Swatch className="rounded-sm border-2 border-ink bg-card" />, label: 'Agent Card' },
+          { swatch: <Swatch className="rounded-full bg-ink" />, label: 'A2A task' },
+          { swatch: <Swatch className="rounded-md border border-accent bg-accent-soft" />, label: 'Agent, opaque' },
+          { swatch: <Swatch className="rounded-md border-2 border-dashed border-highlight bg-card" />, label: 'MCP tool' },
+          { swatch: <Swatch className="rounded-sm bg-accent" />, label: 'Message packet' },
+        ]}
+      />
 
       <ol className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5" aria-label="Hops">
         {hops.map((item, hopIndex) => {
@@ -308,21 +374,21 @@ export default function FollowPacket() {
         })}
       </ol>
 
-      <p className="mt-4 text-base leading-7" aria-live="polite">
+      <p className="mt-4 max-w-[65ch] text-base leading-7" aria-live="polite">
         {hop.plain}
       </p>
 
-      <div className="mt-4">
-        <h4 id={jsonId} className="font-mono text-xs tracking-wide text-muted uppercase">
-          On this hop
-        </h4>
+      <TechnicalDetail summary="Technical detail for this hop">
+        <p id={jsonId} className="text-sm text-muted">
+          {hop.preface}
+        </p>
         <pre
           aria-labelledby={jsonId}
-          className="mt-2 max-h-80 overflow-auto rounded-xl border border-line bg-paper p-3 text-xs leading-5 whitespace-pre-wrap"
+          className="mt-2 max-h-80 overflow-auto font-mono text-xs leading-5 whitespace-pre-wrap"
         >
-          {`${hop.preface}\n\n${JSON.stringify(hop.body, null, 2)}`}
+          {JSON.stringify(hop.body, null, 2)}
         </pre>
-      </div>
+      </TechnicalDetail>
 
       <div className="mt-6 border-t border-line pt-4">
         <h4 className="font-serif text-xl">Would an orchestrator pick this agent?</h4>

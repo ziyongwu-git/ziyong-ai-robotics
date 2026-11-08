@@ -1,38 +1,38 @@
 <!--
-  Original drawing for the note on A2A and MCP.
-  Its colors stay put in light and dark mode, the same way the other covers do.
+  Original drawing for the note on how agents talk.
+  Plan reader, clinic finder, and the directory tool. A2A between agents, MCP to the tool.
+  ASCII only. Colors stay put in both themes.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" fill="none">
-  <rect width="960" height="540" fill="#f3eee4"/>
+  <rect width="960" height="540" fill="#f6f3ec"/>
   <pattern id="talk-dots" width="28" height="28" patternUnits="userSpaceOnUse">
-    <circle cx="1" cy="1" r="1.15" fill="#e3d7c6"/>
+    <circle cx="1" cy="1" r="1.15" fill="#e4dace"/>
   </pattern>
   <rect width="960" height="540" fill="url(#talk-dots)"/>
-  <circle cx="180" cy="140" r="90" fill="#f6e6d8"/>
-  <circle cx="760" cy="400" r="120" fill="#e7f3ef"/>
+  <circle cx="160" cy="100" r="70" fill="#f6e4d4"/>
+  <circle cx="800" cy="450" r="100" fill="#d9efe9"/>
 
-  <rect x="70" y="120" width="250" height="280" rx="28" fill="#fffdf8" stroke="#e4d9c8" stroke-width="2"/>
-  <text x="195" y="180" text-anchor="middle" fill="#9a3412" font-family="ui-monospace, monospace" font-size="16">AGENT</text>
-  <text x="195" y="230" text-anchor="middle" fill="#1c1915" font-family="Georgia, serif" font-size="28">Plan reader</text>
-  <text x="195" y="276" text-anchor="middle" fill="#5c564c" font-family="Georgia, serif" font-size="18">another stack</text>
-  <text x="195" y="330" text-anchor="middle" fill="#5c564c" font-family="Georgia, serif" font-size="16">sees a card,</text>
-  <text x="195" y="356" text-anchor="middle" fill="#5c564c" font-family="Georgia, serif" font-size="16">not the tools</text>
+  <rect x="60" y="140" width="250" height="250" rx="28" fill="#fffdf8" stroke="#1c1915" stroke-width="2"/>
+  <text x="185" y="196" text-anchor="middle" fill="#7c2d12" font-family="ui-monospace, monospace" font-size="15">CLIENT</text>
+  <text x="185" y="244" text-anchor="middle" fill="#1c1915" font-family="Georgia, serif" font-size="28">Plan reader</text>
+  <text x="185" y="290" text-anchor="middle" fill="#5c564c" font-family="Georgia, serif" font-size="18">another stack</text>
+  <text x="185" y="340" text-anchor="middle" fill="#5c564c" font-family="Georgia, serif" font-size="16">sees a card</text>
 
-  <path d="M330 230 H430" stroke="#1c1915" stroke-width="2.5"/>
-  <path d="M418 222 L436 230 L418 238" stroke="#1c1915" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M430 290 H330" stroke="#0f5c52" stroke-width="2.5"/>
-  <path d="M342 282 L324 290 L342 298" stroke="#0f5c52" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <rect x="348" y="196" width="64" height="28" rx="8" fill="#9a3412"/>
-  <text x="380" y="215" text-anchor="middle" fill="#fffdf8" font-family="ui-monospace, monospace" font-size="13">A2A</text>
+  <path d="M320 230 H 420" stroke="#1c1915" stroke-width="2.5"/>
+  <path d="M408 222 L 426 230 L 408 238" stroke="#1c1915" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M420 300 H 320" stroke="#0a534a" stroke-width="2.5"/>
+  <path d="M332 292 L 314 300 L 332 308" stroke="#0a534a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="338" y="198" width="64" height="28" rx="8" fill="#7c2d12"/>
+  <text x="370" y="217" text-anchor="middle" fill="#fffdf8" font-family="ui-monospace, monospace" font-size="13">A2A</text>
 
-  <rect x="450" y="90" width="280" height="250" rx="28" fill="#fffdf8" stroke="#e4d9c8" stroke-width="2"/>
-  <text x="590" y="150" text-anchor="middle" fill="#9a3412" font-family="ui-monospace, monospace" font-size="16">AGENT</text>
-  <text x="590" y="198" text-anchor="middle" fill="#1c1915" font-family="Georgia, serif" font-size="28">Clinic finder</text>
-  <text x="590" y="244" text-anchor="middle" fill="#5c564c" font-family="Georgia, serif" font-size="18">LangGraph inside</text>
-  <text x="590" y="286" text-anchor="middle" fill="#0f5c52" font-family="ui-monospace, monospace" font-size="15">MCP client</text>
+  <rect x="440" y="110" width="280" height="230" rx="28" fill="#f6e4d4" stroke="#7c2d12" stroke-width="2"/>
+  <text x="580" y="166" text-anchor="middle" fill="#7c2d12" font-family="ui-monospace, monospace" font-size="15">AGENT</text>
+  <text x="580" y="214" text-anchor="middle" fill="#1c1915" font-family="Georgia, serif" font-size="28">Clinic finder</text>
+  <text x="580" y="258" text-anchor="middle" fill="#5c564c" font-family="Georgia, serif" font-size="18">prompt stays inside</text>
+  <text x="580" y="296" text-anchor="middle" fill="#0a534a" font-family="ui-monospace, monospace" font-size="15">MCP client</text>
 
-  <path d="M620 340 V390" stroke="#0f5c52" stroke-width="2" stroke-dasharray="5 5"/>
-  <rect x="500" y="390" width="280" height="100" rx="20" fill="#f7fbf9" stroke="#0f5c52" stroke-width="2"/>
-  <text x="640" y="430" text-anchor="middle" fill="#0f5c52" font-family="ui-monospace, monospace" font-size="15">MCP TOOL</text>
-  <text x="640" y="462" text-anchor="middle" fill="#1c1915" font-family="Georgia, serif" font-size="20">find_clinics</text>
+  <path d="M580 340 V 390" stroke="#0a534a" stroke-width="2" stroke-dasharray="5 5"/>
+  <rect x="470" y="390" width="280" height="100" rx="18" fill="#fffdf8" stroke="#0a534a" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="610" y="430" text-anchor="middle" fill="#0a534a" font-family="ui-monospace, monospace" font-size="15">TOOL</text>
+  <text x="610" y="460" text-anchor="middle" fill="#1c1915" font-family="Georgia, serif" font-size="22">find_clinics</text>
 </svg>

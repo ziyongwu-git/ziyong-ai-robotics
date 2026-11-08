@@ -1,0 +1,23 @@
+---
+/**
+ * A callout that sends the reader to a demo and names the action.
+ * The demo has to perform that action. This box does not pretend to.
+ */
+interface Props {
+  href: string;
+  title: string;
+}
+
+const { href, title } = Astro.props;
+---
+
+<aside class="not-prose my-6 rounded-2xl border border-highlight bg-highlight-soft px-4 py-4">
+  <p class="font-mono text-xs tracking-[0.14em] text-highlight uppercase">Try it</p>
+  <h3 class="mt-1 font-serif text-2xl text-ink">{title}</h3>
+  <div class="mt-2 max-w-[65ch] text-sm leading-6 text-ink">
+    <slot />
+  </div>
+  <p class="mt-3">
+    <a class="text-sm font-medium text-accent underline decoration-line underline-offset-4" href={href}>{title}</a>
+  </p>
+</aside>

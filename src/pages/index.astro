@@ -1,60 +1,63 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BuiltOn from '../components/BuiltOn.astro';
-import CertCard from '../components/CertCard.astro';
-import HeroFigure from '../components/HeroFigure.astro';
 import LearningCard from '../components/LearningCard.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import TabletopVla from '../components/demos/TabletopVla.tsx';
 import { site } from '../config';
-import { getFeaturedProjects, getLearningPosts, getProjects, workCounts } from '../lib/content';
-import { certsFor, currentlyLearning } from '../lib/certifications';
+import { experimentHint } from '../lib/experiments';
+import { getFeaturedProjects, getLearningPosts, isSampleNote, workCounts } from '../lib/content';
+import { certsFor, currentlyLearning, usesCertification, certificationIds } from '../lib/certifications';
 
-const posts = (await getLearningPosts()).slice(0, 3);
+const posts = (await getLearningPosts()).filter((post) => !isSampleNote(post));
 const featured = await getFeaturedProjects();
-const gallery = featured.length > 0 ? featured : await getProjects();
-const stage = gallery.find((item) => item.id === 'see-think-move');
+const stage = featured.find((item) => item.id === 'see-think-move') ?? featured[0];
+const gallery = featured.filter((item) => item.id !== stage?.id);
 const homeCerts = currentlyLearning();
 const certCounts = await Promise.all(homeCerts.map(async (cert) => ({ cert, ...(await workCounts(cert.id)) })));
+
+function pairedDemo(post: (typeof posts)[number]) {
+  return featured.find((project) =>
+    usesCertification(project.data.certification, certificationIds(post.data.certification)),
+  );
+}
 ---
 
 <BaseLayout title={site.name} description={site.description}>
-  <section class="grid items-center gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(280px,0.95fr)]">
-    <div class="enter">
-      <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">Public notebook</p>
-      <h1 class="mt-3 font-serif text-5xl text-ink sm:text-7xl">{site.name}</h1>
-      <p class="mt-4 max-w-xl font-serif text-2xl italic leading-snug text-ink sm:text-3xl">
-        Demos you can poke, notes worth keeping, certificates they sit on.
-      </p>
-      <p class="mt-6 max-w-xl text-base leading-7 text-muted">
-        A public notebook about AI, data, and machines that move. Start with something you can click. Pages marked
-        Sample show the format.
-      </p>
-      <div class="mt-6 flex flex-wrap gap-3">
-        <a class="btn btn-solid" href="#demos">Play a demo</a>
-        <a class="btn btn-line" href="/learning">Read the notes</a>
-      </div>
-    </div>
-    <HeroFigure />
-  </section>
+  <header class="enter max-w-[65ch]">
+    <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">Public notebook</p>
+    <h1 class="mt-3 font-serif text-5xl text-ink sm:text-6xl">{site.name}</h1>
+    <p class="mt-4 font-serif text-2xl italic leading-snug text-ink">
+      I learn this in public, and I leave the toys where you can try the idea yourself.
+    </p>
+    <p class="mt-5 text-base leading-7">
+      This is a notebook about AI, data, and machines that move. The demos run in the browser. The notes say what I
+      want to remember, and which certificate each one sits on. The longer biography is on About.
+    </p>
+  </header>
 
   {
     stage && (
-      <section class="enter-late mt-14 scroll-mt-24" id="demos" aria-labelledby="stage-heading">
+      <section class="enter-late mt-12 scroll-mt-24" id="demos" aria-labelledby="stage-heading">
         <div class="overflow-hidden rounded-[2rem] border border-line bg-card">
-          <div class="flex flex-wrap items-end justify-between gap-4 p-5 sm:p-7">
-            <div class="max-w-2xl">
-              <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">Live demo</p>
+          <div class="flex flex-wrap items-end justify-between gap-4 border-b border-line p-5 sm:p-7">
+            <div class="max-w-[65ch]">
+              <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">One demo to start</p>
               <h2 id="stage-heading" class="mt-2 font-serif text-4xl">
                 <a class="hover:text-accent" href={`/demos/${stage.id}`}>
                   {stage.data.title}
                 </a>
               </h2>
               <p class="mt-3 text-base leading-7 text-muted">{stage.data.summary}</p>
+              <p class="mt-3 text-sm leading-6">
+                <a class="text-accent underline decoration-line underline-offset-4" href={`/demos/${stage.id}#demo`}>
+                  Open the full page
+                </a>
+              </p>
             </div>
             <BuiltOn certs={certsFor(stage.data.certification)} layout="compact" />
           </div>
-          <div class="px-3 pb-4 sm:px-5 sm:pb-6">
+          <div class="px-3 py-4 sm:px-5 sm:py-6">
             <TabletopVla client:load />
           </div>
         </div>
@@ -62,23 +65,21 @@ const certCounts = await Promise.all(homeCerts.map(async (cert) => ({ cert, ...(
     )
   }
 
-  <section class:list={['mt-14', !stage && 'scroll-mt-24']} aria-labelledby="gallery-heading" id={stage ? undefined : 'demos'}>
+  <section class="mt-14" aria-labelledby="gallery-heading">
     <div class="flex flex-wrap items-end justify-between gap-3">
-      <h2 id="gallery-heading" class="font-serif text-3xl">Demos</h2>
+      <h2 id="gallery-heading" class="font-serif text-3xl">Shipped demos</h2>
       <a class="text-sm text-accent underline decoration-line underline-offset-4" href="/demos">All demos</a>
     </div>
-    <p class="mt-2 max-w-2xl text-sm leading-6 text-muted">
-      Small experiments you can move. Swipe the row, or open a card.
+    <p class="mt-2 max-w-[65ch] text-sm leading-6 text-muted">
+      Each card is a toy you can run. The sample arm stays in the archive, at its old address.
     </p>
     {
       gallery.length === 0 ? (
-        <p class="mt-6 text-muted">No demos yet. New files in src/content/projects/ show up here.</p>
+        <p class="mt-6 text-muted">No other shipped demos yet.</p>
       ) : (
-        <div class="mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 lg:grid lg:grid-cols-3 lg:overflow-visible lg:pb-0">
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
           {gallery.map((project) => (
-            <div class="w-[85%] shrink-0 snap-start sm:w-[22rem] lg:w-full lg:shrink">
-              <ProjectCard project={project} layout="card" />
-            </div>
+            <ProjectCard project={project} layout="card" />
           ))}
         </div>
       )
@@ -90,14 +91,30 @@ const certCounts = await Promise.all(homeCerts.map(async (cert) => ({ cert, ...(
       <h2 id="notes-heading" class="font-serif text-3xl">Notes</h2>
       <a class="text-sm text-accent underline decoration-line underline-offset-4" href="/learning">All notes</a>
     </div>
+    <p class="mt-2 max-w-[65ch] text-sm leading-6 text-muted">
+      Standalone explainers, each paired with the demo that lets you try the same idea.
+    </p>
     {
       posts.length === 0 ? (
-        <p class="mt-6 text-muted">No notes yet. New files in src/content/learning/ show up here.</p>
+        <p class="mt-6 text-muted">No notes yet.</p>
       ) : (
-        <div class="mt-6 space-y-5">
-          {posts.map((post, index) => (
-            <LearningCard post={post} layout={index === 0 ? 'feature' : 'row'} />
-          ))}
+        <div class="mt-6 space-y-8">
+          {posts.map((post) => {
+            const demo = pairedDemo(post);
+            return (
+              <div>
+                <LearningCard post={post} layout="feature" />
+                {demo && (
+                  <p class="mt-3 max-w-[65ch] text-sm leading-6">
+                    <a class="font-medium text-accent underline decoration-line underline-offset-4" href={`/demos/${demo.id}#demo`}>
+                      Try it in {demo.data.title}
+                    </a>
+                    <span class="text-muted"> — {experimentHint(demo.id)}</span>
+                  </p>
+                )}
+              </div>
+            );
+          })}
         </div>
       )
     }
@@ -110,18 +127,25 @@ const certCounts = await Promise.all(homeCerts.map(async (cert) => ({ cert, ...(
         All certificates
       </a>
     </div>
-    <p class="mt-2 max-w-2xl text-sm leading-6 text-muted">
-      DeepLearning.AI certificates the demos and notes are built on. Each card opens the certificate and the work that uses it.
+    <p class="mt-2 max-w-[65ch] text-sm leading-6 text-muted">
+      DeepLearning.AI certificates these demos and notes are built on. The count is the work that names that certificate.
     </p>
     {
       certCounts.length === 0 ? (
         <p class="mt-6 text-muted">No DeepLearning.AI certificates are marked for the home row yet.</p>
       ) : (
-        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul class="mt-4 divide-y divide-line border-y border-line">
           {certCounts.map(({ cert, demos, notes }) => (
-            <CertCard cert={cert} demos={demos} notes={notes} />
+            <li>
+              <a class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3 hover:text-accent" href={`/certificates/${cert.id}`}>
+                <span class="font-serif text-xl">{cert.name}</span>
+                <span class="font-mono text-xs text-muted">
+                  {cert.date} · {demos === 1 ? '1 demo' : `${demos} demos`} · {notes === 1 ? '1 note' : `${notes} notes`}
+                </span>
+              </a>
+            </li>
           ))}
-        </div>
+        </ul>
       )
     }
   </section>

@@ -1,8 +1,9 @@
-import { useEffect, useId, useReducer, useRef, useState } from 'react';
+import { useEffect, useId, useReducer, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import {
   BLOCK_FILL,
   FLOW_MAX,
   PRESETS,
+  RED_ASIDE,
   GRASP,
   blend,
   blockById,
@@ -15,6 +16,7 @@ import {
   type DemoState,
   type Waypoint,
 } from './tabletop';
+import { FirstExperiment, Legend, ResultPanel, Swatch, TechnicalDetail } from './Workbench';
 
 /**
  * Interactive picture of a vision-language-action loop.
@@ -78,6 +80,8 @@ export default function TabletopVla() {
   const [actT, setActT] = useState(0);
   const seenAct = useRef(state.actId);
   const reduced = useReducedMotion();
+  const svgRef = useRef<SVGSVGElement>(null);
+  const dragging = useRef<BlockId | null>(null);
 
   // A new move should start at the hand, not on the last frame of the previous one.
   if (state.phase === 'act' && seenAct.current !== state.actId) {
@@ -129,6 +133,39 @@ export default function TabletopVla() {
       : 'Fewer than four steps stop early, and the gripper can miss.';
 
   const aria = describe(state);
+  const canDrag = (state.phase === 'ready' || state.phase === 'finished') && !state.playing && !state.table.gripper.holding;
+
+  function localPoint(event: { clientX: number; clientY: number }) {
+    const svg = svgRef.current;
+    if (!svg) return null;
+    const rect = svg.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return null;
+    return {
+      x: ((event.clientX - rect.left) / rect.width) * scene.view.w,
+      y: ((event.clientY - rect.top) / rect.height) * scene.view.h,
+    };
+  }
+
+  function onBlockDown(id: BlockId, event: ReactPointerEvent<SVGGElement>) {
+    if (!canDrag) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragging.current = id;
+  }
+
+  function onBlockMove(id: BlockId, event: ReactPointerEvent<SVGGElement>) {
+    if (dragging.current !== id) return;
+    const point = localPoint(event);
+    if (!point) return;
+    dispatch({ type: 'moveBlock', id, x: point.x, y: point.y });
+  }
+
+  function onBlockUp(id: BlockId, event: ReactPointerEvent<SVGGElement>) {
+    if (dragging.current !== id) return;
+    dragging.current = null;
+    const point = localPoint(event);
+    if (!point) return;
+    dispatch({ type: 'moveBlock', id, x: point.x, y: point.y, record: true });
+  }
 
   return (
     <div className="not-prose rounded-2xl border border-line bg-card p-4 text-ink sm:p-6" data-phase={state.phase}>
@@ -137,7 +174,42 @@ export default function TabletopVla() {
         <p className="rounded-full bg-accent-soft px-3 py-1 text-sm">{PHASE_LABEL[state.phase]}</p>
       </div>
 
-      <ol className="mt-4 flex flex-wrap gap-2" aria-label="Stages of the loop">
+      <FirstExperiment
+        title="Move the red block, then run"
+        actions={
+          <>
+            <button
+              type="button"
+              className="btn btn-solid min-h-11"
+              onClick={() => dispatch({ type: 'moveBlock', id: 'red', x: RED_ASIDE.x, y: RED_ASIDE.y, record: true })}
+            >
+              Move the red block
+            </button>
+            <button
+              type="button"
+              className="btn btn-line min-h-11"
+              onClick={() => {
+                const text = 'Put the red block in the tray';
+                if (reduced) {
+                  dispatch({ type: 'text', text });
+                  dispatch({ type: 'finishNow' });
+                  return;
+                }
+                dispatch({ type: 'run', reduced, text });
+              }}
+            >
+              Run the same instruction
+            </button>
+          </>
+        }
+      >
+        Drag a block, or use the button. Then run the tray instruction. The tokens should name the new spot, and the
+        thick path should aim there. Fewer than four flow steps can still miss, and the panel says by how much.
+      </FirstExperiment>
+
+      <div className="mt-4 grid items-start gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(16rem,0.72fr)]">
+      <div>
+      <ol className="mt-0 flex flex-wrap gap-2" aria-label="Stages of the loop">
         {STAGES.map((item) => {
           const on = item.id === stage;
           return (
@@ -155,9 +227,10 @@ export default function TabletopVla() {
       </ol>
 
       <svg
+        ref={svgRef}
         viewBox={`0 0 ${scene.view.w} ${scene.view.h}`}
-        className="mt-4 h-auto w-full"
-        role="img"
+        className="mt-4 h-auto w-full touch-none"
+        role="group"
         aria-label={aria}
       >
         <defs>
@@ -277,24 +350,40 @@ export default function TabletopVla() {
           .filter((item) => item.id !== pose.hide)
           .sort((a, b) => a.z - b.z || a.y - b.y)
           .map((item) => (
-            <Block key={item.id} id={item.id} x={item.x} y={item.y} />
+            <Block
+              key={item.id}
+              id={item.id}
+              x={item.x}
+              y={item.y}
+              draggable={canDrag}
+              onPointerDown={(event) => onBlockDown(item.id, event)}
+              onPointerMove={(event) => onBlockMove(item.id, event)}
+              onPointerUp={(event) => onBlockUp(item.id, event)}
+            />
           ))}
         {pose.ghost && <Block id={pose.ghost.id} x={pose.ghost.x} y={pose.ghost.y} />}
         <Gripper x={pose.x} y={pose.y} open={pose.open} />
       </svg>
 
-      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
-        <span>Dashed: the noisy start.</span>
-        <span>Thin: the geometric answer.</span>
-        <span>Thick: where the flow has pulled the path.</span>
+      <Legend
+        items={[
+          { swatch: <Swatch className="rounded-sm bg-[#c4492c]" />, label: 'Block, letter plus color' },
+          { swatch: <Swatch className="rounded-sm border border-dashed border-highlight" />, label: 'Tray' },
+          { swatch: <Swatch className="rounded-full border-2 border-muted bg-transparent" />, label: 'Dashed path, noisy start' },
+          { swatch: <Swatch className="rounded-full bg-highlight" />, label: 'Thin path, geometric answer' },
+          { swatch: <Swatch className="rounded-full bg-accent" />, label: 'Thick path, where the flow has pulled' },
+        ]}
+      />
       </div>
-
-      <div className="mt-4">
-        <p className="font-mono text-xs tracking-wide text-muted uppercase">Seen tokens</p>
-        {state.tokens.length === 0 ? (
-          <p className="mt-2 text-sm text-muted">Tokens show up here when the toy looks at the table.</p>
-        ) : (
-          <ul className="mt-2 flex flex-wrap gap-2">
+      <ResultPanel title="What changed">
+        <p>{state.sentence}</p>
+        {state.note ? <p className="text-muted">{state.note}</p> : null}
+        <p className="font-mono text-xs text-muted">
+          Phase {PHASE_LABEL[state.phase]}
+          {state.phase === 'flow' ? ` · flow ${state.flowFrame} / ${state.flowSteps}` : ''}
+        </p>
+        {state.tokens.length > 0 ? (
+          <ul className="flex flex-wrap gap-2">
             {state.tokens.map((token, index) => (
               <li
                 key={token.id}
@@ -306,20 +395,26 @@ export default function TabletopVla() {
               </li>
             ))}
           </ul>
+        ) : (
+          <p className="text-muted">Tokens show up when the toy looks at the table.</p>
         )}
-      </div>
-
-      <div className="mt-4" aria-live="polite">
-        <p className="font-mono text-xs tracking-wide text-muted uppercase">Plan</p>
-        <p className="mt-1 font-serif text-xl leading-snug">{state.sentence}</p>
-        {state.note ? <p className="mt-1 text-sm text-muted">{state.note}</p> : null}
+        {state.journal.length > 0 ? (
+          <ol className="list-decimal space-y-1 pl-5">
+            {state.journal.map((line, index) => (
+              <li key={`${index}-${line.slice(0, 24)}`}>{line}</li>
+            ))}
+          </ol>
+        ) : (
+          <p className="text-muted">Nothing has moved yet.</p>
+        )}
+      </ResultPanel>
       </div>
 
       <form
         className="mt-5 flex flex-col gap-2 sm:flex-row"
         onSubmit={(event) => {
           event.preventDefault();
-          dispatch({ type: 'run', reduced });
+          dispatch(reduced ? { type: 'finishNow' } : { type: 'run', reduced });
         }}
       >
         <label htmlFor={`${markerId}-instruction`} className="sr-only">
@@ -344,7 +439,14 @@ export default function TabletopVla() {
             type="button"
             className={choiceClass(state.text === preset.text)}
             aria-pressed={state.text === preset.text}
-            onClick={() => dispatch({ type: 'run', reduced, text: preset.text })}
+            onClick={() => {
+              if (reduced) {
+                dispatch({ type: 'text', text: preset.text });
+                dispatch({ type: 'finishNow' });
+                return;
+              }
+              dispatch({ type: 'run', reduced, text: preset.text });
+            }}
           >
             {preset.label}
           </button>
@@ -406,6 +508,30 @@ export default function TabletopVla() {
           Play runs the whole loop. Step walks one beat: the next token, the plan, one flow step, or the move.
         </p>
       )}
+      <TechnicalDetail summary="Technical detail">
+        <pre className="max-h-80 overflow-auto font-mono text-xs leading-5 whitespace-pre-wrap">
+          {JSON.stringify(
+            {
+              instruction: state.text,
+              phase: state.phase,
+              flowSteps: state.flowSteps,
+              flowFrame: state.flowFrame,
+              sentence: state.sentence,
+              note: state.note,
+              tokens: state.tokens.map((token) => token.label),
+              blocks: state.table.blocks.map((item) => ({
+                id: item.id,
+                x: Math.round(item.x),
+                y: Math.round(item.y),
+                inTray: item.inTray,
+                on: item.on,
+              })),
+            },
+            null,
+            2,
+          )}
+        </pre>
+      </TechnicalDetail>
       <p className="mt-2 text-sm text-muted">
         No network and no model. The sentences come from a few grammar rules, and the path is geometry. A real
         vision-language-action model would have learned both from data.
@@ -503,11 +629,26 @@ function Target(props: { x: number; y: number }) {
   );
 }
 
-function Block(props: { id: BlockId; x: number; y: number }) {
+function Block(props: {
+  id: BlockId;
+  x: number;
+  y: number;
+  draggable?: boolean;
+  onPointerDown?: (event: ReactPointerEvent<SVGGElement>) => void;
+  onPointerMove?: (event: ReactPointerEvent<SVGGElement>) => void;
+  onPointerUp?: (event: ReactPointerEvent<SVGGElement>) => void;
+}) {
   const half = scene.block / 2;
   const letter = props.id.slice(0, 1).toUpperCase();
   return (
-    <g>
+    <g
+      style={{ cursor: props.draggable ? 'grab' : 'default', touchAction: 'none' }}
+      onPointerDown={props.onPointerDown}
+      onPointerMove={props.onPointerMove}
+      onPointerUp={props.onPointerUp}
+      onPointerCancel={props.onPointerUp}
+    >
+      <title>{`${props.id} block${props.draggable ? ', drag to move' : ''}`}</title>
       <rect
         x={props.x - half}
         y={props.y - half}

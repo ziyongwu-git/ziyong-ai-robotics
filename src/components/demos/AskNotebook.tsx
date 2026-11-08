@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type DragEvent } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import {
   Background,
   Controls,
@@ -25,6 +25,7 @@ import {
   freshId,
   makeEdge,
   makeNode,
+  linearScoreGraph,
   notesGraph,
   parallelExtractGraph,
   reply,
@@ -43,6 +44,7 @@ import {
   type TaskKind,
   type TaskNode,
 } from './notebook';
+import { FirstExperiment, Legend, Swatch, TechnicalDetail } from './Workbench';
 
 /**
  * DAG canvas for Ask the notebook.
@@ -178,6 +180,9 @@ function NotebookCanvas() {
   const [history, setHistory] = useState<Finished[]>([]);
   const [query, setQuery] = useState('');
   const [asked, setAsked] = useState<Reply | null>(null);
+  const [queuedAsk, setQueuedAsk] = useState<string | null>(null);
+  const historyRef = useRef(history);
+  historyRef.current = history;
 
   const graph = useMemo(() => toGraph(nodes, edges), [nodes, edges]);
   const issues = useMemo(() => validateGraph(graph), [graph]);
@@ -311,6 +316,41 @@ function NotebookCanvas() {
     setPlaying(true);
   }
 
+  function signatureOf(next: NotebookGraph): string {
+    return JSON.stringify({
+      nodes: next.nodes,
+      edges: next.edges.map((edge) => [edge.source, edge.target]),
+    });
+  }
+
+  function runGraphNow(next: NotebookGraph) {
+    const result = runGraph(next);
+    if (!result.ok) {
+      setBanner(result.issues[0]?.message ?? 'This DAG cannot run.');
+      setQueuedAsk(null);
+      return;
+    }
+    const stored: Finished = { ...result, number: (historyRef.current[0]?.number ?? 0) + 1 };
+    setFinished(stored);
+    setRanSignature(signatureOf(next));
+    setAsked(null);
+    setHistory((items) => [stored, ...items].slice(0, 4));
+    setBanner(null);
+    if (reduced) {
+      setWave(stored.levels.length);
+      setPlaying(false);
+      return;
+    }
+    setWave(-1);
+    setPlaying(true);
+  }
+
+  function loadAndRun(next: NotebookGraph, question: string) {
+    loadGraph(next);
+    setQueuedAsk(question);
+    runGraphNow(next);
+  }
+
   function ask(text: string) {
     const next = text.trim();
     if (!finished || !done || next.length === 0) return;
@@ -318,6 +358,15 @@ function NotebookCanvas() {
     setQuery(next);
     setAsked(reply(next, finished.passages, scoring));
   }
+
+  useEffect(() => {
+    if (!queuedAsk || !done || !finished) return;
+    const text = queuedAsk;
+    setQueuedAsk(null);
+    const scoring = finished.scorers[0]?.settings ?? { method: 'bm25' as const, topK: 3, useTitle: true };
+    setQuery(text);
+    setAsked(reply(text, finished.passages, scoring));
+  }, [queuedAsk, done, finished]);
 
   const viewNodes = nodes.map((node) => ({
     ...node,
@@ -352,6 +401,25 @@ function NotebookCanvas() {
           <p className="mt-2 text-sm leading-6 text-muted">
             Draw the DAG in this browser. No model is called. Sentences in an answer are copied from the chunks the index kept. Task colors match Airflow’s graph view. The times are real compute time. The waves are the playback.
           </p>
+
+          <FirstExperiment
+            title="Branch two scorers and compare"
+            actions={
+              <>
+                <button type="button" className="btn btn-line min-h-11" onClick={() => loadAndRun(linearScoreGraph(), 'Where do the vectors go?')}>
+                  1. Run one path
+                </button>
+                <button type="button" className="btn btn-solid min-h-11" onClick={() => loadAndRun(dualScoreGraph(), 'Where do the vectors go?')}>
+                  2. Add a parallel scorer
+                </button>
+              </>
+            }
+          >
+            Run one BM25 scorer, then run BM25 beside a keyword count. Both use the question “Where do the vectors go?”
+            One path scores in a single wave. The second run lights two score tasks in the same wave. The scores use
+            different formulas, so the numbers differ even when both quote the same passage. You can still drag edges
+            and ask something else after that.
+          </FirstExperiment>
 
           <div className="mt-4 flex flex-wrap gap-2">
             <button type="button" className="min-h-11 rounded-full border border-line bg-paper px-3 text-sm" onClick={() => loadGraph(parallelExtractGraph())}>
@@ -471,16 +539,57 @@ function NotebookCanvas() {
               <p className="mt-1 text-sm leading-6">
                 Finished in {formatMs(finished.totalMs)}. {finished.levels.length} wave{finished.levels.length === 1 ? '' : 's'}. {finished.label}. {finished.passages.length} passages indexed.
               </p>
-              <ul className="mt-2 space-y-1 text-sm">
+              <ol className="mt-3 space-y-2 text-sm">
+                {finished.levels.map((level, index) => (
+                  <li key={level.join('-')}>
+                    <span className="font-mono text-xs text-muted">Wave {index + 1}</span>
+                    {level.length > 1 ? ' ran together: ' : ': '}
+                    {level.join(', ')}
+                  </li>
+                ))}
+              </ol>
+              <ul className="mt-3 space-y-2 text-sm">
                 {finished.steps.map((step) => (
                   <li key={step.id}>
                     <span className="font-mono text-xs text-muted">{step.id}</span> {step.badge}
-                    <span className="text-muted"> · {formatMs(step.durationMs)}</span>
+                    <span className="text-muted"> · {step.state} · {formatMs(step.durationMs)}</span>
+                    <span className="mt-0.5 block">{step.sentence}</span>
                   </li>
                 ))}
               </ul>
             </section>
           )}
+          <Legend
+            items={[
+              { swatch: <Swatch className="rounded-full bg-[#808080]" />, label: 'Queued' },
+              { swatch: <Swatch className="rounded-full bg-[#32cd32]" />, label: 'Running' },
+              { swatch: <Swatch className="rounded-full bg-[#1f7a32]" />, label: 'Success' },
+              { swatch: <Swatch className="rounded-full bg-[#c62828]" />, label: 'Failed' },
+              { swatch: <Swatch className="rounded-full bg-[#ff69b4]" />, label: 'Skipped' },
+            ]}
+          />
+          <TechnicalDetail summary="Technical detail">
+            <pre className="max-h-80 overflow-auto font-mono text-xs leading-5 whitespace-pre-wrap">
+              {JSON.stringify(
+                {
+                  nodes: graph.nodes.map((node) => ({ id: node.id, kind: node.kind, settings: node.settings })),
+                  edges: graph.edges.map((edge) => [edge.source, edge.target]),
+                  steps: finished && fresh
+                    ? finished.steps.map((step) => ({
+                        id: step.id,
+                        state: step.state,
+                        badge: step.badge,
+                        in: step.inputCount,
+                        out: step.outputCount,
+                        sentence: step.sentence,
+                      }))
+                    : [],
+                },
+                null,
+                2,
+              )}
+            </pre>
+          </TechnicalDetail>
           {finished && !fresh && (
             <p className="mt-3 text-sm text-muted" role="status">
               The graph changed after run {finished.number}. Answers below still use that index until you run again.
@@ -958,8 +1067,16 @@ function SideBySide({
         const answer = reply(query, passagesFor(scorer.id), scorer.settings);
         return (
           <div key={scorer.id} className="rounded-xl border border-line bg-card p-3 text-sm">
-            <p className="font-mono text-xs text-muted">{scorer.settings.method}</p>
-            <p className="mt-1">{answer.hits[0] ? `${answer.hits[0].passage.title} · ${answer.hits[0].score.toFixed(2)}` : 'No match'}</p>
+            <p className="font-mono text-xs text-muted">{scorer.id} · {scorer.settings.method}</p>
+            {answer.hits[0] ? (
+              <>
+                <p className="mt-1">{answer.hits[0].passage.title}</p>
+                <p className="mt-1 font-mono text-xs text-muted">score {answer.hits[0].score.toFixed(2)}</p>
+                <p className="mt-2 text-muted">{answer.hits[0].passage.text.slice(0, 160)}</p>
+              </>
+            ) : (
+              <p className="mt-1">No passage matched. The scorer kept nothing it could quote.</p>
+            )}
           </div>
         );
       })}

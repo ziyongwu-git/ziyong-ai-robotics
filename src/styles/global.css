@@ -170,7 +170,7 @@ h3,
 input[type='range'] {
   width: 100%;
   accent-color: var(--accent);
-  height: 1.6rem;
+  height: 2.75rem;
 }
 
 /*
@@ -178,6 +178,7 @@ input[type='range'] {
  * Point its colors at our tokens so dark mode stays consistent.
  */
 .prose {
+  max-width: 65ch;
   --tw-prose-body: var(--ink);
   --tw-prose-headings: var(--ink);
   --tw-prose-links: var(--accent);
@@ -198,6 +199,10 @@ input[type='range'] {
 .prose :where(h1, h2, h3) {
   font-family: var(--font-serif);
   font-weight: 500;
+}
+
+.prose :where(code, pre, kbd) {
+  font-family: var(--font-mono);
 }
 
 .prose a {

@@ -61,7 +61,7 @@ The header links are the `nav` list in `src/config.ts`.
 
 | URL | Page |
 | --- | --- |
-| `/` | Home: a live demo, then the demo gallery, notes, and the certificate row |
+| `/` | Home: a short introduction, one live demo, the other shipped demos, notes paired with those demos, and a certificate index |
 | `/demos` | Demo index |
 | `/demos/<file-name>` | One demo. The widget is at the top. The explanation follows. |
 | `/learning` | Notes, newest first, with tag filters |
@@ -104,7 +104,7 @@ Rules the build will enforce:
 - `title`, `date`, `tags`, `source`, `summary`, and `certification` are required.
 - `date` is `YYYY-MM-DD`.
 - `tags` is one or more of `ai`, `robotics`, `data`. To allow a new tag, add it to the `tags` array in `src/config.ts`.
-- `source` is the course, paper, video, or book. The label on the page is "Course / source".
+- `source` is the course, paper, video, or book. The label on the page is "Sources & technical references". The field name stays `source`.
 - `certification` is an `id` from `src/data/certifications.ts`, and it has to be a DeepLearning.AI certificate. One id, or a list:
 
   ```yaml
@@ -163,7 +163,7 @@ repo: "https://github.com/ziyongwu-git/my-repo"
 
 - `certification` is required, same rule as on a note.
 - `status` is one of `idea`, `in-progress`, `shipped`, or `sample`. Use `sample` only for format examples. The page shows a placeholder banner when the status is `sample`.
-- `featured: true` puts the demo on the home page. Omit it, or set `false`, to keep it on the demos page only.
+- `featured: true` puts a shipped demo on the home page. Omit it, or set `false`, to keep it on the demos page only. A `sample` stays off the home page even if this is true. It is listed under Sample archive on `/demos`.
 - `date` is optional. Newer dates are listed first.
 - `demo` and `repo` are optional. Leave the line out when you do not have a link. A link must start with `/` (a page on this site), `http://`, or `https://`.
 - `cover` works the same way as on a note.
@@ -241,7 +241,7 @@ DeepLearning.AI ids you can use in `certification`:
 - Name, one-line description, public URL, email, LinkedIn, and GitHub: `src/config.ts`. Email is `ziyong.w@gmail.com` (a `mailto` link in the footer and on About). LinkedIn is `https://www.linkedin.com/in/ziyongwu/`. GitHub is `https://github.com/ziyongwu-git`. Do not add a phone number or a street address. The header and the home page do not list employers, years, or roles. That copy stays in `src/profile.ts` and on About.
 - The resume-style copy (roles, dates, skills, education): `src/profile.ts`. Add a line only when you can point at the source. The public location line stays "Seattle area".
 - Licenses and courses: `src/data/certifications.ts`, not `profile.ts`.
-- Colors and fonts: the two variable blocks at the top of `src/styles/global.css`. The home-page sketch is `src/components/HeroFigure.astro`. Its motion stops when the browser is set to reduced motion. The live tabletop on the home page does the same.
+- Colors and fonts: the two variable blocks at the top of `src/styles/global.css`. Fraunces is for titles, IBM Plex Sans for prose and controls, IBM Plex Mono for technical values and code. The home page leads with the tabletop demo. `src/components/HeroFigure.astro` is an older field sketch and is not on the home page. The live tabletop stops its timer when the browser asks for reduced motion.
 
 The public URL in `src/config.ts` (`url`) is what the sitemap and RSS feed use. It has no trailing slash.
 

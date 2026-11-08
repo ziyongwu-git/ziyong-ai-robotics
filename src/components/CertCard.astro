@@ -24,7 +24,7 @@ const noteLabel = notes === 1 ? '1 note' : `${notes} notes`;
     nested ? 'p-4' : 'p-5',
   ]}
 >
-  <p class="font-mono text-[0.65rem] tracking-[0.16em] text-accent uppercase">
+  <p class="text-sm text-muted">
     {cert.issuer} · {cert.date}
   </p>
   <h3 class:list={['mt-2 font-serif text-ink group-hover:text-accent', nested ? 'text-xl' : 'text-2xl']}>
@@ -35,7 +35,7 @@ const noteLabel = notes === 1 ? '1 note' : `${notes} notes`;
       <p class="mt-2 flex-1 text-sm leading-6 text-muted">{cert.blurb}</p>
     )
   }
-  <p class:list={['font-mono text-xs tracking-wide text-muted uppercase', nested || !cert.blurb ? 'mt-3' : 'mt-4']}>
+  <p class:list={['text-sm text-muted', nested || !cert.blurb ? 'mt-3' : 'mt-4']}>
     {demoLabel} · {noteLabel}
   </p>
 </a>
