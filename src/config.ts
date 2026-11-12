@@ -15,10 +15,18 @@ export type Tag = (typeof tags)[number];
 export const projectStatuses = ['idea', 'in-progress', 'shipped', 'sample'] as const;
 export type ProjectStatus = (typeof projectStatuses)[number];
 
+/**
+ * Build status. A build is a product that shipped.
+ * `live` is up. `building` is not public yet. `paused` is not being updated.
+ */
+export const buildStatuses = ['building', 'live', 'paused'] as const;
+export type BuildStatus = (typeof buildStatuses)[number];
+
 /** Header links. The path has to match a file in src/pages. */
 export const nav = [
   { href: '/', label: 'Home' },
   { href: '/demos', label: 'Demos' },
+  { href: '/builds', label: 'Builds' },
   { href: '/learning', label: 'Notes' },
   { href: '/certificates', label: 'Certificates' },
   { href: '/about', label: 'About' },
@@ -27,10 +35,10 @@ export const nav = [
 export const site = {
   name: 'Ziyong Wu',
   /** One line under the name, also used in the browser tab on the home page. */
-  role: 'Notes and demos on AI, data, and robotics',
+  role: 'Notes, demos, and builds on AI, data, and robotics',
   /** Default sentence for search results and link previews. Career details stay on About. */
   description:
-    'Public notebook of Ziyong Wu: interactive demos, course notes, and DeepLearning.AI certificates on AI, data, and robotics.',
+    'Public notebook of Ziyong Wu: interactive demos, shipped products, course notes, and DeepLearning.AI certificates on AI, data, and robotics.',
   /**
    * Public URL of the deployed site, with no trailing slash.
    * After Vercel gives you a domain, replace this and deploy again.

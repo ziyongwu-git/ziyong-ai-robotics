@@ -4,7 +4,7 @@
  * Decorative. The page heading is the accessible name.
  */
 interface Props {
-  kind: 'learning' | 'projects' | 'certifications';
+  kind: 'learning' | 'projects' | 'certifications' | 'builds';
 }
 
 const { kind } = Astro.props;
@@ -70,6 +70,33 @@ const { kind } = Astro.props;
           <rect x="430" y="48" width="28" height="18" rx="6" fill="var(--accent)" />
           <rect x="500" y="40" width="70" height="36" rx="10" fill="var(--card)" stroke="var(--ink)" />
           <rect x="590" y="40" width="36" height="36" rx="18" fill="var(--ink)" />
+        </g>
+      )
+    }
+    {
+      kind === 'builds' && (
+        <g>
+          <rect x="28" y="24" width="74" height="34" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" />
+          <rect x="112" y="24" width="124" height="34" rx="10" fill="var(--highlight-soft)" stroke="var(--highlight)" />
+          <rect x="246" y="24" width="74" height="34" rx="10" fill="var(--card)" stroke="var(--ink)" />
+          <path
+            d="M283 58 V74 H468"
+            fill="none"
+            stroke="var(--ink)"
+            stroke-opacity="0.4"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+          <rect x="468" y="58" width="140" height="30" rx="10" fill="var(--card)" stroke="var(--highlight)" />
+          <g>
+            <rect x="28" y="86" width="20" height="20" rx="4" fill="var(--card)" stroke="var(--line)" />
+            <rect x="54" y="86" width="20" height="20" rx="4" fill="var(--highlight)" />
+            <rect x="80" y="86" width="20" height="20" rx="4" fill="var(--card)" stroke="var(--line)" />
+            <rect x="106" y="86" width="20" height="20" rx="4" fill="var(--card)" stroke="var(--line)" />
+            <rect x="132" y="86" width="20" height="20" rx="4" fill="var(--accent)" />
+            <rect x="158" y="86" width="20" height="20" rx="4" fill="var(--card)" stroke="var(--line)" />
+            <rect x="184" y="86" width="20" height="20" rx="4" fill="var(--highlight)" />
+          </g>
         </g>
       )
     }

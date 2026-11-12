@@ -16,8 +16,8 @@ function isActive(href: string): boolean {
 ---
 
 <header class="sticky top-0 z-20 border-b border-line bg-paper/90 backdrop-blur-md">
-  <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-3 px-5 py-3 sm:px-8">
-    <a href="/" class="flex items-center gap-2 text-ink">
+  <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-2 px-5 py-3 sm:px-8">
+    <a href="/" class="mr-auto flex items-center gap-2 text-ink">
       <svg viewBox="0 0 32 32" class="h-7 w-7" aria-hidden="true">
         <path
           d="M4 26 14 8 28 16"
@@ -32,8 +32,7 @@ function isActive(href: string): boolean {
       </svg>
       <span class="font-medium tracking-tight">{site.name}</span>
     </a>
-    <div class="flex items-center gap-1">
-      <nav aria-label="Primary" class="flex flex-wrap items-center gap-1">
+    <nav aria-label="Primary" class="order-last flex w-full flex-wrap items-center gap-1 sm:order-none sm:w-auto">
         {
           nav.map((item) => {
             const active = isActive(item.href);
@@ -51,8 +50,8 @@ function isActive(href: string): boolean {
             );
           })
         }
-      </nav>
-      <button
+    </nav>
+    <button
         id="theme-toggle"
         type="button"
         class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-line text-ink"
@@ -67,8 +66,7 @@ function isActive(href: string): boolean {
             <path d="M12 2.6v2.3M12 19.1v2.3M2.6 12h2.3M19.1 12h2.3M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M19.1 4.9l-1.6 1.6M6.5 17.5l-1.6 1.6"></path>
           </g>
         </svg>
-      </button>
-    </div>
+    </button>
   </div>
 </header>
 

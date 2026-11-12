@@ -2,7 +2,7 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import { familyIds, usesCertification } from './certifications';
 
 /**
- * Helpers for the two content folders.
+ * Helpers for the content folders: notes, demos, and builds.
  * Pages call these instead of sorting posts themselves.
  */
 
@@ -20,6 +20,18 @@ export async function getProjects(): Promise<CollectionEntry<'projects'>[]> {
   return projects.sort((a, b) => {
     const byDate = (b.data.date?.getTime() ?? 0) - (a.data.date?.getTime() ?? 0);
     if (byDate !== 0) return byDate;
+    return a.data.title.localeCompare(b.data.title);
+  });
+}
+
+/** Builds, in `order`, then most recently updated. */
+export async function getBuilds(): Promise<CollectionEntry<'builds'>[]> {
+  const builds = await getCollection('builds');
+  return builds.sort((a, b) => {
+    const byOrder = a.data.order - b.data.order;
+    if (byOrder !== 0) return byOrder;
+    const byUpdated = b.data.updated.getTime() - a.data.updated.getTime();
+    if (byUpdated !== 0) return byUpdated;
     return a.data.title.localeCompare(b.data.title);
   });
 }

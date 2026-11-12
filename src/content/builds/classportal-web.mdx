@@ -1,0 +1,156 @@
+---
+title: "ClassPortal Web"
+summary: "A multi-school web app for dance-school-style programs: class scheduling, attendance, and invoicing. I shipped it in November 2026 with AI coding agents."
+status: live
+# Month the work began. The day is a month marker. The page shows "Nov 2026".
+started: 2026-11-01
+# Calendar day of this rewrite. Shown in full on the page.
+updated: 2026-11-11
+liveUrl: "https://classportal-web-production.up.railway.app"
+stack:
+  - Next.js 15
+  - React 19
+  - TypeScript
+  - Tailwind v4
+  - Prisma
+  - SQLite
+  - Docker
+  - Node 22
+  - Railway
+  - vitest
+order: 1
+cover: "/covers/classportal-web.svg"
+---
+
+{/*
+  Slug classportal-web must stay stable.
+  Rewrite this file in place. Do not rename it. The URL is /builds/classportal-web.
+*/}
+
+In November 2026 I shipped ClassPortal Web. It is a web app for dance-school-style programs that run more than one school: class scheduling, attendance, and invoicing. I built it with AI coding agents.
+
+The live app is [classportal-web-production.up.railway.app](https://classportal-web-production.up.railway.app).
+
+## Who it is for
+
+Three roles use it: a website admin, school admins and teachers, and families.
+
+<figure class="not-prose my-8">
+  <figcaption class="font-mono text-xs tracking-[0.18em] text-accent uppercase">Roles, the app, and what it talks to</figcaption>
+  <div class="mt-4 overflow-hidden rounded-[1.75rem] border border-line bg-card">
+    <ul class="grid gap-px bg-line">
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 bg-accent-soft px-4 py-3">
+        <span class="font-mono text-xs tracking-[0.14em] text-accent uppercase">Role</span>
+        <span class="font-serif text-xl text-ink">Website admin</span>
+      </li>
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 bg-highlight-soft px-4 py-3">
+        <span class="font-mono text-xs tracking-[0.14em] text-highlight uppercase">Role</span>
+        <span class="font-serif text-xl text-ink">School admins and teachers</span>
+      </li>
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 bg-card px-4 py-3">
+        <span class="font-mono text-xs tracking-[0.14em] text-muted uppercase">Role</span>
+        <span class="font-serif text-xl text-ink">Families</span>
+      </li>
+    </ul>
+    <div class="border-t border-line px-4 py-5">
+      <p class="font-mono text-xs tracking-[0.14em] text-accent uppercase">App</p>
+      <p class="mt-1 font-serif text-2xl text-ink">ClassPortal Web</p>
+      <p class="mt-2 text-sm leading-6 text-muted">Server actions checked with zod. Sessions use bcrypt and hashed tokens. Queries stay inside the caller's role and school.</p>
+    </div>
+    <ul class="grid gap-px border-t border-line bg-line sm:grid-cols-3">
+      <li class="bg-paper px-4 py-4">
+        <p class="font-mono text-xs tracking-[0.14em] text-highlight uppercase">Data</p>
+        <p class="mt-2 font-serif text-lg leading-tight text-ink">Prisma and SQLite</p>
+        <p class="mt-1 text-sm leading-6 text-muted">On a persistent volume.</p>
+      </li>
+      <li class="bg-paper px-4 py-4">
+        <p class="font-mono text-xs tracking-[0.14em] text-accent uppercase">Mail</p>
+        <p class="mt-2 font-serif text-lg leading-tight text-ink">Resend or SMTP</p>
+        <p class="mt-1 text-sm leading-6 text-muted">Sender name and reply-to, per school.</p>
+      </li>
+      <li class="bg-paper px-4 py-4">
+        <p class="font-mono text-xs tracking-[0.14em] text-accent uppercase">Assistant</p>
+        <p class="mt-2 font-serif text-lg leading-tight text-ink">Ask ClassPortal</p>
+        <p class="mt-1 text-sm leading-6 text-muted">Grok by default. OpenAI or Anthropic optional. Help docs when no key is set.</p>
+      </li>
+    </ul>
+  </div>
+</figure>
+
+## What it does
+
+A session can be accepted or declined, and the confirmation shows on a calendar. Attendance gets taken. Invoice emails go out.
+
+Invites and password resets are email too. Each school sets the sender name and the reply-to on those messages.
+
+The language toggle is English, Chinese, and Spanish. A test fails when a translation is missing. The design is kid-friendly, and the tooltips are accessible.
+
+<ul class="not-prose my-6 flex flex-wrap gap-2" aria-label="Languages">
+  <li class="rounded-full bg-ink px-3 py-1.5 font-mono text-xs text-paper">English</li>
+  <li class="rounded-full border border-line bg-card px-3 py-1.5 font-mono text-xs text-ink">中文</li>
+  <li class="rounded-full border border-line bg-card px-3 py-1.5 font-mono text-xs text-ink">Español</li>
+</ul>
+
+## Ask ClassPortal
+
+The assistant is called Ask ClassPortal. Grok is the default. OpenAI or Anthropic can be used instead. It is there for sales and for guidance.
+
+"Take me there" highlights the field you asked about. Lookups are read-only, and they stay inside the role and the school of the person asking. There is a setup checklist, and a place to capture a lead.
+
+I put limits on it. Requests are rate-limited. Chats are kept for 30 days, and there is an admin page for them. If no API key is set, it searches the help docs instead of calling a model.
+
+## How it is put together
+
+The front of it is Next.js 15, React 19, and TypeScript, styled with Tailwind v4. Data is Prisma on SQLite. Sign-in is a custom session: bcrypt for passwords, hashed tokens for the session. Changes go through server actions checked with zod, and queries are scoped to the role and the school.
+
+It runs on Railway, in Docker, on Node 22, with a persistent volume. Email goes through Resend or SMTP. The tests are vitest.
+
+## Milestones
+
+<ol class="not-prose mt-2 list-none pl-0">
+  <li class="relative pb-8 pl-8">
+    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
+    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">1</p>
+    <h3 class="mt-1 font-serif text-2xl text-ink">v1 and the first deploy</h3>
+  </li>
+  <li class="relative pb-8 pl-8">
+    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
+    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">2</p>
+    <h3 class="mt-1 font-serif text-2xl text-ink">Theme, three languages, multi-school</h3>
+  </li>
+  <li class="relative pb-8 pl-8">
+    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
+    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">3</p>
+    <h3 class="mt-1 font-serif text-2xl text-ink">Families, invites, i18n, sender settings, tooltips</h3>
+  </li>
+  <li class="relative pb-8 pl-8">
+    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
+    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">4</p>
+    <h3 class="mt-1 font-serif text-2xl text-ink">Ask ClassPortal</h3>
+  </li>
+  <li class="relative pl-8">
+    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full bg-highlight" aria-hidden="true"></span>
+    <p class="font-mono text-xs tracking-[0.16em] text-highlight uppercase">
+      5 · <time datetime="2026-11-11">Nov 11, 2026</time>
+    </p>
+    <h3 class="mt-1 font-serif text-2xl text-ink">Boot-crash hotfix</h3>
+  </li>
+</ol>
+
+## Next
+
+Still ahead:
+
+- A feedback chat box that reaches the admin.
+- Inline actions in the assistant, with confirmation cards.
+- Stripe payment links.
+- Email notices for sessions.
+- A verified sending domain for each school.
+
+## What I learned
+
+I got to take a product the whole way: scheduling, attendance, invoices, email, languages, and a live URL. Ask ClassPortal is the applied LLM piece, and the guardrails are part of the product: rate limits, 30 days of chat, an admin page, read-only lookups scoped to a role and a school, and help-doc search when no API key is set. More than one school means the data has to say which school a row belongs to. Three languages count because a missing translation fails a test. I shipped it with AI coding agents.

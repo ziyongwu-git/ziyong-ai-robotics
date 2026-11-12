@@ -1,7 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
-import { projectStatuses, tags } from './config';
+import { buildStatuses, projectStatuses, tags } from './config';
 import { certificationField } from './lib/certification-field';
 
 /**
@@ -99,4 +99,37 @@ const projects = defineCollection({
   }),
 });
 
-export const collections = { learning, projects };
+/**
+ * Shipped products. Separate from demos and notes.
+ *
+ * A build does not take `certification`. Demos and notes still require it.
+ * The public URL is `/builds/<file-name>`. Keep a filename stable once it
+ * is published. `order` lists smaller numbers first.
+ *
+ * `started` is the month the work began, written as YYYY-MM-01. The page
+ * shows that month. `updated` is the calendar day of the latest rewrite.
+ */
+const builds = defineCollection({
+  loader: glob({
+    pattern: '**/*.{md,mdx}',
+    base: './src/content/builds',
+  }),
+  schema: z.object({
+    title: z.string(),
+    summary: z.string(),
+    status: z.enum(buildStatuses),
+    /** Month the work began. Use the first of that month: YYYY-MM-01. */
+    started: z.coerce.date(),
+    /** Calendar day of the latest rewrite, shown in full on the page. */
+    updated: z.coerce.date(),
+    /** Optional live app. A path on this site, or an http(s) URL. */
+    liveUrl: optionalPath('the live URL'),
+    stack: z.array(z.string().min(1)).min(1),
+    /** Optional picture. Leave it out for a generated pattern. See `optionalCover`. */
+    cover: optionalCover,
+    /** Smaller numbers are listed first. */
+    order: z.number().int(),
+  }),
+});
+
+export const collections = { learning, projects, builds };

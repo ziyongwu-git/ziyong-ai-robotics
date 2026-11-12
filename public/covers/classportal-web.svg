@@ -1,0 +1,97 @@
+<!--
+  Original drawing for ClassPortal Web.
+  Three roles, a week of sessions, and the assistant.
+  A diagram, not a screenshot. ASCII only. Colors stay put in both themes.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" fill="none">
+  <rect width="960" height="540" fill="#f6f3ec"/>
+  <pattern id="cp-dots" width="28" height="28" patternUnits="userSpaceOnUse">
+    <circle cx="1" cy="1" r="1.15" fill="#e4dace"/>
+  </pattern>
+  <rect width="960" height="540" fill="url(#cp-dots)"/>
+  <circle cx="80" cy="36" r="70" fill="#f6e4d4"/>
+  <circle cx="900" cy="520" r="80" fill="#d9efe9"/>
+
+  <rect x="36" y="40" width="276" height="460" rx="28" fill="#fffdf8" stroke="#e4dace" stroke-width="2"/>
+  <text x="60" y="78" fill="#7c2d12" font-family="ui-monospace, monospace" font-size="13" letter-spacing="1.5">ROLES</text>
+  <rect x="60" y="100" width="228" height="108" rx="18" fill="#f6e4d4"/>
+  <text x="174" y="146" text-anchor="middle" fill="#7c2d12" font-family="ui-monospace, monospace" font-size="12">01</text>
+  <text x="174" y="176" text-anchor="middle" fill="#1c1915" font-family="Georgia, serif" font-size="22">Website admin</text>
+  <rect x="60" y="222" width="228" height="128" rx="18" fill="#d9efe9"/>
+  <text x="174" y="266" text-anchor="middle" fill="#0a534a" font-family="ui-monospace, monospace" font-size="12">02</text>
+  <text x="174" y="298" text-anchor="middle" fill="#1c1915" font-family="Georgia, serif" font-size="20">School admins</text>
+  <text x="174" y="324" text-anchor="middle" fill="#1c1915" font-family="Georgia, serif" font-size="20">and teachers</text>
+  <rect x="60" y="364" width="228" height="108" rx="18" fill="#fffdf8" stroke="#1c1915" stroke-width="1.6"/>
+  <text x="174" y="410" text-anchor="middle" fill="#5c564c" font-family="ui-monospace, monospace" font-size="12">03</text>
+  <text x="174" y="440" text-anchor="middle" fill="#1c1915" font-family="Georgia, serif" font-size="22">Families</text>
+
+  <rect x="332" y="40" width="296" height="460" rx="28" fill="#fffdf8" stroke="#e4dace" stroke-width="2"/>
+  <text x="356" y="78" fill="#7c2d12" font-family="ui-monospace, monospace" font-size="13" letter-spacing="1.5">WEEK</text>
+  <text x="356" y="114" fill="#1c1915" font-family="Georgia, serif" font-size="28">Sessions</text>
+  <g fill="#5c564c" font-family="ui-monospace, monospace" font-size="12" text-anchor="middle">
+    <text x="370" y="156">M</text>
+    <text x="406" y="156">T</text>
+    <text x="442" y="156">W</text>
+    <text x="478" y="156">T</text>
+    <text x="514" y="156">F</text>
+    <text x="550" y="156">S</text>
+    <text x="586" y="156">S</text>
+  </g>
+  <g>
+    <rect x="356" y="168" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="392" y="168" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="428" y="168" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="464" y="168" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="500" y="168" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="536" y="168" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="572" y="168" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="356" y="204" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="392" y="204" width="28" height="28" rx="6" fill="#0a534a"/>
+    <rect x="428" y="204" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="464" y="204" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="500" y="204" width="28" height="28" rx="6" fill="#7c2d12"/>
+    <rect x="536" y="204" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="572" y="204" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="356" y="240" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="392" y="240" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="428" y="240" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="464" y="240" width="28" height="28" rx="6" fill="#0a534a"/>
+    <rect x="500" y="240" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="536" y="240" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="572" y="240" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="356" y="276" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="392" y="276" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="428" y="276" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="464" y="276" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="500" y="276" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="536" y="276" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="572" y="276" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="356" y="312" width="28" height="28" rx="6" fill="#7c2d12"/>
+    <rect x="392" y="312" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="428" y="312" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="464" y="312" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="500" y="312" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="536" y="312" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+    <rect x="572" y="312" width="28" height="28" rx="6" fill="#fffdf8" stroke="#e4dace"/>
+  </g>
+  <text x="480" y="390" text-anchor="middle" fill="#5c564c" font-family="ui-monospace, monospace" font-size="14">accept or decline</text>
+  <text x="480" y="424" text-anchor="middle" fill="#1c1915" font-family="Georgia, serif" font-size="18">on a calendar</text>
+
+  <rect x="648" y="40" width="276" height="460" rx="28" fill="#fffdf8" stroke="#e4dace" stroke-width="2"/>
+  <text x="672" y="78" fill="#7c2d12" font-family="ui-monospace, monospace" font-size="13" letter-spacing="1.5">ASK</text>
+  <text x="672" y="118" fill="#1c1915" font-family="Georgia, serif" font-size="28">ClassPortal</text>
+  <g font-family="ui-monospace, monospace" font-size="13" text-anchor="middle">
+    <rect x="672" y="146" width="68" height="34" rx="17" fill="#1c1915"/>
+    <text x="706" y="168" fill="#f6f3ec">EN</text>
+    <rect x="752" y="146" width="68" height="34" rx="17" fill="#fffdf8" stroke="#1c1915"/>
+    <text x="786" y="168" fill="#1c1915">ZH</text>
+    <rect x="832" y="146" width="68" height="34" rx="17" fill="#fffdf8" stroke="#1c1915"/>
+    <text x="866" y="168" fill="#1c1915">ES</text>
+  </g>
+  <rect x="672" y="214" width="228" height="112" rx="22" fill="#f6e4d4"/>
+  <text x="786" y="258" text-anchor="middle" fill="#7c2d12" font-family="ui-monospace, monospace" font-size="12">ASSISTANT</text>
+  <text x="786" y="292" text-anchor="middle" fill="#1c1915" font-family="Georgia, serif" font-size="20">sales and guidance</text>
+  <rect x="672" y="352" width="228" height="52" rx="14" fill="#fffdf8" stroke="#0a534a" stroke-width="2"/>
+  <text x="786" y="384" text-anchor="middle" fill="#0a534a" font-family="ui-monospace, monospace" font-size="14">Take me there</text>
+  <text x="786" y="452" text-anchor="middle" fill="#5c564c" font-family="ui-monospace, monospace" font-size="13">Grok by default</text>
+</svg>
