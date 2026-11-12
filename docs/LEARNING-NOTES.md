@@ -53,7 +53,7 @@ Two other directives you may want later:
 
 A content collection is a folder of posts plus a checklist.
 
-`src/content/learning/` holds the notes. `src/content/projects/` holds the demos. The folder is still named `projects`. The public pages are `/demos` and `/demos/<file-name>`. Old `/projects` addresses redirect there.
+`src/content/learning/` holds the notes. `src/content/projects/` holds the demos. The folder is still named `projects`. The public pages are `/demos` and `/demos/<file-name>`. Old `/projects` addresses redirect there. `src/content/builds/` holds shipped products. Those pages are `/builds` and `/builds/<file-name>`. A build does not take `certification`. Notes and demos still require it.
 
 `src/content.config.ts` (next to the folder, not inside it) lists the fields each file must have. When you build, Astro checks every file. A missing title, a tag that is not in the allowed list, or a `certification` that is missing or unknown stops the build, which is kinder than a blank page later.
 
@@ -83,7 +83,7 @@ Notes and projects can show a picture. If the file's frontmatter has no `cover`,
 
 If you set `cover`, the site uses that file instead. Put it in `public/covers/` and point at it with `/covers/your-file.jpg`. A file used that way keeps its own colors in both themes. The sample attention note is the example (`public/covers/attention.svg`). It is an original drawing, not a photo of a person.
 
-The home page opens with the tabletop demo, the same component as `/demos/see-think-move`, rendered with `client:load`. Other demos stay on their own pages until someone opens them. Sample notes and the sample arm stay at their old addresses, under Sample archive.
+The home page opens with the tabletop demo, the same component as `/demos/see-think-move`, rendered with `client:load`. Other demos stay on their own pages until someone opens them. A short builds strip sits under those demos. Sample notes and the sample arm stay at their old addresses, under Sample archive.
 
 ## Certifications
 

@@ -1,0 +1,91 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CoverArt from '../../components/CoverArt.astro';
+import type { BuildStatus } from '../../config';
+import { buildStatusLabel, formatDate, formatMonth, isoDate, isoMonth } from '../../lib/format';
+
+export async function getStaticPaths() {
+  const builds = await getCollection('builds');
+  return builds.map((build) => ({
+    params: { id: build.id },
+  }));
+}
+
+const { id } = Astro.params;
+if (!id) {
+  throw new Error('Missing build id.');
+}
+
+const build = await getEntry('builds', id);
+if (!build) {
+  throw new Error(`No build entry for ${id}.`);
+}
+
+const { Content } = await render(build);
+const live = build.data.liveUrl;
+const liveExternal = live ? live.startsWith('http') : false;
+
+const statusTone: Record<BuildStatus, string> = {
+  building: 'bg-accent-soft',
+  live: 'bg-highlight-soft',
+  paused: 'border border-line bg-paper',
+};
+---
+
+<BaseLayout
+  title={build.data.title}
+  description={build.data.summary}
+  width="narrow"
+  ogType="article"
+  published={build.data.updated}
+>
+  <p>
+    <a class="text-sm text-accent underline decoration-line underline-offset-4" href="/builds">All builds</a>
+  </p>
+  <div class="mt-6 overflow-hidden rounded-3xl border border-line">
+    <CoverArt title={build.data.title} tags={[]} cover={build.data.cover} seed={build.id} frame="card" />
+  </div>
+  <div class="mt-6">
+    <span
+      class:list={[
+        'rounded-full px-2.5 py-1 font-mono text-xs tracking-wide text-ink uppercase',
+        statusTone[build.data.status],
+      ]}
+    >
+      {buildStatusLabel(build.data.status)}
+    </span>
+  </div>
+  <h1 class="mt-4 font-serif text-4xl leading-tight sm:text-5xl">{build.data.title}</h1>
+  <p class="mt-4 text-lg leading-8 text-muted">{build.data.summary}</p>
+  <p class="mt-4 text-sm">
+    <span class="font-medium text-ink">Updated </span>
+    <time datetime={isoDate(build.data.updated)}>{formatDate(build.data.updated)}</time>
+    <span class="text-muted"> · Started </span>
+    <time datetime={isoMonth(build.data.started)}>{formatMonth(build.data.started)}</time>
+  </p>
+  <ul class="mt-4 flex flex-wrap gap-2" aria-label="Stack">
+    {
+      build.data.stack.map((item) => (
+        <li class="rounded-full border border-line bg-card px-2.5 py-1 font-mono text-xs text-muted">{item}</li>
+      ))
+    }
+  </ul>
+  {
+    live && (
+      <p class="mt-6">
+        <a
+          class="btn btn-solid"
+          href={live}
+          target={liveExternal ? '_blank' : undefined}
+          rel={liveExternal ? 'noopener noreferrer' : undefined}
+        >
+          Live app
+        </a>
+      </p>
+    )
+  }
+  <div class="prose mt-10">
+    <Content />
+  </div>
+</BaseLayout>

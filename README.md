@@ -1,6 +1,6 @@
 # Ziyong Wu — personal site
 
-A personal notebook: demos, notes, DeepLearning.AI certificates, and an about page. The home page leads with the demos. The resume-style background lives on About only.
+A personal notebook: demos, shipped builds, notes, DeepLearning.AI certificates, and an about page. The home page leads with the demos. The resume-style background lives on About only.
 
 It is built with [Astro](https://astro.build), [Tailwind CSS](https://tailwindcss.com), and [MDX](https://mdxjs.com), with React available when a project needs something interactive (a slider, a chart, a small tool). The finished site is a folder of static files, which [Vercel](https://vercel.com) can host for free.
 
@@ -43,7 +43,8 @@ npm run preview
 | `src/components/` | Pieces reused by pages. React demos live in `src/components/demos/`. |
 | `src/content/learning/` | Notes. One `.md` or `.mdx` file per note. The public URL is `/learning/<file-name>`. |
 | `src/content/projects/` | Demos. The folder name stays `projects`. The public URL is `/demos/<file-name>`. Use `.mdx` when the page embeds a widget. |
-| `src/content.config.ts` | The checklist for those files (required title, required `certification`, allowed tags, and so on). It sits **next to** `content/`, not inside it. |
+| `src/content/builds/` | Shipped products. One file per product. The public URL is `/builds/<file-name>`. No `certification` field. |
+| `src/content.config.ts` | The checklist for those files (required title, required `certification` on notes and demos, and so on). It sits **next to** `content/`, not inside it. |
 | `src/data/certifications.ts` | Licenses and courses. DeepLearning.AI entries get a page at `/certificates/<id>`. Older credentials are listed on About only. |
 | `src/config.ts` | Your name, one-line positioning, public URL, and contact links. |
 | `src/styles/global.css` | Colors, fonts, and dark mode. |
@@ -61,9 +62,11 @@ The header links are the `nav` list in `src/config.ts`.
 
 | URL | Page |
 | --- | --- |
-| `/` | Home: a short introduction, one live demo, the other shipped demos, notes paired with those demos, and a certificate index |
+| `/` | Home: a short introduction, one live demo, the other shipped demos, a builds strip, notes paired with those demos, and a certificate index |
 | `/demos` | Demo index |
 | `/demos/<file-name>` | One demo. The widget is at the top. The explanation follows. |
+| `/builds` | Shipped products |
+| `/builds/<file-name>` | One product. The `updated` date is the last rewrite. |
 | `/learning` | Notes, newest first, with tag filters |
 | `/learning/<file-name>` | One note |
 | `/certificates` | DeepLearning.AI certificates, and the demos and notes on each |
@@ -72,7 +75,7 @@ The header links are the `nav` list in `src/config.ts`.
 | `/rss.xml` | RSS feed for the notes |
 | `/sitemap-index.xml` | Sitemap |
 
-`/projects` and `/projects/<file-name>` redirect to `/demos`. `/learning/certifications` redirects to `/certificates`. The header order is Home, Demos, Notes, Certificates, About.
+`/projects` and `/projects/<file-name>` redirect to `/demos`. `/learning/certifications` redirects to `/certificates`. The header order is Home, Demos, Builds, Notes, Certificates, About.
 
 ## Add a learning-log post
 
@@ -208,6 +211,43 @@ If the widget's buttons look strangely spaced, add `className="not-prose"` to it
 
 In an `.mdx` file, `{` starts code. When you mention a snippet in a sentence, wrap it in backticks.
 
+## Add a build
+
+Builds are products you have shipped, in their own folder. Leave `certification` off. Demos and notes still require that field.
+
+1. Add a file in `src/content/builds/`. Use lowercase letters, numbers, and dashes. `classportal-web.mdx` is the URL `/builds/classportal-web`. Once a page is public, keep that filename. The slug has to stay stable.
+2. Put the whole write-up in that one file, including any diagram you want on the page.
+
+```yaml
+---
+title: "ClassPortal Web"
+summary: "What it is, in one or two sentences."
+status: live
+# Month the work began. Use the first of that month. The page shows the month.
+started: 2026-11-01
+# The day you last rewrote the page. Shown in full.
+updated: 2026-11-11
+liveUrl: "https://example.com"
+stack:
+  - Next.js 15
+  - TypeScript
+order: 1
+# cover: "/covers/my-picture.svg"
+---
+```
+
+- `title`, `summary`, `status`, `started`, `updated`, `stack`, and `order` are required.
+- `status` is one of `building`, `live`, or `paused`.
+- `started` is the month work began, written `YYYY-MM-01`. The page prints the month and year.
+- `updated` is a real calendar day, `YYYY-MM-DD`. The page prints the full date.
+- `liveUrl` is optional. Leave the line out when there is no public app. A link must start with `/`, `http://`, or `https://`.
+- `stack` is one or more strings.
+- `order` is a whole number. Smaller numbers are listed first.
+- `cover` works the same way as on a note. Leave it out for a generated pattern.
+- Do not add `certification`. That field belongs to demos and notes.
+
+`src/content/builds/classportal-web.mdx` is the worked example. A short comment at the top of the file says the slug must stay stable, because that page is rewritten in place.
+
 ## Certifications and courses
 
 Edit `src/data/certifications.ts`. Copy an existing block. The comment at the top of that file explains each field.
@@ -283,9 +323,10 @@ Read the last lines of the terminal. The content checker is the usual cause:
 
 - A tag other than `ai`, `robotics`, or `data`.
 - A missing `title`, `date`, `source`, `summary`, or `certification` on a note.
-- A missing `certification` on a demo, or an id that is not a DeepLearning.AI certificate in `src/data/certifications.ts`. The message lists the ids that work.
+- A missing `certification` on a demo, or an id that is not a DeepLearning.AI certificate in `src/data/certifications.ts`. The message lists the ids that work. Builds do not use this field.
 - A date not written as `YYYY-MM-DD`.
 - A demo `status` outside `idea`, `in-progress`, `shipped`, `sample`.
+- A build missing `title`, `summary`, `status`, `started`, `updated`, `stack`, or `order`, or a `status` outside `building`, `live`, `paused`.
 - A `demo`, `repo`, or `cover` path that does not start with `/`, `http://`, or `https://`.
 - A certification date that is not like `Oct 2026`, a repeated `id`, a missing `blurb` on a DeepLearning.AI entry, or a `parentId` that does not match another entry. The error names the certificate.
 

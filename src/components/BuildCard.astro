@@ -1,0 +1,90 @@
+---
+/**
+ * One shipped product in a list.
+ *
+ * layout:
+ * - strip: short row for the home page, under the demos.
+ * - card: picture on top. Used when the index has several builds.
+ * - feature: picture beside the text. Used when the index has one build.
+ */
+import type { CollectionEntry } from 'astro:content';
+import type { BuildStatus } from '../config';
+import CoverArt from './CoverArt.astro';
+import { buildStatusLabel, formatDate, formatMonth, isoDate, isoMonth } from '../lib/format';
+
+interface Props {
+  build: CollectionEntry<'builds'>;
+  layout?: 'feature' | 'card' | 'strip';
+}
+
+const { build, layout = 'card' } = Astro.props;
+const href = `/builds/${build.id}`;
+const live = build.data.liveUrl;
+const liveExternal = live ? live.startsWith('http') : false;
+const horizontal = layout === 'feature' || layout === 'strip';
+
+const statusTone: Record<BuildStatus, string> = {
+  building: 'bg-accent-soft',
+  live: 'bg-highlight-soft',
+  paused: 'border border-line bg-paper',
+};
+---
+
+<article
+  class:list={[
+    'group flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-card hover:border-accent motion-safe:transition motion-safe:duration-300 motion-safe:hover:-translate-y-0.5',
+    layout === 'feature' && 'md:col-span-2',
+    horizontal && 'md:grid',
+    layout === 'feature' && 'md:grid-cols-[minmax(0,1.12fr)_minmax(0,0.88fr)]',
+    layout === 'strip' && 'md:grid-cols-[240px_minmax(0,1fr)]',
+  ]}
+>
+  <div class:list={['relative', horizontal && 'md:self-center']}>
+    <a href={href} tabindex="-1" aria-hidden="true" class="block">
+      <CoverArt title={build.data.title} tags={[]} cover={build.data.cover} seed={build.id} />
+    </a>
+    <span
+      class:list={[
+        'pointer-events-none absolute top-3 left-3 rounded-full px-2.5 py-1 font-mono text-xs tracking-wide text-ink uppercase',
+        statusTone[build.data.status],
+      ]}
+    >
+      {buildStatusLabel(build.data.status)}
+    </span>
+  </div>
+  <div class:list={['flex flex-1 flex-col', layout === 'feature' ? 'p-6 sm:p-7' : 'p-5']}>
+    <p class="text-sm text-muted">
+      Updated <time datetime={isoDate(build.data.updated)}>{formatDate(build.data.updated)}</time>
+      <span aria-hidden="true"> · </span>
+      Started <time datetime={isoMonth(build.data.started)}>{formatMonth(build.data.started)}</time>
+    </p>
+    <h3 class:list={['mt-3 font-serif text-ink', layout === 'strip' ? 'text-2xl' : 'text-3xl']}>
+      <a class="hover:text-accent" href={href}>{build.data.title}</a>
+    </h3>
+    <p class="mt-2 flex-1 text-sm leading-6 text-muted">{build.data.summary}</p>
+    {
+      layout !== 'strip' && (
+        <ul class="mt-4 flex flex-wrap gap-2" aria-label="Stack">
+          {build.data.stack.map((item) => (
+            <li class="rounded-full border border-line px-2.5 py-1 font-mono text-xs text-muted">{item}</li>
+          ))}
+        </ul>
+      )
+    }
+    <div class="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+      <a class="text-accent underline decoration-line underline-offset-4" href={href}>Read the build</a>
+      {
+        live && (
+          <a
+            class="text-accent underline decoration-line underline-offset-4"
+            href={live}
+            target={liveExternal ? '_blank' : undefined}
+            rel={liveExternal ? 'noopener noreferrer' : undefined}
+          >
+            Live app
+          </a>
+        )
+      }
+    </div>
+  </div>
+</article>
