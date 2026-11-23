@@ -1,23 +1,29 @@
 ---
-title: "ClassPortal Web"
-summary: "A multi-school web app for dance-school-style programs: class scheduling, attendance, and invoicing. I shipped it in November 2026 with AI coding agents."
+title: "ClassLista (formerly ClassPortal)"
+summary: "A multi-school web app for dance-school-style programs: classes, attendance, invoices, and payments. I first shipped it as ClassPortal, and I renamed it ClassLista in November 2026. I built it with AI coding agents."
 status: live
 # Month the work began. The day is a month marker. The page shows "Nov 2026".
 started: 2026-11-01
 # Calendar day of this rewrite. Shown in full on the page.
-updated: 2026-11-11
-liveUrl: "https://classportal-web-production.up.railway.app"
+updated: 2026-11-23
+liveUrl: "https://classlista.com"
 stack:
   - Next.js 15
   - React 19
   - TypeScript
   - Tailwind v4
-  - Prisma
+  - Prisma 6
   - SQLite
+  - zod 4
   - Docker
   - Node 22
   - Railway
-  - vitest
+  - Resend
+  - Node test runner via tsx
+  - GitHub Actions CI
+  - ESLint
+  - Prettier
+  - Dependabot
 order: 1
 cover: "/covers/classportal-web.svg"
 ---
@@ -27,9 +33,9 @@ cover: "/covers/classportal-web.svg"
   Rewrite this file in place. Do not rename it. The URL is /builds/classportal-web.
 */}
 
-In November 2026 I shipped ClassPortal Web. It is a web app for dance-school-style programs that run more than one school: class scheduling, attendance, and invoicing. I built it with AI coding agents.
+In November 2026 I shipped a multi-school web app for dance-school-style programs: classes, attendance, invoices, and payments. The first version was ClassPortal. On November 22 I renamed it ClassLista. The Chinese name is 课堂通. I built it with AI coding agents.
 
-The live app is [classportal-web-production.up.railway.app](https://classportal-web-production.up.railway.app).
+The live app is [classlista.com](https://classlista.com).
 
 ## Who it is for
 
@@ -54,19 +60,20 @@ Three roles use it: a website admin, school admins and teachers, and families.
     </ul>
     <div class="border-t border-line px-4 py-5">
       <p class="font-mono text-xs tracking-[0.14em] text-accent uppercase">App</p>
-      <p class="mt-1 font-serif text-2xl text-ink">ClassPortal Web</p>
-      <p class="mt-2 text-sm leading-6 text-muted">Server actions checked with zod. Sessions use bcrypt and hashed tokens. Queries stay inside the caller's role and school.</p>
+      <p class="mt-1 font-serif text-2xl text-ink">ClassLista</p>
+      <p class="mt-1 text-sm leading-6 text-muted">Formerly ClassPortal. Chinese name 课堂通.</p>
+      <p class="mt-2 text-sm leading-6 text-muted">Server actions checked with zod 4. Sessions use bcrypt and hashed tokens. Queries stay inside the caller's role and school.</p>
     </div>
     <ul class="grid gap-px border-t border-line bg-line sm:grid-cols-3">
       <li class="bg-paper px-4 py-4">
         <p class="font-mono text-xs tracking-[0.14em] text-highlight uppercase">Data</p>
-        <p class="mt-2 font-serif text-lg leading-tight text-ink">Prisma and SQLite</p>
+        <p class="mt-2 font-serif text-lg leading-tight text-ink">Prisma 6 and SQLite</p>
         <p class="mt-1 text-sm leading-6 text-muted">On a persistent volume.</p>
       </li>
       <li class="bg-paper px-4 py-4">
         <p class="font-mono text-xs tracking-[0.14em] text-accent uppercase">Mail</p>
-        <p class="mt-2 font-serif text-lg leading-tight text-ink">Resend or SMTP</p>
-        <p class="mt-1 text-sm leading-6 text-muted">Sender name and reply-to, per school.</p>
+        <p class="mt-2 font-serif text-lg leading-tight text-ink">Resend</p>
+        <p class="mt-1 text-sm leading-6 text-muted">From its own mail domain. Sender name and reply-to, per school.</p>
       </li>
       <li class="bg-paper px-4 py-4">
         <p class="font-mono text-xs tracking-[0.14em] text-accent uppercase">Assistant</p>
@@ -79,9 +86,9 @@ Three roles use it: a website admin, school admins and teachers, and families.
 
 ## What it does
 
-A session can be accepted or declined, and the confirmation shows on a calendar. Attendance gets taken. Invoice emails go out.
+Through November 11, a session can be accepted or declined, and the confirmation shows on a calendar. Attendance gets taken. Invoice emails go out.
 
-Invites and password resets are email too. Each school sets the sender name and the reply-to on those messages.
+Invites and password resets are email too. Email goes through Resend or SMTP. Each school sets the sender name and the reply-to on those messages.
 
 The language toggle is English, Chinese, and Spanish. A test fails when a translation is missing. The design is kid-friendly, and the tooltips are accessible.
 
@@ -101,9 +108,51 @@ I put limits on it. Requests are rate-limited. Chats are kept for 30 days, and t
 
 ## How it is put together
 
-The front of it is Next.js 15, React 19, and TypeScript, styled with Tailwind v4. Data is Prisma on SQLite. Sign-in is a custom session: bcrypt for passwords, hashed tokens for the session. Changes go through server actions checked with zod, and queries are scoped to the role and the school.
+The front of it is Next.js 15, React 19, and TypeScript, styled with Tailwind v4. Data is Prisma 6 on SQLite. Sign-in is a custom session: bcrypt for passwords, hashed tokens for the session. Changes go through server actions checked with zod 4, and queries are scoped to the role and the school.
 
-It runs on Railway, in Docker, on Node 22, with a persistent volume. Email goes through Resend or SMTP. The tests are vitest.
+It runs on Railway, in Docker, on Node 22, with a persistent volume. Platform email sends through Resend.
+
+Tests run with Node's built-in test runner, via tsx. GitHub Actions runs CI. ESLint, Prettier, and Dependabot are part of the setup.
+
+## November 11 to 23
+
+After the first ship I kept going on the same app, through November 23. The work below is grouped by theme.
+
+### Name and home
+
+On November 22 I renamed ClassPortal to ClassLista. The Chinese name is 课堂通. The public address is classlista.com. [www.classlista.com](https://www.classlista.com) and the old Railway address both redirect there. Platform email now actually sends, through Resend, from its own mail domain.
+
+### Teachers and attendance
+
+Attendance is Present, Absent, or Excused. The teacher Today screen takes attendance in one tap, and that attendance can be edited for 30 days. A corrected class adjusts the invoice with a credit or a charge. Teachers have self-serve powers, and an admin can switch those powers on or off.
+
+### Families
+
+A school has a join code. The code is random, and there is no public school directory. Class emails include Coming and Can't make it. Those are one tap, with no sign-in. A family can say yes to the rest of the term. Make-up classes are opt-in, per school. The join page shows where a family stands.
+
+### Scheduling
+
+A term has a roster. A class can have several weekly times, and it can repeat until a date. This class and the following ones can be edited or cancelled. The app warns about a clash for the same teacher, the same room, or the same child. Staff Planner can be viewed by teacher, room, student, or family. Holidays can start from suggested days, and a school can add custom days off, with conflict warnings and reminders. Places have their own time zones. On a phone, the calendar opens as an upcoming list.
+
+### Money
+
+Invoices show Paid, Unpaid, or Overdue, and staff record payments. A school lists how families pay: Zelle, Venmo, PayPal, a card link to the school's own Stripe, Square, or PayPal page, bank transfer, check, cash, WeChat Pay, Alipay, or a custom method. A family taps "I've paid", and staff confirm. The app keeps payment records and refund records. ClassLista itself does not move the money yet.
+
+### Owner view
+
+The owner view has a platform home, school pages, a usage dashboard, and pages for emails, activity, the system, and people. Open as admin is a support mode, and it is time-limited.
+
+### Look and feel
+
+There is a public landing page, with a language picker. Notices, dates, and amounts follow the reader's language. The new look came in seven passes. It includes school colors and a logo, a floating tab bar, drawn status icons, and warmer neutrals. The fonts are Bricolage Grotesque and Figtree. Each role has a phone-first home. I polished accessibility and the phone layout. There is an app icon, and links have previews. Setup cards open a school one step at a time.
+
+### Hardening
+
+CI runs on every pull request. Login is throttled, and an account can lock. A person can sign out of all devices. Sessions end when the password changes. I closed two screens that showed data across schools. The database is copied before a migration. Content-Security-Policy is on in report-only mode. There is a health page. Dependencies were upgraded.
+
+### Ask ClassPortal, continued
+
+How-to answers are grounded in the step-by-step help guides. Suggest a feature sends that feedback to the website admin.
 
 ## Milestones
 
@@ -132,12 +181,84 @@ It runs on Railway, in Docker, on Node 22, with a persistent volume. Email goes 
     <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">4</p>
     <h3 class="mt-1 font-serif text-2xl text-ink">Ask ClassPortal</h3>
   </li>
-  <li class="relative pl-8">
-    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full bg-highlight" aria-hidden="true"></span>
-    <p class="font-mono text-xs tracking-[0.16em] text-highlight uppercase">
+  <li class="relative pb-8 pl-8">
+    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
+    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">
       5 · <time datetime="2026-11-11">Nov 11, 2026</time>
     </p>
     <h3 class="mt-1 font-serif text-2xl text-ink">Boot-crash hotfix</h3>
+  </li>
+  <li class="relative pb-8 pl-8">
+    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
+    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">
+      6 · <time datetime="2026-11-11">Nov 11, 2026</time>
+    </p>
+    <h3 class="mt-1 font-serif text-2xl text-ink">Feedback to the admin, and grounded help answers</h3>
+  </li>
+  <li class="relative pb-8 pl-8">
+    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
+    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">
+      7 · <time datetime="2026-11-12">Nov 12, 2026</time>
+    </p>
+    <h3 class="mt-1 font-serif text-2xl text-ink">Teacher Today and attendance</h3>
+  </li>
+  <li class="relative pb-8 pl-8">
+    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
+    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">
+      8 · <time datetime="2026-11-14">Nov 14, 2026</time>
+    </p>
+    <h3 class="mt-1 font-serif text-2xl text-ink">Role homes and join codes</h3>
+  </li>
+  <li class="relative pb-8 pl-8">
+    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
+    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">
+      9 · <time datetime="2026-11-15">Nov 15–16, 2026</time>
+    </p>
+    <h3 class="mt-1 font-serif text-2xl text-ink">CI and hardening</h3>
+  </li>
+  <li class="relative pb-8 pl-8">
+    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
+    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">
+      10 · <time datetime="2026-11-19">Nov 19, 2026</time>
+    </p>
+    <h3 class="mt-1 font-serif text-2xl text-ink">Landing page, class emails, payment status, rosters, planner, clash warnings</h3>
+  </li>
+  <li class="relative pb-8 pl-8">
+    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
+    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">
+      11 · <time datetime="2026-11-20">Nov 20, 2026</time>
+    </p>
+    <h3 class="mt-1 font-serif text-2xl text-ink">Owner platform and make-up classes</h3>
+  </li>
+  <li class="relative pb-8 pl-8">
+    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
+    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">
+      12 · <time datetime="2026-11-21">Nov 21, 2026</time>
+    </p>
+    <h3 class="mt-1 font-serif text-2xl text-ink">New look</h3>
+  </li>
+  <li class="relative pb-8 pl-8">
+    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
+    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">
+      13 · <time datetime="2026-11-22">Nov 22, 2026</time>
+    </p>
+    <h3 class="mt-1 font-serif text-2xl text-ink">Renamed ClassLista, classlista.com, and holidays</h3>
+  </li>
+  <li class="relative pl-8">
+    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full bg-highlight" aria-hidden="true"></span>
+    <p class="font-mono text-xs tracking-[0.16em] text-highlight uppercase">
+      14 · <time datetime="2026-11-23">Nov 23, 2026</time>
+    </p>
+    <h3 class="mt-1 font-serif text-2xl text-ink">Setup cards, new fonts, time zones, payment methods</h3>
   </li>
 </ol>
 
@@ -145,12 +266,14 @@ It runs on Railway, in Docker, on Node 22, with a persistent volume. Email goes 
 
 Still ahead:
 
-- A feedback chat box that reaches the admin.
-- Inline actions in the assistant, with confirmation cards.
-- Stripe payment links.
-- Email notices for sessions.
-- A verified sending domain for each school.
+- Built-in online checkout.
+- Assistant actions, with confirmation cards. The assistant is still read-only.
+- Real privacy and terms pages.
+- Off-site backups, and a staging environment.
+- Error tracking and uptime monitoring.
 
 ## What I learned
 
-I got to take a product the whole way: scheduling, attendance, invoices, email, languages, and a live URL. Ask ClassPortal is the applied LLM piece, and the guardrails are part of the product: rate limits, 30 days of chat, an admin page, read-only lookups scoped to a role and a school, and help-doc search when no API key is set. More than one school means the data has to say which school a row belongs to. Three languages count because a missing translation fails a test. I shipped it with AI coding agents.
+I got to take a product the whole way: scheduling, attendance, invoices, payments, email, languages, and a live URL. Ask ClassPortal is the applied LLM piece, and the guardrails are part of the product: rate limits, 30 days of chat, an admin page, read-only lookups scoped to a role and a school, and help-doc search when no API key is set. More than one school means the data has to say which school a row belongs to. Three languages count because a missing translation fails a test. I shipped it with AI coding agents.
+
+After November 11 the cadence stayed fast and agent-driven, in dozens of small pull requests. I kept that pace in bounds with CI on every pull request, the hardening above, and a copy of the database before a migration.

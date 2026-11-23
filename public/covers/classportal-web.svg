@@ -1,5 +1,5 @@
 <!--
-  Original drawing for ClassPortal Web.
+  Original drawing for ClassLista, formerly ClassPortal.
   Three roles, a week of sessions, and the assistant.
   A diagram, not a screenshot. ASCII only. Colors stay put in both themes.
 -->
@@ -79,7 +79,7 @@
 
   <rect x="648" y="40" width="276" height="460" rx="28" fill="#fffdf8" stroke="#e4dace" stroke-width="2"/>
   <text x="672" y="78" fill="#7c2d12" font-family="ui-monospace, monospace" font-size="13" letter-spacing="1.5">ASK</text>
-  <text x="672" y="118" fill="#1c1915" font-family="Georgia, serif" font-size="28">ClassPortal</text>
+  <text x="672" y="118" fill="#1c1915" font-family="Georgia, serif" font-size="28">ClassLista</text>
   <g font-family="ui-monospace, monospace" font-size="13" text-anchor="middle">
     <rect x="672" y="146" width="68" height="34" rx="17" fill="#1c1915"/>
     <text x="706" y="168" fill="#f6f3ec">EN</text>
