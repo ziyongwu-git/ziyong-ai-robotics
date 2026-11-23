@@ -1,6 +1,6 @@
 ---
-title: "ClassLista (formerly ClassPortal)"
-summary: "A multi-school web app for dance-school-style programs: classes, attendance, invoices, and payments. I first shipped it as ClassPortal, and I renamed it ClassLista in November 2026. I built it with AI coding agents."
+title: "ClassLista"
+summary: "A multi-school web app for dance-school-style programs: classes, attendance, invoices, and payments. I built and shipped it in about three weeks of November 2026, directing AI coding agents."
 status: live
 # Month the work began. The day is a month marker. The page shows "Nov 2026".
 started: 2026-11-01
@@ -33,13 +33,64 @@ cover: "/covers/classportal-web.svg"
   Rewrite this file in place. Do not rename it. The URL is /builds/classportal-web.
 */}
 
-In November 2026 I shipped a multi-school web app for dance-school-style programs: classes, attendance, invoices, and payments. The first version was ClassPortal. On November 22 I renamed it ClassLista. The Chinese name is 课堂通. I built it with AI coding agents.
+ClassLista is a multi-school web app for dance-school-style programs. It runs classes, attendance, invoices, and payments. The Chinese name is 课堂通.
 
 The live app is [classlista.com](https://classlista.com).
 
+## How I built it
+
+I built and shipped ClassLista in about three weeks in November 2026. I was the solo builder. I directed AI coding agents, and the product calls were mine. English, Chinese, and Spanish were in from early on.
+
+<figure class="not-prose my-8">
+  <figcaption class="font-mono text-xs tracking-[0.18em] text-accent uppercase">Build principles</figcaption>
+  <ol class="mt-4 list-none pl-0">
+    <li class="relative pb-8 pl-8">
+      <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+      <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
+      <p class="font-mono text-xs tracking-[0.16em] text-accent uppercase">01</p>
+      <h3 class="mt-1 font-serif text-2xl text-ink">Ship small, review everything</h3>
+      <p class="mt-2 text-sm leading-6 text-muted">Small pull requests, dozens of them, each one reviewable. CI runs on every change.</p>
+    </li>
+    <li class="relative pb-8 pl-8">
+      <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+      <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
+      <p class="font-mono text-xs tracking-[0.16em] text-accent uppercase">02</p>
+      <h3 class="mt-1 font-serif text-2xl text-ink">Design for the busiest user</h3>
+      <p class="mt-2 text-sm leading-6 text-muted">Each role has a phone-first home. Attendance is one tap. A class email lets a parent answer Coming or Can't make it, with no sign-in.</p>
+    </li>
+    <li class="relative pb-8 pl-8">
+      <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+      <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
+      <p class="font-mono text-xs tracking-[0.16em] text-accent uppercase">03</p>
+      <h3 class="mt-1 font-serif text-2xl text-ink">Privacy by default</h3>
+      <p class="mt-2 text-sm leading-6 text-muted">A family joins with a random school code. There is no public school directory. A query stays inside that school.</p>
+    </li>
+    <li class="relative pb-8 pl-8">
+      <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+      <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
+      <p class="font-mono text-xs tracking-[0.16em] text-accent uppercase">04</p>
+      <h3 class="mt-1 font-serif text-2xl text-ink">Let schools opt in</h3>
+      <p class="mt-2 text-sm leading-6 text-muted">Make-up classes stay off until a school turns them on. Families pay by the methods the school already uses. Online checkout is still ahead.</p>
+    </li>
+    <li class="relative pb-8 pl-8">
+      <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+      <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
+      <p class="font-mono text-xs tracking-[0.16em] text-accent uppercase">05</p>
+      <h3 class="mt-1 font-serif text-2xl text-ink">Guardrails before autonomy</h3>
+      <p class="mt-2 text-sm leading-6 text-muted">The assistant is read-only. A lookup stays inside the asker's role and school, and how-to answers come from the help guides. Requests are rate-limited. With no API key, it searches the docs. Grok is the default. OpenAI or Anthropic can be used instead.</p>
+    </li>
+    <li class="relative pl-8">
+      <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
+      <p class="font-mono text-xs tracking-[0.16em] text-accent uppercase">06</p>
+      <h3 class="mt-1 font-serif text-2xl text-ink">Security is product work</h3>
+      <p class="mt-2 text-sm leading-6 text-muted">Login is throttled, and an account can lock. A person can sign out of every device, and a session ends when the password changes. The database is copied before a migration. Content-Security-Policy is on in report-only mode.</p>
+    </li>
+  </ol>
+</figure>
+
 ## Who it is for
 
-Three roles use it: a website admin, school admins and teachers, and families.
+Four roles use it: the owner, school admins, teachers, and families. Each role has a phone-first home.
 
 <figure class="not-prose my-8">
   <figcaption class="font-mono text-xs tracking-[0.18em] text-accent uppercase">Roles, the app, and what it talks to</figcaption>
@@ -47,21 +98,25 @@ Three roles use it: a website admin, school admins and teachers, and families.
     <ul class="grid gap-px bg-line">
       <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 bg-accent-soft px-4 py-3">
         <span class="font-mono text-xs tracking-[0.14em] text-accent uppercase">Role</span>
-        <span class="font-serif text-xl text-ink">Website admin</span>
+        <span class="font-serif text-xl text-ink">Owner</span>
       </li>
       <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 bg-highlight-soft px-4 py-3">
         <span class="font-mono text-xs tracking-[0.14em] text-highlight uppercase">Role</span>
-        <span class="font-serif text-xl text-ink">School admins and teachers</span>
+        <span class="font-serif text-xl text-ink">School admins</span>
       </li>
       <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 bg-card px-4 py-3">
         <span class="font-mono text-xs tracking-[0.14em] text-muted uppercase">Role</span>
+        <span class="font-serif text-xl text-ink">Teachers</span>
+      </li>
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 bg-paper px-4 py-3">
+        <span class="font-mono text-xs tracking-[0.14em] text-accent uppercase">Role</span>
         <span class="font-serif text-xl text-ink">Families</span>
       </li>
     </ul>
     <div class="border-t border-line px-4 py-5">
       <p class="font-mono text-xs tracking-[0.14em] text-accent uppercase">App</p>
       <p class="mt-1 font-serif text-2xl text-ink">ClassLista</p>
-      <p class="mt-1 text-sm leading-6 text-muted">Formerly ClassPortal. Chinese name 课堂通.</p>
+      <p class="mt-1 text-sm leading-6 text-muted">Chinese name 课堂通.</p>
       <p class="mt-2 text-sm leading-6 text-muted">Server actions checked with zod 4. Sessions use bcrypt and hashed tokens. Queries stay inside the caller's role and school.</p>
     </div>
     <ul class="grid gap-px border-t border-line bg-line sm:grid-cols-3">
@@ -77,20 +132,40 @@ Three roles use it: a website admin, school admins and teachers, and families.
       </li>
       <li class="bg-paper px-4 py-4">
         <p class="font-mono text-xs tracking-[0.14em] text-accent uppercase">Assistant</p>
-        <p class="mt-2 font-serif text-lg leading-tight text-ink">Ask ClassPortal</p>
-        <p class="mt-1 text-sm leading-6 text-muted">Grok by default. OpenAI or Anthropic optional. Help docs when no key is set.</p>
+        <p class="mt-2 font-serif text-lg leading-tight text-ink">In-app assistant</p>
+        <p class="mt-1 text-sm leading-6 text-muted">Read-only. Grounded in the help guides. Grok by default.</p>
       </li>
     </ul>
   </div>
 </figure>
 
-## What it does
+## School admins
 
-Through November 11, a session can be accepted or declined, and the confirmation shows on a calendar. Attendance gets taken. Invoice emails go out.
+Setup cards open a school one step at a time. The school uses its own colors and logo. Each school sets the sender name and the reply-to on its email, and each school has a join code. An admin can switch a teacher's self-serve powers on or off. Make-up classes stay off until the school opts in. The school lists how families pay.
 
-Invites and password resets are email too. Email goes through Resend or SMTP. Each school sets the sender name and the reply-to on those messages.
+## Teachers
 
-The language toggle is English, Chinese, and Spanish. A test fails when a translation is missing. The design is kid-friendly, and the tooltips are accessible.
+Attendance is Present, Absent, or Excused. On the Today screen a teacher marks it in one tap, and can edit it for 30 days. A corrected class adjusts the invoice with a credit or a charge. Teachers have self-serve powers, and an admin can switch those powers on or off.
+
+## Families
+
+A family joins with a code. The join page shows where that family stands. A class email includes Coming and Can't make it. Each one is a single tap, with no sign-in. A family can say yes to the rest of the term. Make-up classes show up when the school has opted in. A family can tap "I've paid".
+
+## Owner
+
+The owner has a platform home, a page per school, a usage dashboard, and pages for emails, activity, the system, and people. Open as admin is a support mode, and it is time-limited. Suggest a feature sends that note to the website admin.
+
+## Scheduling
+
+A term has a roster. A class can meet at several times each week, and it can repeat until a date. This class and the following ones can be edited or cancelled. The app warns when the same teacher, the same room, or the same child would clash. Staff Planner groups the schedule by teacher, room, student, or family. Holidays can start from suggested days. A school can add its own days off, with conflict warnings and reminders. Each place has its own time zone. A session can be accepted or declined, and the answer shows on a calendar. On a phone, the calendar opens as a list of what is coming up.
+
+## Money
+
+Invoices show Paid, Unpaid, or Overdue, and staff record payments. A school lists how families pay: Zelle, Venmo, PayPal, a card link to the school's own Stripe, Square, or PayPal page, bank transfer, check, cash, WeChat Pay, Alipay, or a custom method. A family taps "I've paid", and staff confirm. The app keeps payment records and refund records. ClassLista does not move the money.
+
+## Languages
+
+The app is in English, Chinese, and Spanish. A test fails when a translation is missing. The public landing page has a language picker. Notices, dates, and amounts follow the reader's language. The design is kid-friendly, and the tooltips are accessible.
 
 <ul class="not-prose my-6 flex flex-wrap gap-2" aria-label="Languages">
   <li class="rounded-full bg-ink px-3 py-1.5 font-mono text-xs text-paper">English</li>
@@ -98,182 +173,26 @@ The language toggle is English, Chinese, and Spanish. A test fails when a transl
   <li class="rounded-full border border-line bg-card px-3 py-1.5 font-mono text-xs text-ink">Español</li>
 </ul>
 
-## Ask ClassPortal
+## The assistant
 
-The assistant is called Ask ClassPortal. Grok is the default. OpenAI or Anthropic can be used instead. It is there for sales and for guidance.
+ClassLista has an in-app AI assistant. It is there for sales and for guidance. Grok is the default. OpenAI or Anthropic can be used instead.
 
-"Take me there" highlights the field you asked about. Lookups are read-only, and they stay inside the role and the school of the person asking. There is a setup checklist, and a place to capture a lead.
+How-to answers are grounded in the step-by-step help guides. "Take me there" highlights the field you asked about. Lookups are read-only, and they stay inside the role and the school of the person asking. There is a setup checklist, and a place to capture a lead.
 
-I put limits on it. Requests are rate-limited. Chats are kept for 30 days, and there is an admin page for them. If no API key is set, it searches the help docs instead of calling a model.
+Requests are rate-limited. Chats are kept for 30 days, and there is an admin page for them. If no API key is set, the assistant searches the help docs instead of calling a model.
 
 ## How it is put together
 
-The front of it is Next.js 15, React 19, and TypeScript, styled with Tailwind v4. Data is Prisma 6 on SQLite. Sign-in is a custom session: bcrypt for passwords, hashed tokens for the session. Changes go through server actions checked with zod 4, and queries are scoped to the role and the school.
+The front of it is Next.js 15, React 19, and TypeScript, styled with Tailwind v4. The type is Bricolage Grotesque and Figtree. On screen there is a floating tab bar, drawn status icons, an app icon, and a preview when a link is shared.
 
-It runs on Railway, in Docker, on Node 22, with a persistent volume. Platform email sends through Resend.
+Data is Prisma 6 on SQLite, on a persistent volume. Sign-in is a custom session: bcrypt for passwords, hashed tokens for the session. Changes go through server actions checked with zod 4, and queries are scoped to the role and the school.
 
-Tests run with Node's built-in test runner, via tsx. GitHub Actions runs CI. ESLint, Prettier, and Dependabot are part of the setup.
+It runs on Railway, in Docker, on Node 22. Platform email sends through Resend, from its own mail domain. Tests run with Node's built-in test runner, via tsx. GitHub Actions runs CI. ESLint, Prettier, and Dependabot are part of the setup. There is a health page.
 
-## November 11 to 23
-
-After the first ship I kept going on the same app, through November 23. The work below is grouped by theme.
-
-### Name and home
-
-On November 22 I renamed ClassPortal to ClassLista. The Chinese name is 课堂通. The public address is classlista.com. [www.classlista.com](https://www.classlista.com) and the old Railway address both redirect there. Platform email now actually sends, through Resend, from its own mail domain.
-
-### Teachers and attendance
-
-Attendance is Present, Absent, or Excused. The teacher Today screen takes attendance in one tap, and that attendance can be edited for 30 days. A corrected class adjusts the invoice with a credit or a charge. Teachers have self-serve powers, and an admin can switch those powers on or off.
-
-### Families
-
-A school has a join code. The code is random, and there is no public school directory. Class emails include Coming and Can't make it. Those are one tap, with no sign-in. A family can say yes to the rest of the term. Make-up classes are opt-in, per school. The join page shows where a family stands.
-
-### Scheduling
-
-A term has a roster. A class can have several weekly times, and it can repeat until a date. This class and the following ones can be edited or cancelled. The app warns about a clash for the same teacher, the same room, or the same child. Staff Planner can be viewed by teacher, room, student, or family. Holidays can start from suggested days, and a school can add custom days off, with conflict warnings and reminders. Places have their own time zones. On a phone, the calendar opens as an upcoming list.
-
-### Money
-
-Invoices show Paid, Unpaid, or Overdue, and staff record payments. A school lists how families pay: Zelle, Venmo, PayPal, a card link to the school's own Stripe, Square, or PayPal page, bank transfer, check, cash, WeChat Pay, Alipay, or a custom method. A family taps "I've paid", and staff confirm. The app keeps payment records and refund records. ClassLista itself does not move the money yet.
-
-### Owner view
-
-The owner view has a platform home, school pages, a usage dashboard, and pages for emails, activity, the system, and people. Open as admin is a support mode, and it is time-limited.
-
-### Look and feel
-
-There is a public landing page, with a language picker. Notices, dates, and amounts follow the reader's language. The new look came in seven passes. It includes school colors and a logo, a floating tab bar, drawn status icons, and warmer neutrals. The fonts are Bricolage Grotesque and Figtree. Each role has a phone-first home. I polished accessibility and the phone layout. There is an app icon, and links have previews. Setup cards open a school one step at a time.
-
-### Hardening
-
-CI runs on every pull request. Login is throttled, and an account can lock. A person can sign out of all devices. Sessions end when the password changes. I closed two screens that showed data across schools. The database is copied before a migration. Content-Security-Policy is on in report-only mode. There is a health page. Dependencies were upgraded.
-
-### Ask ClassPortal, continued
-
-How-to answers are grounded in the step-by-step help guides. Suggest a feature sends that feedback to the website admin.
-
-## Milestones
-
-<ol class="not-prose mt-2 list-none pl-0">
-  <li class="relative pb-8 pl-8">
-    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
-    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
-    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">1</p>
-    <h3 class="mt-1 font-serif text-2xl text-ink">v1 and the first deploy</h3>
-  </li>
-  <li class="relative pb-8 pl-8">
-    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
-    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
-    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">2</p>
-    <h3 class="mt-1 font-serif text-2xl text-ink">Theme, three languages, multi-school</h3>
-  </li>
-  <li class="relative pb-8 pl-8">
-    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
-    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
-    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">3</p>
-    <h3 class="mt-1 font-serif text-2xl text-ink">Families, invites, i18n, sender settings, tooltips</h3>
-  </li>
-  <li class="relative pb-8 pl-8">
-    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
-    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
-    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">4</p>
-    <h3 class="mt-1 font-serif text-2xl text-ink">Ask ClassPortal</h3>
-  </li>
-  <li class="relative pb-8 pl-8">
-    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
-    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
-    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">
-      5 · <time datetime="2026-11-11">Nov 11, 2026</time>
-    </p>
-    <h3 class="mt-1 font-serif text-2xl text-ink">Boot-crash hotfix</h3>
-  </li>
-  <li class="relative pb-8 pl-8">
-    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
-    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
-    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">
-      6 · <time datetime="2026-11-11">Nov 11, 2026</time>
-    </p>
-    <h3 class="mt-1 font-serif text-2xl text-ink">Feedback to the admin, and grounded help answers</h3>
-  </li>
-  <li class="relative pb-8 pl-8">
-    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
-    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
-    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">
-      7 · <time datetime="2026-11-12">Nov 12, 2026</time>
-    </p>
-    <h3 class="mt-1 font-serif text-2xl text-ink">Teacher Today and attendance</h3>
-  </li>
-  <li class="relative pb-8 pl-8">
-    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
-    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
-    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">
-      8 · <time datetime="2026-11-14">Nov 14, 2026</time>
-    </p>
-    <h3 class="mt-1 font-serif text-2xl text-ink">Role homes and join codes</h3>
-  </li>
-  <li class="relative pb-8 pl-8">
-    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
-    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
-    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">
-      9 · <time datetime="2026-11-15">Nov 15–16, 2026</time>
-    </p>
-    <h3 class="mt-1 font-serif text-2xl text-ink">CI and hardening</h3>
-  </li>
-  <li class="relative pb-8 pl-8">
-    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
-    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
-    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">
-      10 · <time datetime="2026-11-19">Nov 19, 2026</time>
-    </p>
-    <h3 class="mt-1 font-serif text-2xl text-ink">Landing page, class emails, payment status, rosters, planner, clash warnings</h3>
-  </li>
-  <li class="relative pb-8 pl-8">
-    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
-    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
-    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">
-      11 · <time datetime="2026-11-20">Nov 20, 2026</time>
-    </p>
-    <h3 class="mt-1 font-serif text-2xl text-ink">Owner platform and make-up classes</h3>
-  </li>
-  <li class="relative pb-8 pl-8">
-    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
-    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
-    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">
-      12 · <time datetime="2026-11-21">Nov 21, 2026</time>
-    </p>
-    <h3 class="mt-1 font-serif text-2xl text-ink">New look</h3>
-  </li>
-  <li class="relative pb-8 pl-8">
-    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
-    <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
-    <p class="font-mono text-xs tracking-[0.16em] text-muted uppercase">
-      13 · <time datetime="2026-11-22">Nov 22, 2026</time>
-    </p>
-    <h3 class="mt-1 font-serif text-2xl text-ink">Renamed ClassLista, classlista.com, and holidays</h3>
-  </li>
-  <li class="relative pl-8">
-    <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full bg-highlight" aria-hidden="true"></span>
-    <p class="font-mono text-xs tracking-[0.16em] text-highlight uppercase">
-      14 · <time datetime="2026-11-23">Nov 23, 2026</time>
-    </p>
-    <h3 class="mt-1 font-serif text-2xl text-ink">Setup cards, new fonts, time zones, payment methods</h3>
-  </li>
-</ol>
-
-## Next
-
-Still ahead:
+## What's next
 
 - Built-in online checkout.
 - Assistant actions, with confirmation cards. The assistant is still read-only.
 - Real privacy and terms pages.
 - Off-site backups, and a staging environment.
 - Error tracking and uptime monitoring.
-
-## What I learned
-
-I got to take a product the whole way: scheduling, attendance, invoices, payments, email, languages, and a live URL. Ask ClassPortal is the applied LLM piece, and the guardrails are part of the product: rate limits, 30 days of chat, an admin page, read-only lookups scoped to a role and a school, and help-doc search when no API key is set. More than one school means the data has to say which school a row belongs to. Three languages count because a missing translation fails a test. I shipped it with AI coding agents.
-
-After November 11 the cadence stayed fast and agent-driven, in dozens of small pull requests. I kept that pace in bounds with CI on every pull request, the hardening above, and a copy of the database before a migration.

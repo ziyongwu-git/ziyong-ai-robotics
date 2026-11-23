@@ -1,6 +1,6 @@
 <!--
-  Original drawing for ClassLista, formerly ClassPortal.
-  Three roles, a week of sessions, and the assistant.
+  Drawing for ClassLista.
+  Three roles, a week of sessions, and the in-app assistant.
   A diagram, not a screenshot. ASCII only. Colors stay put in both themes.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" fill="none">
@@ -16,7 +16,7 @@
   <text x="60" y="78" fill="#7c2d12" font-family="ui-monospace, monospace" font-size="13" letter-spacing="1.5">ROLES</text>
   <rect x="60" y="100" width="228" height="108" rx="18" fill="#f6e4d4"/>
   <text x="174" y="146" text-anchor="middle" fill="#7c2d12" font-family="ui-monospace, monospace" font-size="12">01</text>
-  <text x="174" y="176" text-anchor="middle" fill="#1c1915" font-family="Georgia, serif" font-size="22">Website admin</text>
+  <text x="174" y="176" text-anchor="middle" fill="#1c1915" font-family="Georgia, serif" font-size="22">Owner</text>
   <rect x="60" y="222" width="228" height="128" rx="18" fill="#d9efe9"/>
   <text x="174" y="266" text-anchor="middle" fill="#0a534a" font-family="ui-monospace, monospace" font-size="12">02</text>
   <text x="174" y="298" text-anchor="middle" fill="#1c1915" font-family="Georgia, serif" font-size="20">School admins</text>
@@ -78,7 +78,7 @@
   <text x="480" y="424" text-anchor="middle" fill="#1c1915" font-family="Georgia, serif" font-size="18">on a calendar</text>
 
   <rect x="648" y="40" width="276" height="460" rx="28" fill="#fffdf8" stroke="#e4dace" stroke-width="2"/>
-  <text x="672" y="78" fill="#7c2d12" font-family="ui-monospace, monospace" font-size="13" letter-spacing="1.5">ASK</text>
+  <text x="672" y="78" fill="#7c2d12" font-family="ui-monospace, monospace" font-size="13" letter-spacing="1.5">APP</text>
   <text x="672" y="118" fill="#1c1915" font-family="Georgia, serif" font-size="28">ClassLista</text>
   <g font-family="ui-monospace, monospace" font-size="13" text-anchor="middle">
     <rect x="672" y="146" width="68" height="34" rx="17" fill="#1c1915"/>
