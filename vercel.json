@@ -5,5 +5,25 @@
     { "source": "/projects/:path*", "destination": "/demos/:path*", "permanent": true },
     { "source": "/learning/certifications", "destination": "/certificates", "permanent": true },
     { "source": "/learning/certifications/", "destination": "/certificates", "permanent": true }
-  ]
+  ],
+  "proxy": {
+    "entrypoint": "middleware.ts",
+    "matcher": [
+      "/demos",
+      "/demos/",
+      "/demos/:path*",
+      "/demos(.*)",
+      "/builds",
+      "/builds/",
+      "/builds/:path*",
+      "/builds(.*)",
+      "/covers/see-think-move.svg",
+      "/covers/ask-the-notebook.svg",
+      "/covers/follow-the-packet.svg",
+      "/covers/classportal-web.svg",
+      "/covers/(see-think-move|ask-the-notebook|follow-the-packet|classportal-web)\\.svg",
+      "/_astro/:path*",
+      "/_astro/(?!BaseLayout\\.).+"
+    ]
+  }
 }

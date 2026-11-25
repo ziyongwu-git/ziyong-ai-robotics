@@ -1,8 +1,14 @@
 ---
+export const prerender = false;
+
 import Band from '../../components/Band.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import BuildCard from '../../components/BuildCard.astro';
 import { getBuilds } from '../../lib/content';
+import { denyIfLocked } from '../../lib/invite';
+
+const denied = await denyIfLocked(Astro.request, import.meta.env.DEV);
+if (denied) return denied;
 
 const builds = await getBuilds();
 ---
@@ -10,6 +16,7 @@ const builds = await getBuilds();
 <BaseLayout
   title="Builds"
   description="Products Ziyong Wu has shipped. Each page is one product, with the live app when it is up."
+  noindex
 >
   <header class="grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
     <div class="max-w-[65ch]">

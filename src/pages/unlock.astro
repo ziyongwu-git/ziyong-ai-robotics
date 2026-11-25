@@ -1,0 +1,154 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config';
+import {
+  ATTEMPT_COOKIE,
+  ATTEMPT_WINDOW_MS,
+  INVITE_COOKIE,
+  INVITE_MAX_AGE_SECONDS,
+  clearIpFailures,
+  clientIp,
+  currentInviteConfig,
+  evaluateUnlock,
+  ipFailureCount,
+  readCookie,
+  redirectResponse,
+  rememberIpFailure,
+  requestHasInvite,
+  safeNext,
+  serializeCookie,
+  wait,
+} from '../lib/invite';
+
+const secure = Astro.url.protocol === 'https:';
+const config = currentInviteConfig(import.meta.env.DEV);
+const now = Date.now();
+let ip = clientIp(Astro.request);
+try {
+  const { ipAddress } = await import('@vercel/functions');
+  ip = ipAddress(Astro.request) ?? ip;
+} catch {
+  /* Local dev has no platform IP. The attempt cookie and the delay still apply. */
+}
+
+let code: string | null = null;
+let nextParam = Astro.url.searchParams.get('next');
+
+if (Astro.request.method === 'POST') {
+  let form = new FormData();
+  try {
+    form = await Astro.request.formData();
+  } catch {
+    form = new FormData();
+  }
+  const submitted = form.get('code');
+  code = typeof submitted === 'string' ? submitted : '';
+  const postedNext = form.get('next');
+  if (typeof postedNext === 'string') nextParam = postedNext;
+} else if (Astro.url.searchParams.has('code')) {
+  code = Astro.url.searchParams.get('code');
+}
+
+const attemptToken = readCookie(Astro.request.headers.get('cookie'), ATTEMPT_COOKIE);
+const result = await evaluateUnlock({
+  code,
+  nextParam,
+  config,
+  attemptToken,
+  ipFailures: ipFailureCount(ip, now),
+  now,
+});
+
+if (result.kind === 'ok') {
+  clearIpFailures(ip);
+  return redirectResponse(new URL(result.next, Astro.url).toString(), [
+    serializeCookie(INVITE_COOKIE, result.cookie, { maxAge: INVITE_MAX_AGE_SECONDS, path: '/', secure }),
+    serializeCookie(ATTEMPT_COOKIE, '', { maxAge: 0, path: '/unlock', secure }),
+  ]);
+}
+
+if (result.kind === 'bad') {
+  if (result.error === 'mismatch') rememberIpFailure(ip, now);
+  await wait(result.delayMs);
+  const cookies = result.attemptCookie
+    ? [serializeCookie(ATTEMPT_COOKIE, result.attemptCookie, { maxAge: Math.ceil(ATTEMPT_WINDOW_MS / 1000), path: '/unlock', secure })]
+    : [];
+  const dest = new URL('/unlock', Astro.url);
+  dest.searchParams.set('next', result.next);
+  dest.searchParams.set('error', result.error === 'rate' ? 'rate' : '1');
+  return redirectResponse(dest.toString(), cookies);
+}
+
+const errorCode = Astro.url.searchParams.get('error');
+if (!errorCode && (await requestHasInvite(Astro.request, config, now))) {
+  return redirectResponse(new URL(result.next, Astro.url).toString(), []);
+}
+
+const next = result.next;
+const showSetupHint = import.meta.env.DEV && !config.devUnlock && (!config.secret || config.codes.length === 0);
+
+Astro.response.headers.set('Cache-Control', 'private, no-store');
+Astro.response.headers.set('X-Robots-Tag', 'noindex');
+Astro.response.headers.set('Referrer-Policy', 'no-referrer');
+
+const errorMessage =
+  errorCode === 'rate'
+    ? 'Too many tries. Wait about 15 minutes, then try again.'
+    : errorCode === '1'
+      ? 'That code did not match. Check it and try again, or email ziyong.w@gmail.com to ask for one.'
+      : '';
+---
+
+<BaseLayout
+  title="Invite"
+  description="Demos and builds on this site are shared by invite."
+  width="narrow"
+  noindex
+>
+  <p class="font-mono text-xs tracking-[0.18em] text-accent uppercase">Invite</p>
+  <h1 class="mt-3 font-serif text-4xl leading-tight sm:text-5xl">Demos and builds are shared by invite.</h1>
+  <p class="mt-4 text-lg leading-8 text-muted">
+    If you have a code, enter it here. If you need one, email
+    <a class="text-accent underline decoration-line underline-offset-4" href={`mailto:${site.email}`}>{site.email}</a>.
+  </p>
+
+  {
+    errorMessage && (
+      <p class="mt-6 rounded-2xl border border-line bg-accent-soft px-4 py-3 text-sm leading-6 text-ink" role="alert">
+        {errorMessage}
+      </p>
+    )
+  }
+
+  <form class="mt-8" method="post">
+    <input type="hidden" name="next" value={next} />
+    <label class="block text-sm font-medium text-ink" for="invite-code">Invite code</label>
+    <input
+      id="invite-code"
+      name="code"
+      type="text"
+      required
+      maxlength="200"
+      autocomplete="off"
+      autocapitalize="off"
+      autocorrect="off"
+      spellcheck="false"
+      class="mt-2 w-full rounded-2xl border border-line bg-card px-4 py-3 text-base text-ink"
+    />
+    <button class="btn btn-solid mt-4" type="submit">Unlock</button>
+  </form>
+
+  <p class="mt-6 text-sm leading-6 text-muted">A code lasts about 30 days in this browser.</p>
+
+  {
+    showSetupHint && (
+      <p class="mt-6 text-sm leading-6 text-muted">
+        This note is only on your computer. Copy <span class="font-mono text-xs">.env.example</span> to
+        <span class="font-mono text-xs">.env</span>, then set INVITE_CODES and INVITE_COOKIE_SECRET. Or set
+        INVITE_DEV_UNLOCK=1 while you run <span class="font-mono text-xs">npm run dev</span>.
+      </p>
+    )
+  }
+</BaseLayout>

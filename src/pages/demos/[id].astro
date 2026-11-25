@@ -1,5 +1,7 @@
 ---
-import { getCollection, getEntry, render } from 'astro:content';
+export const prerender = false;
+
+import { getEntry, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import BuiltOn from '../../components/BuiltOn.astro';
 import PlaceholderNote from '../../components/PlaceholderNote.astro';
@@ -7,23 +9,17 @@ import TagList from '../../components/TagList.astro';
 import { certificationIds, certsFor, usesCertification } from '../../lib/certifications';
 import { getLearningPosts } from '../../lib/content';
 import { formatDate, isoDate, statusLabel } from '../../lib/format';
+import { denyIfLocked } from '../../lib/invite';
 import type { ProjectStatus } from '../../config';
 
-export async function getStaticPaths() {
-  const projects = await getCollection('projects');
-  return projects.map((project) => ({
-    params: { id: project.id },
-  }));
-}
+const denied = await denyIfLocked(Astro.request, import.meta.env.DEV);
+if (denied) return denied;
 
 const { id } = Astro.params;
-if (!id) {
-  throw new Error('Missing demo id.');
-}
-
-const project = await getEntry('projects', id);
+const project = id ? await getEntry('projects', id) : undefined;
 if (!project) {
-  throw new Error(`No demo entry for ${id}.`);
+  Astro.response.status = 404;
+  return Astro.rewrite('/404');
 }
 
 const { Content } = await render(project);
@@ -49,6 +45,7 @@ const statusTone: Record<ProjectStatus, string> = {
   width="wide"
   ogType="article"
   published={project.data.date}
+  noindex
 >
   <div class="max-w-3xl">
     <p>
