@@ -55,8 +55,8 @@ npm run preview
 | `docs/` | Notes about the tools. These pages are not on the website. |
 | `airflow/` | A sample Airflow DAG that chunks the notes into a JSON index. Not part of `npm run build` or the Vercel deploy. See `airflow/README.md`. |
 | `astro.config.ts` | Astro settings: mostly static output, the Vercel adapter, React, MDX, the sitemap. |
-| `middleware.ts` | Vercel check that runs before a demo file is sent. |
-| `src/middleware.ts` | The same check for pages that are drawn on request. |
+| `src/middleware.ts` | The check that runs before a demo or build page is drawn. |
+| `scripts/protect-gated-assets.mjs` | Moves demo scripts out of the public folder after the build. |
 | `src/lib/invite.ts` | How codes and the unlock cookie are checked. |
 | `.env.example` | Blank template for the invite settings on your computer. Copy it to `.env`. |
 | `dist/` | The built site. Generated. Do not edit it. |

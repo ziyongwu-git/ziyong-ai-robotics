@@ -91,9 +91,9 @@ if (!existsSync(configPath)) {
   failures.push('Missing .vercel/output/config.json.');
 } else {
   const config = JSON.parse(readFileSync(configPath, 'utf8'));
-  const route = config.routes?.[0];
-  if (route?.dest !== 'gated-asset' || route?.src !== '^/_astro/(?!BaseLayout\\.).+$') {
-    failures.push('The first Vercel route must send non-stylesheet /_astro files to the invite function.');
+  const route = (config.routes ?? []).find((item) => item.dest === 'gated-asset');
+  if (!route?.src?.startsWith('^/_astro/(')) {
+    failures.push('Vercel routes must send demo scripts under /_astro to the invite function.');
   }
 }
 

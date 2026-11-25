@@ -35,9 +35,18 @@ for (const dir of staticDirs) {
 }
 
 await mkdir(assetDir, { recursive: true });
-const sourceDir = staticDirs.find((dir) => dir.endsWith(`dist/client/_astro`)) ?? staticDirs[0];
 for (const name of names) {
-  await cp(join(sourceDir, name), join(assetDir, name));
+  let copied = false;
+  for (const dir of staticDirs) {
+    try {
+      await cp(join(dir, name), join(assetDir, name));
+      copied = true;
+      break;
+    } catch {
+      /* This output folder may not contain the file. Try the next one. */
+    }
+  }
+  if (!copied) throw new Error(`Could not copy demo asset ${name}.`);
 }
 
 for (const dir of staticDirs) {
@@ -78,11 +87,17 @@ await writeFile(
 );
 
 const config = JSON.parse(await readFile(configPath, 'utf8'));
-const route = {
-  src: '^/_astro/(?!BaseLayout\\.).+$',
-  dest: 'gated-asset',
-};
-config.routes = [route, ...config.routes.filter((item) => item.dest !== 'gated-asset')];
+config.routes = (config.routes ?? []).filter((item) => item.dest !== 'gated-asset');
+if (names.size > 0) {
+  const escaped = [...names].map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const route = {
+    src: `^/_astro/(${escaped.join('|')})$`,
+    dest: 'gated-asset',
+  };
+  const filesystem = config.routes.findIndex((item) => item.handle === 'filesystem');
+  const insertAt = filesystem === -1 ? config.routes.length : filesystem + 1;
+  config.routes.splice(insertAt, 0, route);
+}
 await writeFile(configPath, JSON.stringify(config, null, 2) + '\n');
 
 console.log(`protect-gated-assets: moved ${names.size} demo file(s) behind the invite check.`);

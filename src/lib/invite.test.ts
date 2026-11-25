@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import {
   ATTEMPT_WINDOW_MS,
   FAILURE_DELAY_MS,
-  GATE_MATCHER,
   INVITE_COOKIE,
   INVITE_MAX_AGE_SECONDS,
   MAX_ATTEMPTS,
@@ -364,13 +363,14 @@ describe('public pages do not embed gated widgets', () => {
   });
 });
 
-describe('vercel matcher', () => {
-  it('matches the list the routing middleware exports', () => {
+describe('vercel.json', () => {
+  it('keeps the old redirects and does not add a routing middleware entry', () => {
     const vercel = JSON.parse(readFileSync(new URL('../../vercel.json', import.meta.url), 'utf8')) as {
-      proxy: { matcher: string[] };
+      redirects: { source: string; destination: string }[];
+      proxy?: unknown;
     };
-    expect(vercel.proxy.matcher).toEqual([...GATE_MATCHER]);
-    expect(vercel.proxy.entrypoint).toBe('middleware.ts');
+    expect(vercel.proxy).toBeUndefined();
+    expect(vercel.redirects.some((item) => item.source === '/projects' && item.destination === '/demos')).toBe(true);
   });
 });
 

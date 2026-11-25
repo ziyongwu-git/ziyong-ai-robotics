@@ -20,25 +20,6 @@ const EXP_GRACE_MS = 24 * 60 * 60 * 1000;
 const NEXT_FALLBACK = '/demos';
 const MAX_NEXT_LENGTH = 512;
 
-/** Paths Vercel Routing Middleware must inspect before a static file is sent. */
-export const GATE_MATCHER = [
-  '/demos',
-  '/demos/',
-  '/demos/:path*',
-  '/demos(.*)',
-  '/builds',
-  '/builds/',
-  '/builds/:path*',
-  '/builds(.*)',
-  '/covers/see-think-move.svg',
-  '/covers/ask-the-notebook.svg',
-  '/covers/follow-the-packet.svg',
-  '/covers/classportal-web.svg',
-  '/covers/(see-think-move|ask-the-notebook|follow-the-packet|classportal-web)\\.svg',
-  '/_astro/:path*',
-  '/_astro/(?!BaseLayout\\.).+',
-] as const;
-
 export const GATED_COVERS = [
   '/covers/see-think-move.svg',
   '/covers/ask-the-notebook.svg',
