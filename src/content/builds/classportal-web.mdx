@@ -28,6 +28,8 @@ order: 1
 cover: "/covers/classportal-web.svg"
 ---
 
+import AgentArchitecture from '../../components/builds/AgentArchitecture.astro';
+
 {/*
   Slug classportal-web must stay stable.
   Rewrite this file in place. Do not rename it. The URL is /builds/classportal-web.
@@ -39,97 +41,34 @@ The live app is [classlista.com](https://classlista.com).
 
 ## How I built it
 
-I built and shipped ClassLista in about three weeks in November 2026. I work like a product lead running a small team of AI agents. Each agent has a defined role. I make the product calls, set the guardrails, and review what ships.
+I shipped ClassLista in about three weeks in November 2026. I run it as a product lead with a small team of agents. The work moves through six stages. I set the direction. I approve anything that touches production, money, deletes, or auth, and I merge.
 
-Grok is the product coordinator and the operator. It is a Grok Bot agent dedicated to ClassLista. It keeps the backlog, writes the briefs, and reviews plans. It launches the Cursor cloud coding agents, checks production, and handles operations such as the domain, DNS, and email setup.
+Grok is the coordinator. It is a Grok Bot agent for ClassLista. It keeps the backlog, writes the briefs, reviews plans, and launches the Cursor cloud coding agents. Claude drafts the living roadmap. The two of them coordinate directly, through a shared-docs channel in the repository. The channel has a protocol guide, an inbox for Grok and an inbox for Claude, a shared status board, an append-only decisions log, and handoff templates. AGENTS.md and CLAUDE.md tell every agent to read its inbox and the status board at the start of a session, and to update them at the end. Grok also keeps a local synced checkout and reads and writes the same files.
 
-Those Cursor agents built the first version: the core app, languages, families, the in-app assistant, attendance, and the first security lockdown. Several can work in parallel, so more than one pull request can land in the same hour. Claude, running Claude Code in the cloud, then became the main feature builder. It shipped most of the later features as small pull requests, and it drafted a living product roadmap.
+Claude flags a risk in Grok's inbox. Grok queues it and briefs a Cursor agent. The decision lands in the shared log.
 
-There is no live chat between them. I am the relay and the decider. They coordinate through shared artifacts: the repository, a shared AGENTS.md rulebook, and the roadmap. The rulebook is written for anyone changing this code, human or AI tool: Claude Code, Cursor, or Grok.
+Cursor cloud agents built the first version: the core app, languages, families, the in-app assistant, attendance, and the security lockdown. Several can work at once, so more than one pull request can land in the same hour. Claude Code, in the cloud, became the main feature builder and shipped most of the later features. Each builder takes one scoped change on its own branch and opens a small pull request.
 
-Claude's roadmap flagged trust risks in the live demo login. Grok agreed, folded that into the backlog, and had a Cursor agent ship the lockdown first. Grok audits what Claude ships, checks production, and fixes drift such as stale docs. Operational news, such as email going live, comes back to Claude through me.
+GitHub Actions CI runs typecheck, tests, and the build on every pull request. ESLint, Prettier, and Dependabot run with it. I review, and I merge. Railway deploys the Docker image to classlista.com. Grok checks production and handles the domain, DNS, and email through Resend. Grok also audits what shipped and fixes drift, such as stale docs. Every two weeks Grok hands the story to the website assistant, another Grok Bot agent, which writes it into this page.
 
-Every two weeks Grok hands off to the website assistant, another Grok Bot agent, which turns that handoff into this page. Other assistants handle email triage and AI news, so my attention stays on product decisions. English, Chinese, and Spanish were in from early on.
+Under the middle stages sits the shared state: the repository, AGENTS.md, CLAUDE.md, the roadmap, the backlog, and the handoff docs. The rulebooks are for anyone changing this code, human or AI tool. Production checks and audits feed the backlog, so what ships comes back to the plan.
 
-Give each model the job it is best at. Grok coordinates and runs operations. Claude and the Cursor agents build. Keep one shared rulebook, and keep a human deciding what merges.
+Other assistants triage email and watch AI news, so my attention stays on product. The in-app assistant, inside the product, defaults to Grok. OpenAI or Anthropic are optional. It is read-only, and it stays inside the asker's role. English, Chinese, and Spanish were in from early on.
 
-<figure class="not-prose my-8">
-  <figcaption class="font-mono text-xs tracking-[0.18em] text-accent uppercase">How the work moves</figcaption>
-  <div class="mt-4 overflow-hidden rounded-[1.75rem] border border-line bg-card">
-    <ol class="list-none pl-0">
-      <li class="bg-accent-soft px-4 py-4">
-        <p class="font-mono text-xs tracking-[0.14em] text-accent uppercase">01 · Me</p>
-        <p class="mt-1 font-serif text-2xl text-ink">Decide and relay</p>
-        <p class="mt-2 text-sm leading-6 text-muted">Product calls, priorities, and guardrails. I carry the handoffs, and I decide what merges.</p>
-      </li>
-      <li class="border-t border-line bg-highlight-soft px-4 py-4">
-        <p class="text-center font-mono text-sm leading-6 text-muted" aria-hidden="true">↓</p>
-        <p class="mt-3 font-mono text-xs tracking-[0.14em] text-highlight uppercase">02 · Grok</p>
-        <p class="mt-1 font-serif text-2xl text-ink">Product coordinator</p>
-        <p class="mt-2 text-sm leading-6 text-muted">A Grok Bot agent for ClassLista. It keeps the backlog, writes briefs, reviews plans, and launches the Cursor agents. It checks production, and it handles the domain, DNS, and email setup.</p>
-      </li>
-      <li class="border-t border-line bg-card">
-        <p class="bg-paper py-2 text-center font-mono text-sm leading-6 text-muted" aria-hidden="true">↓</p>
-        <p class="px-4 pt-4 font-mono text-xs tracking-[0.14em] text-muted uppercase">03 · The builders</p>
-        <div class="mt-3 grid gap-px bg-line sm:grid-cols-2">
-          <div class="bg-card px-4 py-4">
-            <p class="font-mono text-xs tracking-[0.14em] text-muted uppercase">Cursor</p>
-            <p class="mt-1 font-serif text-xl text-ink">Cloud coding agents</p>
-            <p class="mt-2 text-sm leading-6 text-muted">Built the first version: the core app, languages, families, the in-app assistant, attendance, and the first security lockdown. Several can work in parallel.</p>
-          </div>
-          <div class="bg-paper px-4 py-4">
-            <p class="font-mono text-xs tracking-[0.14em] text-accent uppercase">Claude Code</p>
-            <p class="mt-1 font-serif text-xl text-ink">Main feature builder</p>
-            <p class="mt-2 text-sm leading-6 text-muted">Run in the cloud. It shipped most of the later features as small pull requests, and it drafted a living product roadmap.</p>
-          </div>
-        </div>
-      </li>
-      <li class="border-t border-line bg-paper px-4 py-4">
-        <p class="text-center font-mono text-sm leading-6 text-muted" aria-hidden="true">↓</p>
-        <div class="mt-3 rounded-2xl border border-accent bg-accent-soft px-4 py-4">
-          <p class="font-mono text-xs tracking-[0.14em] text-accent uppercase">In the middle</p>
-          <p class="mt-1 font-serif text-2xl text-ink">AGENTS.md and the roadmap</p>
-          <p class="mt-2 text-sm leading-6 text-muted">The shared center. One rulebook for anyone changing this code, human or AI tool: Claude Code, Cursor, or Grok. The roadmap sits with it. The work lives in the repository. The agents do not chat live.</p>
-        </div>
-      </li>
-      <li class="border-t border-line bg-card px-4 py-4">
-        <p class="text-center font-mono text-sm leading-6 text-muted" aria-hidden="true">↓</p>
-        <p class="mt-3 font-mono text-xs tracking-[0.14em] text-muted uppercase">04 · Pull requests</p>
-        <p class="mt-1 font-serif text-xl text-ink">Small, reviewable changes</p>
-        <p class="mt-2 text-sm leading-6 text-muted">A Cursor agent or Claude Code takes a scoped change on its own branch and opens a small pull request.</p>
-      </li>
-      <li class="border-t border-line bg-paper px-4 py-4">
-        <p class="text-center font-mono text-sm leading-6 text-muted" aria-hidden="true">↓</p>
-        <p class="mt-3 font-mono text-xs tracking-[0.14em] text-accent uppercase">05 · CI</p>
-        <p class="mt-1 font-serif text-xl text-ink">Reviewers and gates</p>
-        <p class="mt-2 text-sm leading-6 text-muted">GitHub Actions CI runs typecheck, tests, and build on every pull request. Dependabot opens dependency updates. ESLint and Prettier keep the code consistent.</p>
-      </li>
-      <li class="border-t border-line bg-accent-soft px-4 py-4">
-        <p class="text-center font-mono text-sm leading-6 text-muted" aria-hidden="true">↓</p>
-        <p class="mt-3 font-mono text-xs tracking-[0.14em] text-accent uppercase">06 · Me</p>
-        <p class="mt-1 font-serif text-2xl text-ink">Review and merge</p>
-        <p class="mt-2 text-sm leading-6 text-muted">Final review. I merge what is ready.</p>
-      </li>
-    </ol>
-    <ul class="grid list-none gap-px border-t border-line bg-line pl-0">
-      <li class="bg-paper px-4 py-4">
-        <p class="font-mono text-xs tracking-[0.14em] text-highlight uppercase">Website assistant · Grok Bot</p>
-        <p class="mt-1 font-serif text-xl text-ink">This page</p>
-        <p class="mt-2 text-sm leading-6 text-muted">Every two weeks it receives a handoff from Grok and turns that into this page, so the write-up stays current.</p>
-      </li>
-      <li class="bg-card px-4 py-4">
-        <p class="font-mono text-xs tracking-[0.14em] text-muted uppercase">Other assistants</p>
-        <p class="mt-1 font-serif text-xl text-ink">Side work</p>
-        <p class="mt-2 text-sm leading-6 text-muted">Email triage and AI news, so my attention stays on product decisions.</p>
-      </li>
-      <li class="bg-paper px-4 py-4">
-        <p class="font-mono text-xs tracking-[0.14em] text-accent uppercase">Inside the product</p>
-        <p class="mt-1 font-serif text-xl text-ink">In-app assistant</p>
-        <p class="mt-2 text-sm leading-6 text-muted">Defaults to Grok, with OpenAI or Anthropic optional.</p>
-      </li>
-    </ul>
-  </div>
-</figure>
+Give each model the job it is best at. Grok coordinates and runs operations. Claude and the Cursor agents build. Keep the shared rulebooks, and keep a human approving what merges.
+
+<AgentArchitecture />
+
+### Walk through one change
+
+The demo login ran through those stages.
+
+1. Claude's roadmap flagged trust risks in the demo login, and Claude wrote that into Grok's inbox.
+2. Grok queued it and briefed a Cursor agent. The decision landed in the shared log.
+3. A Cursor agent shipped the lockdown in small pull requests.
+4. CI passed.
+5. I merged.
+6. Grok verified production.
 
 <figure class="not-prose my-8">
   <figcaption class="font-mono text-xs tracking-[0.18em] text-accent uppercase">Build principles</figcaption>
@@ -152,8 +91,8 @@ Give each model the job it is best at. Grok coordinates and runs operations. Cla
       <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>
       <span class="absolute top-5 bottom-0 left-[6px] w-px bg-line" aria-hidden="true"></span>
       <p class="font-mono text-xs tracking-[0.16em] text-accent uppercase">03</p>
-      <h3 class="mt-1 font-serif text-2xl text-ink">One shared rulebook</h3>
-      <p class="mt-2 text-sm leading-6 text-muted">They coordinate through the repository, AGENTS.md, and the roadmap. I am the relay, and I decide what merges. CI and dependency bots run without being asked.</p>
+      <h3 class="mt-1 font-serif text-2xl text-ink">A shared handoff channel</h3>
+      <p class="mt-2 text-sm leading-6 text-muted">Grok and Claude write to each other in the repository: inboxes, a status board, a decisions log, and handoff templates. AGENTS.md and CLAUDE.md tell each agent to read its inbox and the status board at the start of a session, and to update them at the end. I approve what merges. CI and dependency bots run without being asked.</p>
     </li>
     <li class="relative pb-8 pl-8">
       <span class="absolute top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-paper" aria-hidden="true"></span>

@@ -1,0 +1,877 @@
+---
+/**
+ * System chart for the ClassLista agent team.
+ *
+ * Wide screens: six stage columns, labeled handoffs, a shared-state
+ * hub under plan / build / verify, a two-way Grok–Claude docs link
+ * on that hub, and a feedback arrow back to plan.
+ * Narrow screens: the same stages stacked, with full-size type.
+ * Colors come from the site tokens so light and dark both apply.
+ */
+---
+
+<figure class="agent-arch not-prose my-8" aria-labelledby="agent-arch-caption">
+  <figcaption id="agent-arch-caption" class="font-mono text-xs tracking-[0.18em] text-accent uppercase">
+    How the work moves
+  </figcaption>
+  <p class="sr-only">
+    Six stages, in order: Decide, Plan and coordinate, Build, Verify, Ship and operate, Learn and publish. On a
+    wide screen the stages are columns. On a phone they stack. Labeled arrows mark the handoffs: priorities, then
+    brief, then pull request, then merged, then shipped. A solid two-way link between Grok and Claude is labeled
+    shared handoff docs: inboxes, status board, decisions log. It sits on the shared-state hub, with a protocol
+    guide and handoff templates. AGENTS.md and CLAUDE.md tell every agent to read its inbox and the status board
+    at the start of a session and to update them at the end. Grok keeps a local synced checkout of the same files.
+    Ziyong sets direction and approves production, money, deletes, auth, and merges. Shared state also holds the
+    repository, the roadmap, and the backlog, and it connects plan, build, and verify. A feedback arrow runs from
+    ship and learn back to plan, because production checks and audits feed the backlog. A smaller side lane holds
+    other assistants, for email triage and AI news, and the in-app assistant inside the product. That assistant
+    defaults to Grok. OpenAI or Anthropic are optional. It is read-only and role-scoped.
+  </p>
+
+  <div class="board">
+    <ol class="stages">
+      <li class="stage stage-decide">
+        <article class="card">
+          <p class="kicker"><span class="num">01</span> Me</p>
+          <p class="title">Decide</p>
+          <p class="role">Ziyong · approver</p>
+          <p class="body">I set direction. I approve production, money, deletes, auth, and merges.</p>
+        </article>
+        <p class="handoff">
+          <svg class="arrow-down" viewBox="0 0 16 22" aria-hidden="true">
+            <path d="M8 2v14M3.5 11.5 8 17.5 12.5 11.5"></path>
+          </svg>
+          <svg class="arrow-right" viewBox="0 0 34 12" aria-hidden="true">
+            <path d="M1 6h26M22 1.5 30.5 6 22 10.5"></path>
+          </svg>
+          <span><span class="sr-only">Handoff to plan. </span>priorities</span>
+        </p>
+      </li>
+
+      <li class="stage stage-plan">
+        <article class="card">
+          <p class="kicker"><span class="num">02</span> Grok</p>
+          <p class="title">Plan &amp; coordinate</p>
+          <p class="role">Grok Bot for ClassLista</p>
+          <p class="body">Backlog, briefs, and plan review. Launches the builders.</p>
+          <p class="note">Claude drafts the living roadmap.</p>
+        </article>
+        <p class="handoff">
+          <svg class="arrow-down" viewBox="0 0 16 22" aria-hidden="true">
+            <path d="M8 2v14M3.5 11.5 8 17.5 12.5 11.5"></path>
+          </svg>
+          <svg class="arrow-right" viewBox="0 0 34 12" aria-hidden="true">
+            <path d="M1 6h26M22 1.5 30.5 6 22 10.5"></path>
+          </svg>
+          <span><span class="sr-only">Handoff to the builders. </span>brief</span>
+        </p>
+      </li>
+
+      <li class="stage stage-build">
+        <article class="card">
+          <p class="kicker"><span class="num">03</span> Builders</p>
+          <p class="title">Build</p>
+          <p class="role">Parallel, one change each</p>
+          <div class="split">
+            <div class="lane">
+              <p class="mini">Cursor</p>
+              <p class="body">Cloud agents. First version and the security lockdown.</p>
+            </div>
+            <div class="lane">
+              <p class="mini">Claude Code</p>
+              <p class="body">In the cloud. Main feature builder.</p>
+            </div>
+          </div>
+          <p class="note">Own branch, then a small pull request.</p>
+        </article>
+        <p class="handoff">
+          <svg class="arrow-down" viewBox="0 0 16 22" aria-hidden="true">
+            <path d="M8 2v14M3.5 11.5 8 17.5 12.5 11.5"></path>
+          </svg>
+          <svg class="arrow-right" viewBox="0 0 34 12" aria-hidden="true">
+            <path d="M1 6h26M22 1.5 30.5 6 22 10.5"></path>
+          </svg>
+          <span><span class="sr-only">Handoff to verify. </span>pull request</span>
+        </p>
+      </li>
+
+      <li class="stage stage-verify">
+        <article class="card">
+          <p class="kicker"><span class="num">04</span> Gates</p>
+          <p class="title">Verify</p>
+          <p class="role">Automated, then me</p>
+          <ul class="gates">
+            <li>GitHub Actions CI: typecheck, tests, build</li>
+            <li>ESLint and Prettier</li>
+            <li>Dependabot updates</li>
+          </ul>
+          <p class="note">Then my review and merge.</p>
+        </article>
+        <p class="handoff">
+          <svg class="arrow-down" viewBox="0 0 16 22" aria-hidden="true">
+            <path d="M8 2v14M3.5 11.5 8 17.5 12.5 11.5"></path>
+          </svg>
+          <svg class="arrow-right" viewBox="0 0 34 12" aria-hidden="true">
+            <path d="M1 6h26M22 1.5 30.5 6 22 10.5"></path>
+          </svg>
+          <span><span class="sr-only">Handoff to ship. </span>merged</span>
+        </p>
+      </li>
+
+      <li class="stage stage-ship">
+        <article class="card">
+          <p class="kicker"><span class="num">05</span> Railway</p>
+          <p class="title">Ship &amp; operate</p>
+          <p class="role">classlista.com</p>
+          <p class="body">Docker deploy. Grok checks production, and handles domain, DNS, and email through Resend.</p>
+        </article>
+        <p class="handoff">
+          <svg class="arrow-down" viewBox="0 0 16 22" aria-hidden="true">
+            <path d="M8 2v14M3.5 11.5 8 17.5 12.5 11.5"></path>
+          </svg>
+          <svg class="arrow-right" viewBox="0 0 34 12" aria-hidden="true">
+            <path d="M1 6h26M22 1.5 30.5 6 22 10.5"></path>
+          </svg>
+          <span><span class="sr-only">Handoff to learn. </span>shipped</span>
+        </p>
+      </li>
+
+      <li class="stage stage-learn">
+        <article class="card">
+          <p class="kicker"><span class="num">06</span> Publish</p>
+          <p class="title">Learn &amp; publish</p>
+          <p class="role">After it ships</p>
+          <p class="body">Grok audits what shipped and fixes drift, such as stale docs.</p>
+          <p class="note">A website assistant turns a two-week handoff into this page.</p>
+        </article>
+      </li>
+    </ol>
+
+    <div class="links" aria-hidden="true">
+      <div class="bridge">
+        <span class="bridge-v bridge-v-l"></span>
+        <span class="bridge-v bridge-v-r"></span>
+        <span class="bridge-h"></span>
+        <svg class="bridge-ah bridge-ah-l" viewBox="0 0 12 12">
+          <path d="M9 1.5 3 6l6 4.5"></path>
+        </svg>
+        <svg class="bridge-ah bridge-ah-r" viewBox="0 0 12 12">
+          <path d="M3 1.5 9 6 3 10.5"></path>
+        </svg>
+      </div>
+      <div class="stems">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
+    <div class="hub">
+      <div class="pair">
+        <p class="pair-dir">
+          <svg class="pair-icon" viewBox="0 0 64 16" aria-hidden="true">
+            <path d="M8 8h48M8 8l7-5M8 8l7 5M56 8l-7-5M56 8l-7 5"></path>
+          </svg>
+          <span><span class="sr-only">Two-way link. </span>Grok and Claude</span>
+        </p>
+        <p class="pair-label">Shared handoff docs: inboxes, status board, decisions log.</p>
+        <p class="pair-note">Protocol guide and handoff templates.</p>
+      </div>
+      <p class="kicker">Shared state · plan, build, verify</p>
+      <ul class="hub-items">
+        <li>
+          <span class="mini">Repository</span>
+          <span class="body">Grok keeps a local synced checkout and reads and writes these files.</span>
+        </li>
+        <li>
+          <span class="mini">AGENTS.md, CLAUDE.md</span>
+          <span class="body">For anyone changing this code, human or AI tool. Read the inbox and the status board at the start. Update them at the end.</span>
+        </li>
+        <li>
+          <span class="mini">Roadmap</span>
+          <span class="body">The living product roadmap.</span>
+        </li>
+        <li>
+          <span class="mini">Backlog</span>
+          <span class="body">Briefs and the next change.</span>
+        </li>
+      </ul>
+    </div>
+
+    <p class="loop">
+      <span class="loop-icon" aria-hidden="true">↺</span>
+      <span class="loop-arrow" aria-hidden="true"><span class="loop-head"></span><span class="loop-rule"></span></span>
+      <span class="loop-copy">
+        <span class="kicker">Back to Plan</span>
+        <span class="body">Production checks and audits feed the backlog.</span>
+      </span>
+    </p>
+
+    <aside class="side" aria-label="Side lane">
+      <p class="kicker">Side lane</p>
+      <div class="side-grid">
+        <div>
+          <p class="role">Other assistants</p>
+          <p class="body">Email triage and AI news. They keep my attention on product.</p>
+        </div>
+        <div>
+          <p class="role">In-app assistant</p>
+          <p class="body">Inside the product. Grok by default. OpenAI or Anthropic optional. Read-only and role-scoped.</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+</figure>
+
+<style>
+  .agent-arch {
+    container-name: arch;
+    container-type: inline-size;
+    position: relative;
+    color: var(--ink);
+    font-family: var(--font-sans);
+  }
+
+  /* On a wide viewport the chart leaves the narrow article column. */
+  @media (min-width: 960px) {
+    .agent-arch {
+      width: min(72rem, calc(100vw - 4rem));
+      max-width: none;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+
+  .board {
+    margin-top: 1rem;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 1.75rem;
+    background: var(--card);
+  }
+
+  .stages {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .card {
+    padding: 1rem 1rem 0.95rem;
+  }
+
+  .kicker,
+  .mini,
+  .handoff,
+  .via-tag,
+  .via-note span,
+  .loop-copy .kicker {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .kicker {
+    margin: 0;
+    font-size: 0.68rem;
+    color: var(--accent);
+  }
+
+  .title {
+    margin: 0.2rem 0 0;
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  .role {
+    margin: 0.35rem 0 0;
+    font-size: 0.92rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .body,
+  .note,
+  .gates,
+  .via-note {
+    margin: 0.35rem 0 0;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--muted);
+  }
+
+  .note {
+    color: var(--ink);
+  }
+
+  .mini {
+    margin: 0;
+    font-size: 0.64rem;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+  }
+
+  .split {
+    display: grid;
+    gap: 0.45rem;
+    margin-top: 0.6rem;
+  }
+
+  .lane {
+    padding: 0.45rem 0.55rem 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: 0.8rem;
+    background: var(--card);
+  }
+
+  .lane .body {
+    margin-top: 0.2rem;
+  }
+
+  .gates {
+    padding: 0;
+    list-style: none;
+  }
+
+  .gates li {
+    position: relative;
+    margin-top: 0.28rem;
+    padding-left: 0.75rem;
+  }
+
+  .gates li::before {
+    content: "";
+    position: absolute;
+    top: 0.45em;
+    left: 0;
+    width: 0.32rem;
+    height: 0.32rem;
+    border-radius: 999px;
+    background: var(--accent);
+  }
+
+  .stage-decide .card,
+  .stage-learn .card {
+    background: var(--accent-soft);
+  }
+
+  .stage-plan .card,
+  .stage-ship .card {
+    background: var(--highlight-soft);
+  }
+
+  .stage-plan .kicker,
+  .stage-ship .kicker {
+    color: var(--highlight);
+  }
+
+  .stage-build .card {
+    background: var(--paper);
+  }
+
+  .stage-verify .card {
+    background: var(--card);
+  }
+
+  .stage-build .kicker,
+  .stage-verify .kicker {
+    color: var(--muted);
+  }
+
+  .handoff {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    margin: 0;
+    padding: 0.45rem 0.75rem 0.55rem;
+    border-top: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--muted);
+    font-size: 0.68rem;
+    text-align: center;
+  }
+
+  .arrow-down,
+  .arrow-right {
+    display: block;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .arrow-down {
+    width: 14px;
+    height: 18px;
+  }
+
+  .arrow-right {
+    display: none;
+  }
+
+  .links {
+    display: none;
+  }
+
+  .pair {
+    margin: 0 0 0.85rem;
+    padding: 0.65rem 0.7rem 0.7rem;
+    border: 2px solid var(--highlight);
+    border-radius: 0.9rem;
+    background: var(--card);
+  }
+
+  .pair-dir {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+    color: var(--highlight);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .pair-icon {
+    display: block;
+    flex: none;
+    width: 64px;
+    height: 16px;
+  }
+
+  .pair-icon path,
+  .bridge-ah path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .pair-label {
+    margin: 0.3rem 0 0;
+    color: var(--ink);
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .pair-note {
+    margin: 0.15rem 0 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .hub {
+    padding: 1rem;
+    border-top: 1px solid var(--line);
+    background: var(--accent-soft);
+  }
+
+  .hub .title {
+    font-size: 1.35rem;
+  }
+
+  .hub-items {
+    display: grid;
+    gap: 0.55rem;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .hub-items li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.12rem;
+  }
+
+  .loop {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    margin: 0;
+    padding: 0.9rem 1rem;
+    border-top: 1px solid var(--line);
+    background: var(--highlight-soft);
+    color: var(--highlight);
+  }
+
+  .loop-icon {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+
+  .loop-arrow {
+    display: none;
+  }
+
+  .loop-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .loop-copy .kicker {
+    color: var(--highlight);
+  }
+
+  .loop-copy .body {
+    margin: 0;
+    color: var(--ink);
+  }
+
+  .side {
+    padding: 0.85rem 1rem 1rem;
+    border-top: 1px solid var(--line);
+    background: var(--paper);
+  }
+
+  .side .kicker {
+    color: var(--muted);
+  }
+
+  .side-grid {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 0.45rem;
+  }
+
+  .side .role {
+    margin-top: 0;
+    font-size: 0.95rem;
+  }
+
+  .side .body {
+    margin-top: 0.15rem;
+  }
+
+  @container arch (min-width: 520px) and (max-width: 1019px) {
+    .split,
+    .hub-items,
+    .side-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @container arch (min-width: 1020px) {
+    .board {
+      overflow: visible;
+      padding: 0.85rem 0.7rem 0.8rem;
+    }
+
+    .stages {
+      position: relative;
+      display: grid;
+      grid-template-columns: subgrid;
+      grid-column: 1 / -1;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      column-gap: 0.45rem;
+      row-gap: 0;
+    }
+
+    .stages::before {
+      content: "";
+      position: absolute;
+      top: 0.62rem;
+      left: calc(100% / 12);
+      right: calc(100% / 12);
+      z-index: 0;
+      border-top: 2px solid var(--ink);
+    }
+
+    .stage {
+      position: relative;
+      display: grid;
+      grid-template-rows: 1.7rem minmax(0, 1fr);
+      min-width: 0;
+    }
+
+    .card {
+      grid-row: 2;
+      height: 100%;
+      padding: 0.55rem 0.5rem 0.65rem;
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+    }
+
+    .stage-verify .card {
+      background: var(--paper);
+    }
+
+    .kicker {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.58rem;
+      letter-spacing: 0.08em;
+    }
+
+    .num {
+      display: inline-grid;
+      flex: none;
+      place-items: center;
+      width: 1.35rem;
+      height: 1.35rem;
+      border-radius: 999px;
+      background: var(--ink);
+      color: var(--paper);
+      font-size: 0.58rem;
+      letter-spacing: 0;
+      box-shadow: 0 0 0 2px var(--card);
+    }
+
+    .title {
+      min-height: 2.35em;
+      font-size: 1.02rem;
+      line-height: 1.15;
+    }
+
+    .role,
+    .body,
+    .note,
+    .gates {
+      font-size: 0.75rem;
+      line-height: 1.35;
+    }
+
+    .role {
+      margin-top: 0.25rem;
+    }
+
+    .handoff {
+      position: relative;
+      z-index: 2;
+      grid-row: 1;
+      flex-direction: row;
+      justify-self: end;
+      width: max-content;
+      max-width: none;
+      margin: 0;
+      padding: 0.08rem 0.32rem;
+      transform: translateX(calc(50% + 0.22rem));
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card);
+      color: var(--ink);
+      font-size: 0.58rem;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .arrow-down {
+      display: none;
+    }
+
+    .arrow-right {
+      display: block;
+      width: 22px;
+      height: 9px;
+    }
+
+    .links {
+      display: grid;
+      grid-template-columns: subgrid;
+      grid-template-rows: 1.35rem 0.7rem;
+      grid-column: 1 / -1;
+    }
+
+    .bridge {
+      position: relative;
+      grid-column: 2 / 4;
+      grid-row: 1 / 3;
+      color: var(--highlight);
+    }
+
+    .bridge-v,
+    .bridge-h {
+      position: absolute;
+      background: currentColor;
+    }
+
+    .bridge-v {
+      top: 0;
+      bottom: 0;
+      width: 2px;
+    }
+
+    .bridge-v-l {
+      left: 25%;
+      margin-left: -1px;
+    }
+
+    .bridge-v-r {
+      left: 75%;
+      margin-left: -1px;
+    }
+
+    .bridge-h {
+      top: 42%;
+      right: calc(25% + 8px);
+      left: calc(25% + 8px);
+      height: 2px;
+    }
+
+    .bridge-ah {
+      position: absolute;
+      top: calc(42% - 6px);
+      width: 12px;
+      height: 12px;
+    }
+
+    .bridge-ah-l {
+      left: calc(25% - 1px);
+    }
+
+    .bridge-ah-r {
+      left: calc(75% - 11px);
+    }
+
+    .pair-icon {
+      display: none;
+    }
+
+    .pair {
+      margin-bottom: 0.45rem;
+      padding: 0.4rem 0.45rem 0.45rem;
+    }
+
+    .pair-dir {
+      font-size: 0.62rem;
+    }
+
+    .pair-label {
+      font-size: 0.78rem;
+    }
+
+    .pair-note {
+      font-size: 0.7rem;
+    }
+
+    .stems {
+      display: grid;
+      grid-template-columns: subgrid;
+      grid-column: 2 / 5;
+      grid-row: 2;
+      height: 0.85rem;
+    }
+
+    .stems span {
+      justify-self: center;
+      width: 2px;
+      height: 100%;
+      background: var(--highlight);
+    }
+
+    .stems span:nth-child(-n + 2) {
+      background: transparent;
+    }
+
+    .hub {
+      grid-column: 2 / 5;
+      margin-top: -1px;
+      padding: 0.55rem 0.6rem 0.65rem;
+      border: 2px solid var(--highlight);
+      border-radius: 0 0 1rem 1rem;
+      background: var(--highlight-soft);
+    }
+
+    .hub .kicker {
+      color: var(--highlight);
+      font-size: 0.58rem;
+    }
+
+    .hub .title {
+      min-height: 0;
+      font-size: 1.05rem;
+    }
+
+    .hub-items {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.4rem 0.55rem;
+      margin-top: 0.45rem;
+    }
+
+    .via-note {
+      margin-top: 0.5rem;
+      font-size: 0.72rem;
+    }
+
+    .loop {
+      display: block;
+      grid-column: 2 / 7;
+      margin-top: 0.55rem;
+      padding: 0;
+      border: 0;
+      background: transparent;
+    }
+
+    .loop-icon {
+      display: none;
+    }
+
+    .loop-arrow {
+      display: flex;
+      align-items: center;
+      color: var(--highlight);
+    }
+
+    .loop-head {
+      flex: none;
+      width: 0.48rem;
+      height: 0.48rem;
+      margin-right: -0.12rem;
+      border-bottom: 2px solid var(--highlight);
+      border-left: 2px solid var(--highlight);
+      transform: rotate(45deg);
+    }
+
+    .loop-rule {
+      flex: 1;
+      border-top: 2px solid var(--highlight);
+    }
+
+    .loop-copy {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.35rem 0.6rem;
+      margin-top: 0.28rem;
+    }
+
+    .side {
+      grid-column: 1 / -1;
+      margin-top: 0.7rem;
+      padding: 0.55rem 0.7rem 0.65rem;
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      background: var(--paper);
+    }
+
+    .side-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.35rem 1rem;
+      margin-top: 0.3rem;
+    }
+
+    .side .role,
+    .side .body {
+      font-size: 0.75rem;
+    }
+  }
+</style>
