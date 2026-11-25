@@ -2,7 +2,7 @@
 
 A personal notebook: demos, shipped builds, notes, DeepLearning.AI certificates, and an about page. The home page leads with the demos. The resume-style background lives on About only.
 
-It is built with [Astro](https://astro.build), [Tailwind CSS](https://tailwindcss.com), and [MDX](https://mdxjs.com), with React available when a project needs something interactive (a slider, a chart, a small tool). The finished site is a folder of static files, which [Vercel](https://vercel.com) can host for free.
+It is built with [Astro](https://astro.build), [Tailwind CSS](https://tailwindcss.com), and [MDX](https://mdxjs.com), with React available when a project needs something interactive (a slider, a chart, a small tool). Most pages are ordinary files, which [Vercel](https://vercel.com) can host. Demos, builds, and the invite page are drawn when someone asks for them, so a code can be checked first. There is no database.
 
 If you want the plain-language version of those tool names, read [docs/LEARNING-NOTES.md](docs/LEARNING-NOTES.md). This file is the practical guide.
 
@@ -20,6 +20,8 @@ npm run dev
 ```
 
 Open [http://localhost:4321](http://localhost:4321).
+
+Demos and builds ask for an invite code. To work on them locally, copy `.env.example` to `.env` and follow [Invite codes for demos and builds](#invite-codes-for-demos-and-builds) below. Until you do that, those pages stay locked on your computer too. The home page, notes, certificates, and About stay open.
 
 `npm install` downloads the tools listed in `package.json`. You run it again only when those tools change.
 
@@ -52,7 +54,11 @@ npm run preview
 | `public/` | Files copied as-is. The favicon is here. Pictures for notes go in `public/covers/`. |
 | `docs/` | Notes about the tools. These pages are not on the website. |
 | `airflow/` | A sample Airflow DAG that chunks the notes into a JSON index. Not part of `npm run build` or the Vercel deploy. See `airflow/README.md`. |
-| `astro.config.ts` | Astro settings: static output, React, MDX, the sitemap. |
+| `astro.config.ts` | Astro settings: mostly static output, the Vercel adapter, React, MDX, the sitemap. |
+| `src/middleware.ts` | The check that runs before a demo or build page is drawn. |
+| `scripts/protect-gated-assets.mjs` | Moves demo scripts out of the public folder after the build. |
+| `src/lib/invite.ts` | How codes and the unlock cookie are checked. |
+| `.env.example` | Blank template for the invite settings on your computer. Copy it to `.env`. |
 | `dist/` | The built site. Generated. Do not edit it. |
 | `node_modules/` | Downloaded tools. Generated. Do not edit it. |
 
@@ -63,10 +69,11 @@ The header links are the `nav` list in `src/config.ts`.
 | URL | Page |
 | --- | --- |
 | `/` | Home: a short introduction, one live demo, the other shipped demos, a builds strip, notes paired with those demos, and a certificate index |
-| `/demos` | Demo index |
-| `/demos/<file-name>` | One demo. The widget is at the top. The explanation follows. |
-| `/builds` | Shipped products |
-| `/builds/<file-name>` | One product. The `updated` date is the last rewrite. |
+| `/demos` | Demo index. Invite only. |
+| `/demos/<file-name>` | One demo. The widget is at the top. The explanation follows. Invite only. |
+| `/builds` | Shipped products. Invite only. |
+| `/builds/<file-name>` | One product. The `updated` date is the last rewrite. Invite only. |
+| `/unlock` | The page where a visitor enters a code. |
 | `/learning` | Notes, newest first, with tag filters |
 | `/learning/<file-name>` | One note |
 | `/certificates` | DeepLearning.AI certificates, and the demos and notes on each |
@@ -287,7 +294,7 @@ The public URL in `src/config.ts` (`url`) is what the sitemap and RSS feed use. 
 
 ## Deploy to Vercel
 
-The site is static. You do not add a database or a server.
+You do not add a database. Vercel runs the invite check for you. Do the invite settings in the next section before you rely on a deploy. If those settings are missing, the public pages still load and the demos stay locked. The site does not crash.
 
 1. Push this repository to GitHub.
 2. Sign in at [vercel.com](https://vercel.com) with your GitHub account.
@@ -295,13 +302,98 @@ The site is static. You do not add a database or a server.
 4. Vercel usually detects Astro. Confirm these settings if it asks:
    - Framework preset: **Astro**
    - Build command: `npm run build`
-   - Output directory: `dist`
+   - Output directory: leave this **empty**. If it says `dist`, clear it. The invite gate is not a folder of plain files. A forced `dist` folder would skip the check.
    - Install command: `npm install`
    - Node.js version: **22.x**
 5. Click **Deploy**. Vercel gives you a URL such as `https://ziyong-ai-robotics.vercel.app`.
 6. Copy that URL into `url` in `src/config.ts` (no trailing slash) and push again. The sitemap and the RSS feed then point at the real domain.
 
 Later deploys happen when you push to the branch Vercel is watching, usually `main`.
+
+## Invite codes for demos and builds
+
+The home page, notes, certificates, and About are public. Demos and builds are not. A visitor who opens them, or who clicks Demos or Builds in the header, gets a short page that asks for a code.
+
+You choose the codes. They live in Vercel, not in this GitHub repository. Do not paste a real code into a file and commit it.
+
+The home page shows the title and one line for each demo and build, with an Invite badge. It does not show the widget, the write-up, or the cover picture. Search engines are told not to index the gated pages. Those pages are also left out of the sitemap and the RSS feed.
+
+### Add the two settings
+
+Do this before you merge a change that turns the gate on, so the new deploy already knows the codes.
+
+1. Open [vercel.com](https://vercel.com) and sign in.
+2. Click the project **ziyong-ai-robotics**.
+3. Click **Settings** in the top bar.
+4. Click **Environment Variables** in the left sidebar.
+5. Add the first variable.
+   - **Key:** `INVITE_CODES`
+   - **Value:** one or more codes, separated by commas. Example: `river-copper-4419, quiet-lantern-77`
+   - Spaces around the commas are fine. Do not put a comma inside a code. Codes are case-sensitive.
+   - Make each code long and random, so it cannot be guessed. A short word is not enough. A password manager can invent one, or you can use three uncommon words and a number.
+   - **Environments:** check **Production** and **Preview**. You can leave Development unchecked.
+   - Click **Save**.
+6. Add the second variable.
+   - **Key:** `INVITE_COOKIE_SECRET`
+   - **Value:** a long random string, at least 16 characters. On your computer, in a terminal, run `openssl rand -base64 32` and paste the result. Do not use a word, a sentence, or anything you have used as a password.
+   - **Environments:** **Production** and **Preview**.
+   - Click **Save**.
+7. Saving does not update the live site by itself. Redeploy:
+   - Click **Deployments** in the top bar.
+   - Find the latest deployment. Click the **⋯** menu on that row.
+   - Click **Redeploy**.
+   - If you see **Use existing Build Cache**, turn it **off**.
+   - Confirm.
+
+The next deployment is the one that knows the codes.
+
+### Give someone access
+
+Send them one code, or send a link they can open once:
+
+`https://ziyongwu.vercel.app/unlock?code=THE-CODE&next=/demos`
+
+Replace `THE-CODE` with the real code. Change `next=/demos` to `next=/builds` if you want the link to land on builds. One click sets a cookie in that browser for about 30 days, then opens the page. The cookie is not readable by page scripts. On the live site it is marked Secure, so the browser only sends it over https, and SameSite=Lax, so another website cannot send it along.
+
+Use the real domain if it is no longer `ziyongwu.vercel.app`. The domain is `url` in `src/config.ts`.
+
+### Add a code, or take one back
+
+Each code can be turned off without touching the others.
+
+1. Vercel → your project → **Settings** → **Environment Variables**.
+2. Find `INVITE_CODES`. Click **Edit** (or the **⋯** menu, then edit).
+3. To add a code, type a comma and the new code at the end of the value.
+4. To take a code back, delete that code from the list. Leave the other codes in place.
+5. Click **Save**.
+6. Redeploy, using the same **Deployments → ⋯ → Redeploy** steps as above. Turn the build cache off.
+
+After that redeploy, the removed code stops working, including for someone who already unlocked with it. The other codes keep working. You do not need to change `INVITE_COOKIE_SECRET` for this. Change that secret only when you want to sign **everyone** out at once. If you change it, generate a new random string, save, and redeploy. Every existing cookie stops working. The codes themselves still work when someone enters them again.
+
+### If you forget the settings
+
+The public pages still open. Demos and builds stay on the invite page. Nothing else breaks. Add the two variables and redeploy when you want the codes to start working.
+
+There is a third name, `INVITE_DEV_UNLOCK`. It is only for your computer. Do not add it in Vercel. If it is set there, the live site ignores it.
+
+### On your own computer
+
+In this folder, copy `.env.example` to a file named `.env`. Then either set real test values:
+
+```bash
+INVITE_CODES=local-test-code
+INVITE_COOKIE_SECRET=local-dev-secret-at-least-16
+```
+
+or skip the gate while `npm run dev` is running:
+
+```bash
+INVITE_DEV_UNLOCK=1
+```
+
+`INVITE_DEV_UNLOCK=1` does nothing in `npm run build` and nothing on Vercel. Restart `npm run dev` after you change `.env`.
+
+A wrong code waits a moment and then says it did not match. After too many tries, the form asks you to wait about 15 minutes. That limit is per browser, plus a best-effort limit on the server. It slows guessing. It is not a substitute for a long code.
 
 ## Visits and traffic
 

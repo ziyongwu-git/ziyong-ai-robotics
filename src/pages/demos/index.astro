@@ -1,9 +1,15 @@
 ---
+export const prerender = false;
+
 import Band from '../../components/Band.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 import TagFilter from '../../components/TagFilter.astro';
 import { getProjects, isSampleProject } from '../../lib/content';
+import { denyIfLocked } from '../../lib/invite';
+
+const denied = await denyIfLocked(Astro.request, import.meta.env.DEV);
+if (denied) return denied;
 
 const projects = await getProjects();
 const shipped = projects.filter((project) => !isSampleProject(project));
@@ -13,6 +19,7 @@ const samples = projects.filter((project) => isSampleProject(project));
 <BaseLayout
   title="Demos"
   description="Interactive demos from Ziyong Wu's notebook: a tabletop you can move, a packet you can reroute, and a notebook DAG you can branch."
+  noindex
 >
   <header class="grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
     <div class="max-w-[65ch]">

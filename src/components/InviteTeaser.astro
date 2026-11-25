@@ -1,0 +1,42 @@
+---
+/**
+ * Public stand-in for a demo or a build.
+ * Title and one line only. The write-up, the widget, and the cover stay behind the invite.
+ */
+interface Props {
+  title: string;
+  summary: string;
+  /** Path to open after a code is accepted, for example /demos/see-think-move. */
+  href: string;
+  featured?: boolean;
+}
+
+const { title, summary, href, featured = false } = Astro.props;
+const unlockHref = `/unlock?next=${encodeURIComponent(href)}`;
+const Heading = featured ? 'h2' : 'h3';
+---
+
+<article
+  class:list={[
+    'flex h-full flex-col rounded-3xl border border-line bg-card',
+    featured ? 'p-6 sm:p-8' : 'p-5',
+  ]}
+>
+  <p>
+    <a
+      href={unlockHref}
+      class="inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-2.5 py-1 font-mono text-xs tracking-wide text-accent uppercase"
+    >
+      <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" aria-hidden="true">
+        <rect x="5" y="11" width="14" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"></rect>
+        <path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+      </svg>
+      <span class="sr-only">Unlock {title}. </span>
+      Invite
+    </a>
+  </p>
+  <Heading class:list={['mt-3 font-serif text-ink', featured ? 'text-4xl sm:text-5xl' : 'text-2xl']}>
+    <a class="hover:text-accent" href={href}>{title}</a>
+  </Heading>
+  <p class:list={['mt-3 text-muted', featured ? 'max-w-[65ch] text-base leading-7' : 'text-sm leading-6']}>{summary}</p>
+</article>

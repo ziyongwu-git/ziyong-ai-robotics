@@ -8,7 +8,7 @@ Astro is the site builder. A file in `src/pages` becomes a URL. `src/pages/about
 
 An `.astro` file has two parts. The top, between the `---` lines, runs when the site is built. That is where you load posts and decide what the page should say. The bottom is the HTML a visitor sees.
 
-Most of the HTML is built ahead of time. `npm run build` writes the finished files into `dist/`. Vercel hosts that folder. There is no database and no server process to keep awake.
+Most of the HTML is built ahead of time. Demos, builds, and the invite page are the exception: they are drawn when someone asks for them, after the invite code is checked. `npm run build` prepares the site, and the Vercel adapter publishes it. There is no database. You do not run a server on your own computer except while previewing.
 
 ## Tailwind CSS
 

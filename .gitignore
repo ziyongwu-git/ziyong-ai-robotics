@@ -5,9 +5,10 @@ dist/
 # Astro generates types here when you run dev or build.
 .astro/
 
-# Local environment files, if you add them later.
+# Local environment files. .env.example is the blank template and is committed.
 .env
 .env.*
+!.env.example
 
 # Python virtualenvs and bytecode, including the clinic-finder example.
 .venv/

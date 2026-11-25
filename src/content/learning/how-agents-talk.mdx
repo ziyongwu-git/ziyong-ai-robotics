@@ -10,7 +10,6 @@ certification: a2a-agent2agent-protocol
 cover: "/covers/agents-talk.svg"
 ---
 
-import FollowPacket from '../../components/demos/FollowPacket.tsx';
 import TryIt from '../../components/TryIt.astro';
 import { CardSketch, LayerStack, TaskLife } from '../../components/notes/A2aFigures.tsx';
 
@@ -218,11 +217,7 @@ The widget is the same story, paused on each hop. Pick a question or type one. T
 
 It is a simulation. The directory is the eight fictional clinics. A few regular expressions pick out a city and a specialty. If you ask for a cardiologist in Tucson, the tool returns an empty list and the sentence refuses to invent one. If you type something with no city and no specialty, the task stops at `TASK_STATE_INPUT_REQUIRED` and the tool is never called.
 
-The same toy sits on its own page at [/demos/follow-the-packet](/demos/follow-the-packet).
-
-<h2 id="demo">Interactive demo</h2>
-
-<FollowPacket client:load />
+The same toy sits on its own page at [Follow the packet](/demos/follow-the-packet). That page is shared by invite: it asks for a code before it shows the widget. The clinics, the card, and the hop JSON are the ones described above.
 
 ## Where I would get this wrong
 

@@ -4,9 +4,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import BuiltOn from '../../components/BuiltOn.astro';
 import CoverArt from '../../components/CoverArt.astro';
 import TagList from '../../components/TagList.astro';
+import InviteTeaser from '../../components/InviteTeaser.astro';
 import { certificationIds, certsFor, usesCertification } from '../../lib/certifications';
 import { getProjects } from '../../lib/content';
-import { experimentHint } from '../../lib/experiments';
 import { formatDate, isoDate } from '../../lib/format';
 
 export async function getStaticPaths() {
@@ -88,16 +88,16 @@ const relatedDemos = (await getProjects()).filter((project) =>
     relatedDemos.length > 0 && (
       <section class="mt-6" aria-labelledby="try-demos">
         <h2 id="try-demos" class="font-serif text-2xl">Try it</h2>
-        <ul class="mt-3 space-y-3">
+        <p class="mt-2 text-sm leading-6 text-muted">The interactive demos are shared by invite.</p>
+        <div class="mt-4 grid gap-4">
           {relatedDemos.map((project) => (
-            <li class="rounded-2xl border border-highlight bg-highlight-soft p-4">
-              <a class="font-serif text-xl text-ink hover:text-accent" href={`/demos/${project.id}#demo`}>
-                {project.data.title}
-              </a>
-              <p class="mt-1 text-sm leading-6">{experimentHint(project.id)}</p>
-            </li>
+            <InviteTeaser
+              title={project.data.title}
+              summary={project.data.summary}
+              href={`/demos/${project.id}#demo`}
+            />
           ))}
-        </ul>
+        </div>
       </section>
     )
   }
