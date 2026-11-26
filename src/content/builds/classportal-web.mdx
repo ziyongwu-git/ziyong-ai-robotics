@@ -231,14 +231,3 @@ The front of it is Next.js 15, React 19, and TypeScript, styled with Tailwind v4
 Data is Prisma 6 on SQLite, on a persistent volume. Sign-in is a custom session: bcrypt for passwords, hashed tokens for the session. Changes go through server actions checked with zod 4, and queries are scoped to the role and the school.
 
 It runs on Railway, in Docker, on Node 22. Platform email sends through Resend, from its own mail domain. Tests run with Node's built-in test runner, via tsx. GitHub Actions runs CI. ESLint, Prettier, and Dependabot are part of the setup. There is a health page.
-
-## What's next
-
-- Built-in online checkout.
-- Assistant actions, with confirmation cards. The assistant is still read-only.
-- Real privacy and terms pages.
-- Off-site backups, and a staging environment.
-- Error tracking and uptime monitoring.
-- In progress: fixes from a role-by-role test, including course levels for each language.
-- Pilot testing with Ziyong Dance Academy and a partner school.
-- Exploring a deeper WeChat connection later, such as WeCom, an Official Account, or a Mini Program.
