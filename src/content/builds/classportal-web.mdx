@@ -1,6 +1,6 @@
 ---
 title: "ClassLista"
-summary: "A multi-school web app for dance-school-style programs: classes, attendance, invoices, and payments. I built and shipped it in about three weeks of November 2026, coordinating a small team of AI agents, Grok, Claude, and Cursor, while I made the product calls."
+summary: "A multi-school web app for studios and schools of any kind: classes, attendance, invoices, and payments. I built and shipped it in about three weeks of November 2026, coordinating a small team of AI agents, Grok, Claude, and Cursor, while I made the product calls."
 status: live
 # Month the work began. The day is a month marker. The page shows "Nov 2026".
 started: 2026-11-01
@@ -35,7 +35,7 @@ import AgentArchitecture from '../../components/builds/AgentArchitecture.astro';
   Rewrite this file in place. Do not rename it. The URL is /builds/classportal-web.
 */}
 
-ClassLista is a multi-school web app for dance-school-style programs. It runs classes, attendance, invoices, and payments. The Chinese name is 课堂通.
+ClassLista is a multi-school web app for studios and schools of any kind. The home page says "Every class confirmed before it starts." It runs classes, attendance, invoices, and payments. The Chinese name is 课堂通.
 
 The live app is [classlista.com](https://classlista.com).
 
@@ -184,7 +184,7 @@ Four roles use it: the owner, school admins, teachers, and families. Each role h
 
 ## School admins
 
-Setup cards open a school one step at a time. The school uses its own colors and logo. Each school sets the sender name and the reply-to on its email, and each school has a join code. An admin can switch a teacher's self-serve powers on or off. Make-up classes stay off until the school opts in. The school lists how families pay.
+Setup cards open a school one step at a time. The school uses its own colors and logo. Each school sets the sender name and the reply-to on its email, and each school has a join code. An admin can switch a teacher's self-serve powers on or off. Make-up classes stay off until the school opts in. The school lists how families pay. An admin can download all of a school's data as a zip, including money exports for an accountant.
 
 ## Teachers
 
@@ -192,7 +192,7 @@ Attendance is Present, Absent, or Excused. On the Today screen a teacher marks i
 
 ## Families
 
-A family joins with a code. The join page shows where that family stands. A class email includes Coming and Can't make it. Each one is a single tap, with no sign-in. A family can say yes to the rest of the term. Make-up classes show up when the school has opted in. A family can tap "I've paid".
+A family joins with a code. The join page shows where that family stands. A class email includes Coming and Can't make it. Each one is a single tap, with no sign-in. A family can say yes to the rest of the term. Make-up classes show up when the school has opted in. A family can tap "I've paid" and attach a screenshot of the payment. They can choose a weekly summary email, a monthly one, or none.
 
 ## Owner
 
@@ -200,11 +200,11 @@ The owner has a platform home, a page per school, a usage dashboard, and pages f
 
 ## Scheduling
 
-A term has a roster. A class can meet at several times each week, and it can repeat until a date. This class and the following ones can be edited or cancelled. The app warns when the same teacher, the same room, or the same child would clash. Staff Planner groups the schedule by teacher, room, student, or family. Holidays can start from suggested days. A school can add its own days off, with conflict warnings and reminders. Each place has its own time zone. A session can be accepted or declined, and the answer shows on a calendar. On a phone, the calendar opens as a list of what is coming up.
+A term has a roster. A class can meet at several times each week, and it can repeat until a date. This class and the following ones can be edited or cancelled. The app warns when the same teacher, the same room, or the same child would clash. Staff Planner groups the schedule by teacher, room, student, or family. Holidays can start from suggested days. A school can add its own days off, with conflict warnings and reminders. Each place has its own time zone, and class times use that place's clock. The class dates on an invoice follow that same clock. Invoice due dates follow the school's main place. Copy for WeChat is on a class and on a holiday. A class schedule can be copied for that class's WeChat group. That note has no children's names and no amounts. A session can be accepted or declined, and the answer shows on a calendar. On a phone, the calendar opens as a list of what is coming up.
 
 ## Money
 
-Invoices show Paid, Unpaid, or Overdue, and staff record payments. A school lists how families pay: Zelle, Venmo, PayPal, a card link to the school's own Stripe, Square, or PayPal page, bank transfer, check, cash, WeChat Pay, Alipay, or a custom method. A family taps "I've paid", and staff confirm. The app keeps payment records and refund records. ClassLista does not move the money.
+Invoices show Paid, Unpaid, or Overdue, and staff record payments. A school lists how families pay: Zelle, Venmo, PayPal, a card link to the school's own Stripe, Square, or PayPal page, bank transfer, check, cash, WeChat Pay, Alipay, or a custom method. A family taps "I've paid" and can attach a screenshot of the payment. Staff can attach a screenshot or a receipt when they record a payment, and they confirm. The app keeps payment records and refund records. Copy for WeChat on an invoice is a private note of what that family owes. ClassLista does not move the money.
 
 ## Languages
 
@@ -239,3 +239,6 @@ It runs on Railway, in Docker, on Node 22. Platform email sends through Resend, 
 - Real privacy and terms pages.
 - Off-site backups, and a staging environment.
 - Error tracking and uptime monitoring.
+- In progress: fixes from a role-by-role test, including course levels for each language.
+- Pilot testing with Ziyong Dance Academy and a partner school.
+- Exploring a deeper WeChat connection later, such as WeCom, an Official Account, or a Mini Program.
